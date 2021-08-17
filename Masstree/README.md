@@ -3,9 +3,9 @@
 PiBench wrapper for Masstree.
 
 ## Installation
-cd masstree-beta
-./bootstrap.sh
-./configure --disable-assertions --with-malloc=<jemalloc|tcmalloc|flow|hoard>
+cd masstree-beta \\
+./bootstrap.sh    \\
+./configure --disable-assertions --with-malloc=<jemalloc|tcmalloc|flow|hoard>   \\
 make
 
 
