@@ -3,6 +3,7 @@
 PiBench wrapper for HOT.
 
 ## Installation
+```bash
 git clone https://github.com/speedskater/hot.git
 cp CMakeLists.txt hot/
 cd hot
@@ -11,7 +12,7 @@ mkdir build
 cd build
 cmake ..
 make
-
+```
 
 ## Important Information
 1. Hot can only embed 63 bits key in index, therefore the most significant bit 
