@@ -1,4 +1,8 @@
 # LB+-Tree PiBench Wrapper
 
 ## Installation
-See https://github.com/KaisongHuang/lbtree-wrapper.git
+
+
+## Important information
+This repo contains source code from https://github.com/schencoding/lbtree
+Some modifications are made to compile dram wrapper
