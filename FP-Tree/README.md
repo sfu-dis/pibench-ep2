@@ -6,8 +6,6 @@ I. Oukid, J. Lasperas, A. Nica, T. Willhalm, and W. Lehner. FPTree: A Hybrid SCM
 In Proceedings of the 2016 International Conference on Management of Data, SIGMOD’16, pages 371–386. ACM, 2016
 ```
 
-## The fptree source code can be found at https://github.com/sfu-dis/FPTree.git
-
 ## Build
 
 ### Build PMEM Version
