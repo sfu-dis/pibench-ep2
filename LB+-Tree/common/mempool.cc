@@ -228,5 +228,7 @@ void threadNVMPools::print_usage(void)
     }
     printf("--------------------\n");
 }
-
+#else
+ThreadAllocator the_thread_mempools;
+ThreadAllocator the_thread_nvmpools;
 #endif

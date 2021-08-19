@@ -47,8 +47,8 @@
 /* NVMPOOL_REAL: use pmdk to map NVM
  * undefined:    use memalign to allocate memory to simulate NVM
  */
-#define PMEM // comment this out for using DRAM as NVM
-#define POOL // comment this out to use malloc (new, delete)
+//#define PMEM // comment this out for using DRAM as NVM
+//#define POOL // comment this out to use malloc (new, delete)
 
 #ifdef PMEM
    #define NVMPOOL_REAL
@@ -384,6 +384,7 @@ extern threadNVMPools the_thread_nvmpools;
 
 class Allocator
 {
+public:
    void *alloc(unsigned long long size)
    {
       return new (std::align_val_t(256)) char[size];
@@ -439,8 +440,8 @@ public:
 
 extern thread_local int worker_id; /* in Thread Local Storage */
 
-ThreadAllocator the_thread_mempools;
-ThreadAllocator the_thread_nvmpools;
+extern ThreadAllocator the_thread_mempools;
+extern ThreadAllocator the_thread_nvmpools;
 
 #define the_mempool (the_thread_mempools.tallocators[worker_id])
 #define mempool_alloc the_mempool.alloc
