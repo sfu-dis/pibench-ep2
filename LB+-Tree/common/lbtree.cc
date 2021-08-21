@@ -662,8 +662,8 @@ void lbtree::insert(key_type key, void *ptr)
         if (_xbegin() != _XBEGIN_STARTED)
         {
             // random backoff
-            // sum= 0;
-            // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+            sum= 0;
+            for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
             goto Again2;
         }
 

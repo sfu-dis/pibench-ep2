@@ -33,7 +33,6 @@ static __thread typename default_query_table_params::threadinfo_type * ti;
 
 private:
   default_table mt;
-  loginfo::query_times qtimes_;
 };
 
 __thread typename default_query_table_params::threadinfo_type * masstree_wrapper::ti = nullptr;
@@ -79,8 +78,8 @@ bool masstree_wrapper::find(const char *key, size_t key_sz, char *value_out)
   bool found = lp.find_unlocked(*ti);
   if (found)
     memcpy(value_out, lp.value()->col(0).s, key_sz);
-  // else
-  //   std::cout << "Key not found!\n";
+  else
+    std::cout << "Search Key not found!\n";
   return found;
 }
 
@@ -91,18 +90,12 @@ bool masstree_wrapper::insert(const char *key, size_t key_sz, const char *value,
   swap_endian(k);
   Masstree::default_table::cursor_type lp(mt.table(), Str((const char*)&k, key_sz));
   bool found = lp.find_insert(*ti);
-  if (!found)
-    ti->observe_phantoms(lp.node());
-  else {
-    lp.finish(1, *ti);
-    // std::cout << "Insert Key already exists!\n";
-    return false;
-  }
-  qtimes_.ts = ti->update_timestamp();
-  qtimes_.prev_ts = 0;
-  lp.value() = row_type::create1(Str(value, value_sz), qtimes_.ts, *ti);
+  if (found)
+    std::cout << "Insert Key already exists!\n";
+  else
+    lp.value() = row_type::create1(Str(value, value_sz), 2, *ti);
   lp.finish(1, *ti);
-  return true;
+  return !found;
 }
 
 bool masstree_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
@@ -112,22 +105,13 @@ bool masstree_wrapper::update(const char *key, size_t key_sz, const char *value,
   swap_endian(k);
   Masstree::default_table::cursor_type lp(mt.table(), Str((const char*)&k, key_sz));
   bool found = lp.find_insert(*ti);
-  if (!found) {
-    ti->observe_phantoms(lp.node());
-    qtimes_.ts = ti->update_timestamp();
-    qtimes_.prev_ts = 0;
-    // lp.finish(1, *ti);
-    // std::cout << "Update Key does not exist!\n";
-    // return false;
-  }
-  else {
-    qtimes_.ts = ti->update_timestamp(lp.value()->timestamp());
-    qtimes_.prev_ts = lp.value()->timestamp();
+  if (!found)
+    std::cout << "Update Key does not exist!\n";
+  else
     lp.value()->deallocate_rcu(*ti);
-  }
   lp.value() = row_type::create1(Str(value, value_sz), qtimes_.ts, *ti);
   lp.finish(1, *ti);
-  return true;
+  return found;
 }
 
 bool masstree_wrapper::remove(const char *key, size_t key_sz)
@@ -137,10 +121,10 @@ bool masstree_wrapper::remove(const char *key, size_t key_sz)
   swap_endian(k);
   Masstree::default_table::cursor_type lp(mt.table(), Str((const char*)&k, key_sz));
   bool found = lp.find_locked(*ti);
-  // if (!found)
-  //   std::cout << "Delete Key does not exist!\n";
+  if (!found)
+    std::cout << "Delete Key does not exist!\n";
   lp.finish(-1, *ti);
-  return true;
+  return found;
 }
 
  struct scanner {
