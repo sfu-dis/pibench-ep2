@@ -109,7 +109,7 @@ bool masstree_wrapper::update(const char *key, size_t key_sz, const char *value,
     std::cout << "Update Key does not exist!\n";
   else
     lp.value()->deallocate_rcu(*ti);
-  lp.value() = row_type::create1(Str(value, value_sz), qtimes_.ts, *ti);
+  lp.value() = row_type::create1(Str(value, value_sz), 2, *ti);
   lp.finish(1, *ti);
   return found;
 }
