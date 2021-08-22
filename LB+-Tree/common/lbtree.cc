@@ -1412,124 +1412,124 @@ void lbtree::del(key_type key)
     }
 }
 
-// Continue to add new record to result array, and shift the cur_idx
-// cur_idx points to a position that are empty
-// Return the cur_idx
-inline int lbtree::add_to_sorted_result(std::pair<key_type, void*>* result, std::pair<key_type, void*>* new_record, int total_size, int cur_idx){
-    if (cur_idx >= total_size)
-    {
-      if (result[total_size - 1].first < new_record->first)
-      {
-        return cur_idx;
-      }
-      cur_idx = total_size - 1; // Remove the last element
-    }
+// // Continue to add new record to result array, and shift the cur_idx
+// // cur_idx points to a position that are empty
+// // Return the cur_idx
+// inline int lbtree::add_to_sorted_result(std::pair<key_type, void*>* result, std::pair<key_type, void*>* new_record, int total_size, int cur_idx){
+//     if (cur_idx >= total_size)
+//     {
+//       if (result[total_size - 1].first < new_record->first)
+//       {
+//         return cur_idx;
+//       }
+//       cur_idx = total_size - 1; // Remove the last element
+//     }
 
-    // Start the insertion sort
-    int j = cur_idx - 1;
-    while((j >= 0) && (result[j].first > new_record->first)){
-      result[j + 1] = result[j];
-      --j;
-    }
+//     // Start the insertion sort
+//     int j = cur_idx - 1;
+//     while((j >= 0) && (result[j].first > new_record->first)){
+//       result[j + 1] = result[j];
+//       --j;
+//     }
 
-    result[j + 1] = *new_record;
-    ++cur_idx;
-    return cur_idx;
-  }
+//     result[j + 1] = *new_record;
+//     ++cur_idx;
+//     return cur_idx;
+//   }
 
-// Range scan in one node -- Author: Lu Baotong
-int lbtree::range_scan_in_one_leaf(bleaf *lp, const key_type& key, uint32_t to_scan, std::pair<key_type, void*>* result){
-    unsigned int mask = (unsigned int)(lp->bitmap);
-    int cur_idx = 0;
-    std::pair<key_type, void*> new_record;
+// // Range scan in one node -- Author: Lu Baotong
+// int lbtree::range_scan_in_one_leaf(bleaf *lp, const key_type& key, uint32_t to_scan, std::pair<key_type, void*>* result){
+//     unsigned int mask = (unsigned int)(lp->bitmap);
+//     int cur_idx = 0;
+//     std::pair<key_type, void*> new_record;
 
-    while (mask) {
-        int jj = bitScan(mask)-1;  // next candidate
-        if (lp->k(jj) >= key) { // found
-            new_record.first = lp->k(jj);
-            new_record.second = lp->ch(jj);
-            // Add KV to the result array and matain its sort order
-            cur_idx = add_to_sorted_result(result, &new_record, to_scan, cur_idx);
-        }
-        mask &= ~(0x1<<jj);  // remove this bit
-    } // end while
+//     while (mask) {
+//         int jj = bitScan(mask)-1;  // next candidate
+//         if (lp->k(jj) >= key) { // found
+//             new_record.first = lp->k(jj);
+//             new_record.second = lp->ch(jj);
+//             // Add KV to the result array and matain its sort order
+//             cur_idx = add_to_sorted_result(result, &new_record, to_scan, cur_idx);
+//         }
+//         mask &= ~(0x1<<jj);  // remove this bit
+//     } // end while
 
-    /*
-    for(int i = 0; i < cur_idx; i++){
-        std::cout << "key " << i << " = " << result[i].first << std::endl;
-    }*/
+//     /*
+//     for(int i = 0; i < cur_idx; i++){
+//         std::cout << "key " << i << " = " << result[i].first << std::endl;
+//     }*/
 
-    return cur_idx;
-}
+//     return cur_idx;
+// }
 
-// Range query, first get the lock of node, and then atomically access each node in range
-int lbtree::range_scan_by_size(const key_type& key,  uint32_t to_scan, char* my_result)
-{   
-    std::pair<key_type, void*> *result = reinterpret_cast<std::pair<key_type, void*> *>(my_result);
-    bnode *p;
-    bleaf *lp;
-    int i,t,m,b;
-    int result_idx;
+// // Range query, first get the lock of node, and then atomically access each node in range
+// int lbtree::range_scan_by_size(const key_type& key,  uint32_t to_scan, char* my_result)
+// {   
+//     std::pair<key_type, void*> *result = reinterpret_cast<std::pair<key_type, void*> *>(my_result);
+//     bnode *p;
+//     bleaf *lp;
+//     int i,t,m,b;
+//     int result_idx;
     
-    unsigned char key_hash= hashcode1B(key);
-    int ret_pos;
+//     unsigned char key_hash= hashcode1B(key);
+//     int ret_pos;
     
-Again1:
-    // 1. RTM begin
-    result_idx = 0; // The idx of result array
-    if(_xbegin() != _XBEGIN_STARTED) goto Again1;
+// Again1:
+//     // 1. RTM begin
+//     result_idx = 0; // The idx of result array
+//     if(_xbegin() != _XBEGIN_STARTED) goto Again1;
 
-    // 2. search nonleaf nodes
-    p = tree_meta->tree_root;
+//     // 2. search nonleaf nodes
+//     p = tree_meta->tree_root;
     
-    for (i=tree_meta->root_level; i>0; i--) {
+//     for (i=tree_meta->root_level; i>0; i--) {
         
-        // prefetch the entire node
-        NODE_PREF(p);
+//         // prefetch the entire node
+//         NODE_PREF(p);
 
-        // if the lock bit is set, abort
-        if (p->lock()) {_xabort(1); goto Again1;}
+//         // if the lock bit is set, abort
+//         if (p->lock()) {_xabort(1); goto Again1;}
         
-        // binary search to narrow down to at most 8 entries
-        b=1; t=p->num();
-        while (b+7<=t) {
-            m=(b+t) >>1;
-            if (key > p->k(m)) b=m+1;
-            else if (key < p->k(m)) t = m-1;
-            else {p=p->ch(m); goto inner_done;}
-        }
+//         // binary search to narrow down to at most 8 entries
+//         b=1; t=p->num();
+//         while (b+7<=t) {
+//             m=(b+t) >>1;
+//             if (key > p->k(m)) b=m+1;
+//             else if (key < p->k(m)) t = m-1;
+//             else {p=p->ch(m); goto inner_done;}
+//         }
         
-        // sequential search (which is slightly faster now)
-        for (; b<=t; b++)
-            if (key < p->k(b)) break;
-        p = p->ch(b-1);
+//         // sequential search (which is slightly faster now)
+//         for (; b<=t; b++)
+//             if (key < p->k(b)) break;
+//         p = p->ch(b-1);
         
-    inner_done: ;
-    }
+//     inner_done: ;
+//     }
     
-    // 3. search leaf node
-    lp= (bleaf *)p;
+//     // 3. search leaf node
+//     lp= (bleaf *)p;
 
-    // prefetch the entire node
-    LEAF_PREF (lp);
+//     // prefetch the entire node
+//     LEAF_PREF (lp);
 
-    // 4. real range query
-    auto remaining_scan = to_scan;
-    auto cur_result = result;
-    while((remaining_scan != 0) && (lp != nullptr)){
-        // if the lock bit is set, abort
-        if (lp->lock) {_xabort(2); goto Again1;}
-        auto cur_scan = range_scan_in_one_leaf(lp, key, remaining_scan, cur_result);
-        remaining_scan = remaining_scan - cur_scan;
-        cur_result = cur_result + cur_scan;
-        lp = lp->next[0]; // BT(FIX ME), the next pointer is not always this
-    }
+//     // 4. real range query
+//     auto remaining_scan = to_scan;
+//     auto cur_result = result;
+//     while((remaining_scan != 0) && (lp != nullptr)){
+//         // if the lock bit is set, abort
+//         if (lp->lock) {_xabort(2); goto Again1;}
+//         auto cur_scan = range_scan_in_one_leaf(lp, key, remaining_scan, cur_result);
+//         remaining_scan = remaining_scan - cur_scan;
+//         cur_result = cur_result + cur_scan;
+//         lp = lp->next[0]; // BT(FIX ME), the next pointer is not always this
+//     }
 
-    // 5. RTM commit
-    _xend();
+//     // 5. RTM commit
+//     _xend();
 
-    return (to_scan - remaining_scan);
-}
+//     return (to_scan - remaining_scan);
+// }
 
 
 /* ----------------------------------------------------------------- *
