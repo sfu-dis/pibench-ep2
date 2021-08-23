@@ -1077,7 +1077,7 @@ char *btree::search(entry_key_t key) {
   return NULL;
 }
 
-int btree::scan(entry_key_t, int scan_size, char* result) {
+int btree::scan(entry_key_t key, int scan_size, char* result) {
   bool f = false;
   char *prev;
   char *ptr = btree_search_pred(key, &f, &prev);
