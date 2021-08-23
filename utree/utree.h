@@ -1202,18 +1202,25 @@ retry:
 
 
 void btree::remove(entry_key_t key) {
+  thread_local int i = 0;
+  i++;
   bool f, debug=false;
   list_node_t *cur = NULL, *prev = NULL;
 retry:
   cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
-    // printf("not found.\n");
+    printf("Delete key not found.\n");
     return;
   }
+  // Debug code
+  if (cur->key != key)
+    printf("Wrong node to delete!\n");
+
   if (prev == NULL) {
     prev = list_head;
   }
   if (prev->next != cur) { 
+    printf("%d-th delete\n", i);
     // if (debug){
       printf("prev list node:\n");
       prev->printAll();

@@ -45,5 +45,22 @@ int main()
 	}
 	printf("%lu records scanned\n", count);
 
-	return 0;
+
+	for (auto key : keys)
+    {
+        if (utree.search(key) == NULL)
+            printf("Key not found! %lu\n", key);
+    }
+    printf("Insert & search test passed, now delete\n\n");
+
+
+    shuffle(keys);
+    for (auto key : keys)
+    {
+        utree.remove(key);
+    }
+    printf("All keys deleted!\n");
+
+    return 0;
+
 }
