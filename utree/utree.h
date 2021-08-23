@@ -66,7 +66,7 @@ struct list_node_t {
 };
 
 void list_node_t::printAll(void) { 
-  printf("addr=%p, key=%d, ptr=%u, isUpdate=%d, isDelete=%d, next=%p\n", 
+  printf("addr=%p, key=%lu, ptr=%lu, isUpdate=%d, isDelete=%d, next=%p\n", 
           this, this->key, this->ptr, this->isUpdate, this->isDelete, this->next); 
 }
 #ifdef USE_PMDK
@@ -1135,6 +1135,7 @@ void btree::insert(entry_key_t key, char *right) {
   bool rt = false;
   btree_insert_pred(key, (char *)n, (char **)&prev, &update); 
   if (update && prev != NULL) { 
+    printf("Update!\n");
     // Overwrite.
     prev->ptr = (uint64_t)right; 
     //flush.
