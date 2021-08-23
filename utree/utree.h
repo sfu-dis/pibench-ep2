@@ -1135,7 +1135,6 @@ void btree::insert(entry_key_t key, char *right) {
   bool rt = false;
   btree_insert_pred(key, (char *)n, (char **)&prev, &update); 
   if (update && prev != NULL) { 
-    printf("Update!\n");
     // Overwrite.
     prev->ptr = (uint64_t)right; 
     //flush.
@@ -1146,9 +1145,9 @@ void btree::insert(entry_key_t key, char *right) {
   else { 
     int retry_number = 0, w=0;
 retry:
-  retry_number += 1;
-  if (retry_number > 10 && w == 3) {
-    return;
+    retry_number += 1;
+    if (retry_number > 10 && w == 3) {
+      return;
     }
     if (rt) {
       // we need to re-search the key!
@@ -1169,6 +1168,7 @@ retry:
         prev = list_head;
       }
       if (prev->isUpdate){
+        printf("Never!\n");
         w = 1;
         goto retry;
       }
@@ -1211,7 +1211,6 @@ retry:
     return;
   }
   if (prev == NULL) {
-    printf("Previous is NULL\n");
     prev = list_head;
   }
   if (prev->next != cur) { 
