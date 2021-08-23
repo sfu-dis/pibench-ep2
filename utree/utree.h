@@ -117,7 +117,7 @@ class btree{
     void remove(entry_key_t);        // Remove
     char* search(entry_key_t);       // Search
 
-    int scan(entry_key_t, int scan_size, char* result)
+    int scan(entry_key_t, int scan_size, char* result);
 
     void print()
     {
