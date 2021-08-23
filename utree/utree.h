@@ -1210,16 +1210,17 @@ retry:
     return;
   }
   if (prev == NULL) {
+    printf("Previous is NULL\n");
     prev = list_head;
   }
   if (prev->next != cur) { 
     // if (debug){
-    //   printf("prev list node:\n");
-    //   prev->printAll();
-    //   printf("current list node:\n");
-    //   cur->printAll();
+      printf("prev list node:\n");
+      prev->printAll();
+      printf("current list node:\n");
+      cur->printAll();
     // }
-    // exit(1);
+    exit(1);
     goto retry;
   } else {
     // Delete it.
