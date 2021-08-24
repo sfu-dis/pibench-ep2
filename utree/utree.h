@@ -1058,7 +1058,7 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   }
   
   page *t;
-  while((t = (page *)p->linear_search_pred(key, prev, debug)) == p->hdr.sibling_ptr) {
+  while((t = (page *)p->linear_search_pred(key, prev, debug)) != NULL && t == p->hdr.sibling_ptr) { // debug code
     p = t;
     if(!p) {
       break;
@@ -1072,6 +1072,11 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   }
 
   *f = true;
+
+  // debug code
+  if ((list_node_t *)(*prev)->next != (list_node_t *)t)
+    printf("Exception found!\n");
+
   return (char *)t;
 }
 
