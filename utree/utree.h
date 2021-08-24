@@ -252,13 +252,6 @@ class page{
         
         if(!shift && records[i].key == key) {
           shift = true;
-          // if (i == 0) {
-          //   records[i].ptr = (char *)hdr.leftmost_ptr;
-          // }
-          // else {
-          //   records[i].ptr = records[i + 1].ptr;
-          // }
-          // records[i].key = records[i + 1].key;
           // records[i].ptr = (i == 0) ? 
           //   (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
         }
@@ -268,7 +261,7 @@ class page{
           records[i].ptr = records[i + 1].ptr;
         }
       }
-      if (i == cardinality)
+      if (i >= cardinality)
         printf("Warning! Access out of bound!\n");
 
       if(shift) {
@@ -1231,6 +1224,7 @@ retry:
     printf("Wrong node to delete!\n");
 
   if (prev == NULL) {
+    printf("Previous is null, current node key: %lu\n", cur->key);
     prev = list_head;
   }
   if (prev->next != cur) { 
