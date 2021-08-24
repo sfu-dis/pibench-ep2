@@ -766,7 +766,7 @@ class page{
         do {
           previous_switch_counter = hdr.switch_counter;
           ret = NULL;
-          *prev = NULL; // debug code
+          *prev = nullptr; // debug code
 
           // search from left to right
           if(IS_FORWARD(previous_switch_counter)) {
