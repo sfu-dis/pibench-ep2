@@ -268,8 +268,8 @@ class page{
           records[i].ptr = records[i + 1].ptr;
         }
       }
-      if (i != hdr.last_index + 1)
-        printf("i: %d, last idx: %d\n", i, hdr.last_index);
+      if (i == cardinality)
+        printf("Warning! Access out of bound!\n");
 
       if(shift) {
         --hdr.last_index;
