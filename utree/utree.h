@@ -272,7 +272,7 @@ class page{
         }
       }
       if (i != hdr.last_index)
-        printf("%d i\n", i);
+        printf("i: %d, last idx: %d\n", i, hdr.last_index);
 
       if(shift) {
         --hdr.last_index;
@@ -1038,8 +1038,6 @@ btree::btree(){
   printf("list_head=%p\n", list_head);
   list_head->next = NULL;
   height = 1;
-
-  printf("Cardinality: %d\n", cardinality);
 }
 
 btree::~btree() { 
