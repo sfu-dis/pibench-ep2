@@ -250,12 +250,15 @@ class page{
       int i;
       for(i = 0; records[i].ptr != NULL; ++i) {
         if(!shift && records[i].key == key) {
-          records[i].ptr = (i == 0) ? 
-            (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
+          // if (i == 0) {
+          //   records[i].ptr = (char *)hdr.leftmost_ptr;
+          // }
+          // records[i].ptr = (i == 0) ? 
+          //   (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
           shift = true;
         }
 
-        if(shift) {
+        if(shift && i != hdr.last_index) {
           records[i].key = records[i + 1].key;
           records[i].ptr = records[i + 1].ptr;
         }
