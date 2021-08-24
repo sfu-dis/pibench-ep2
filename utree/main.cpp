@@ -47,7 +47,6 @@ int main()
 	}
 	printf("%lu records scanned\n", count);
 
-
 	for (auto key : keys)
     {
         if (utree.search(key) == NULL)

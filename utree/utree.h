@@ -1073,6 +1073,8 @@ char *btree::search(entry_key_t key) {
   char *ptr = btree_search_pred(key, &f, &prev);
   if (f) {
     list_node_t *n = (list_node_t *)ptr;
+    if (n->key != key)  // debug code
+      printf("Find wrong key!\n");
     if (n->ptr != 0)
       return (char *)n->ptr; 
   } else {
