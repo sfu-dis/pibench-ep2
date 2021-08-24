@@ -272,6 +272,8 @@ class page{
       if(shift) {
         --hdr.last_index;
       }
+      else
+        printf("Wrong page, delete key not found!\n");
       return shift;
     }
 
