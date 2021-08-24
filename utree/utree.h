@@ -1204,12 +1204,15 @@ retry:
 void btree::remove(entry_key_t key) {
   thread_local int i = 0;
   i++;
+
   bool f, debug=false;
   list_node_t *cur = NULL, *prev = NULL;
 retry:
   cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
+    printf("%d-th delete\n", i);
     printf("Delete key not found.\n");
+    exit(1);
     return;
   }
   // Debug code
