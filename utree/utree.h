@@ -248,9 +248,10 @@ class page{
 
       bool shift = false;
       int i;
-      for(i = 0; i < hdr.last_index; ++i) {
-        if (records[i].ptr == NULL)
-          printf("Empty slots between records?\n");
+      for(i = 0; records[i].ptr != NULL; ++i) {
+        if (i > hdr.last_index)
+          printf("Index out of bound?\n");
+        
         if(!shift && records[i].key == key) {
           shift = true;
           // if (i == 0) {
@@ -262,7 +263,7 @@ class page{
           // records[i].key = records[i + 1].key;
           // records[i].ptr = (i == 0) ? 
           //   (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
-          // continue;
+          continue;
         }
 
         if(shift) {
@@ -270,6 +271,8 @@ class page{
           records[i].ptr = records[i + 1].ptr;
         }
       }
+      if (i != hdr.last_index)
+        printf("%d i\n", i);
 
       if(shift) {
         --hdr.last_index;
