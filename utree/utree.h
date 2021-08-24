@@ -1212,7 +1212,7 @@ void btree::remove(entry_key_t key) {
   bool f, debug=false;
   list_node_t *cur = NULL, *prev = NULL;
 retry:
-  cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
+  cur = (list_node_t *)btree_search_pred(key, &f, (char **)(&prev), debug);
   if (!f) {
     printf("%d-th delete\n", i);
     printf("Delete key not found.\n");
@@ -1228,16 +1228,16 @@ retry:
     prev = list_head;
   }
   if (prev->next != cur) { 
-    // printf("%d-th delete\n", i);
-    // // if (debug){
-    //   printf("prev list node:\n");
-    //   prev->printAll();
-    //   printf("current list node:\n");
-    //   cur->printAll();
-    //   printf("list head:\n");
-    //   list_head->printAll();
-    // // }
-    // exit(1);
+    printf("%d-th delete\n", i);
+    // if (debug){
+      printf("prev list node:\n");
+      prev->printAll();
+      printf("current list node:\n");
+      cur->printAll();
+      printf("list head:\n");
+      list_head->printAll();
+    // }
+    exit(1);
     goto retry;
   } else {
     // Delete it.
