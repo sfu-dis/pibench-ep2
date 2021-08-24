@@ -1052,7 +1052,7 @@ void btree::setNewRoot(char *new_root) {
 
 char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug=false){
   page* p = (page*)root;
-  // *prev = NULL; // debug code
+  *prev = NULL; // debug code
   while(p->hdr.leftmost_ptr != NULL) {  // search down to leafnode
     p = (page *)p->linear_search(key);
   }
@@ -1074,7 +1074,7 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   *f = true;
 
   // debug code
-  if ((list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
+  if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
     printf("Exception found!\n");
 
   return (char *)t;
