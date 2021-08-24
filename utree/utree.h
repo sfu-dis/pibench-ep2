@@ -884,9 +884,6 @@ class page{
         } while(hdr.switch_counter != previous_switch_counter);
 
         if(ret) {
-        // debug code
-          if (*reinterpret_cast<list_node_t **>(prev) != NULL && *reinterpret_cast<list_node_t **>(prev)->next != (list_node_t *)ret)
-            printf("Exception found!\n");
           return ret;
         }
         // debug code
@@ -1075,6 +1072,10 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   }
 
   *f = true;
+
+  // debug code
+  if (*(list_node_t **)(prev) != NULL && *(list_node_t **)(prev)->next != (list_node_t *)t)
+    printf("Exception found!\n");
 
   return (char *)t;
 }
