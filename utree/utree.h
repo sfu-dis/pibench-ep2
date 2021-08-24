@@ -1057,13 +1057,13 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
     p = (page *)p->linear_search(key);
   }
   
-  page *t;
-  while((t = (page *)p->linear_search_pred(key, prev, debug)) != NULL && t == p->hdr.sibling_ptr) { // debug code
-    p = t;
-    if(!p) {
-      break;
-    }
-  }
+  page *t = (page *)p->linear_search_pred(key, prev, debug);
+  // while((t = (page *)p->linear_search_pred(key, prev, debug)) != NULL && t == p->hdr.sibling_ptr) { // debug code
+  //   p = t;
+  //   if(!p) {
+  //     break;
+  //   }
+  // }
 
   if(!t) {
     //printf("NOT FOUND %lu, t = %p\n", key, t);
@@ -1238,8 +1238,6 @@ retry:
     printf("Wrong node to delete!\n");
 
   if (prev == NULL) {
-    printf("%d-th delete\n", i);
-    printf("Previous is null, current node key: %lu\n", cur->key);
     prev = list_head;
   }
   if (prev->next != cur) { 
