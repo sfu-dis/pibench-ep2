@@ -1224,6 +1224,7 @@ retry:
     printf("Wrong node to delete!\n");
 
   if (prev == NULL) {
+    printf("%d-th delete\n", i);
     printf("Previous is null, current node key: %lu\n", cur->key);
     prev = list_head;
   }
