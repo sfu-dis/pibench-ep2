@@ -761,6 +761,8 @@ class page{
       entry_key_t k, k1;
 
       if(hdr.leftmost_ptr == NULL) { // Search a leaf node
+        if (hdr.last_index < 0) // debug code - empty Leaf
+          return NULL;
         do {
           previous_switch_counter = hdr.switch_counter;
           ret = NULL;
@@ -1047,7 +1049,7 @@ void btree::setNewRoot(char *new_root) {
 
 char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug=false){
   page* p = (page*)root;
-
+  *prev = NULL; // debug code
   while(p->hdr.leftmost_ptr != NULL) {  // search down to leafnode
     p = (page *)p->linear_search(key);
   }
