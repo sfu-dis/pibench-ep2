@@ -766,6 +766,7 @@ class page{
         do {
           previous_switch_counter = hdr.switch_counter;
           ret = NULL;
+          *prev = NULL; // debug code
 
           // search from left to right
           if(IS_FORWARD(previous_switch_counter)) {
@@ -792,6 +793,8 @@ class page{
 
             if(k == key) {
               if (hdr.pred_ptr != NULL) {
+                if (hdr.pred_ptr->count() != hdr.pred_ptr->hdr.last_index + 1) // debug code
+                  printf("count does not equal last_index + 1!\n");
                 *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
                 if (debug)
                   printf("line 772, *pred=%p\n", *pred);
