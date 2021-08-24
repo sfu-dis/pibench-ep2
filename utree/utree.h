@@ -1234,6 +1234,8 @@ retry:
       prev->printAll();
       printf("current list node:\n");
       cur->printAll();
+      printf("list head:\n");
+      list_head->printAll();
     // }
     exit(1);
     goto retry;
