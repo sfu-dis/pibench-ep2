@@ -774,11 +774,13 @@ class page{
             }
             k = records[0].key;
             if (key < k) {
-              if (hdr.pred_ptr != NULL){
-                *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
-                if (debug)
-                  printf("line 752, *pred=%p\n", *pred);
-              }
+              // debug code
+              // if (hdr.pred_ptr != NULL){
+              //   *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
+              //   if (debug)
+              //     printf("line 752, *pred=%p\n", *pred);
+              // }
+              return NULL;
             }
             if (key > k){
               *pred = records[0].ptr;
