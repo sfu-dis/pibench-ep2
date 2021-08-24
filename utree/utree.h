@@ -792,13 +792,16 @@ class page{
             }
 
             if(k == key) {
-              if (hdr.pred_ptr != NULL) {
-                if (hdr.pred_ptr->count() != hdr.pred_ptr->hdr.last_index + 1) // debug code
-                  printf("count does not equal last_index + 1!\n");
-                *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
-                if (debug)
-                  printf("line 772, *pred=%p\n", *pred);
-              }
+              auto previous_page = hdr.pred_ptr;  // debug code
+              while (previous_page != NULL && previous_page->hdr.last_index < 0)
+                previous_page = previous_page->hdr.pred_ptr;
+              if (previous_page)
+                *pred = previous_page->records[previous_page->count() - 1].ptr;
+              // if (hdr.pred_ptr != NULL) {
+              //   *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
+              //   if (debug)
+              //     printf("line 772, *pred=%p\n", *pred);
+              // }
               if((t = records[0].ptr) != NULL) {
                 if(k == records[0].key) {
                   ret = t;
