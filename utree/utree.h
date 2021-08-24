@@ -887,8 +887,12 @@ class page{
           return ret;
         }
 
-        if((t = (char *)hdr.sibling_ptr) && key >= ((page *)t)->records[0].key)
-          return t;
+          // debug code
+        // if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
+        //   printf("Exception found!\n");
+
+        // if((t = (char *)hdr.sibling_ptr) && key >= ((page *)t)->records[0].key)
+        //   return t;
 
         return NULL;
       }
@@ -1072,10 +1076,6 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   }
 
   *f = true;
-
-  // debug code
-  if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
-    printf("Exception found!\n");
 
   return (char *)t;
 }
