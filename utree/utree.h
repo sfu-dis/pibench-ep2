@@ -885,7 +885,7 @@ class page{
 
         if(ret) {
         // debug code
-          if ((list_node_t *)*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)ret)
+          if (*(list_node_t **)prev != NULL && (*(list_node_t **)prev)->next != (list_node_t *)ret)
             printf("Exception found!\n");
           return ret;
         }
