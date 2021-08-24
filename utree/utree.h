@@ -248,7 +248,7 @@ class page{
 
       bool shift = false;
       int i;
-      for(i = 0; records[i].ptr != NULL; ++i) {
+      for(i = 0; i <= hdr.last_index && records[i].ptr != NULL; ++i) {
         if(!shift && records[i].key == key) {
           // if (i == 0) {
           //   records[i].ptr = (char *)hdr.leftmost_ptr;
@@ -258,7 +258,12 @@ class page{
           shift = true;
         }
 
-        if(shift && i != hdr.last_index) {
+        if(shift) {
+          if (i == hdr.last_index)
+          {
+            records[i].ptr = NULL;
+            break;
+          }
           records[i].key = records[i + 1].key;
           records[i].ptr = records[i + 1].ptr;
         }
@@ -1278,6 +1283,8 @@ void btree::btree_delete(entry_key_t key) {
 
   if(p) {
     if(!p->remove(this, key)) {
+      printf("First time delete not success?");
+      exit(1);
       btree_delete(key);
     }
   }
