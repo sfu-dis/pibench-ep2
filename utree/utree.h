@@ -1228,16 +1228,16 @@ retry:
     prev = list_head;
   }
   if (prev->next != cur) { 
-    printf("%d-th delete\n", i);
-    // if (debug){
-      printf("prev list node:\n");
-      prev->printAll();
-      printf("current list node:\n");
-      cur->printAll();
-      printf("list head:\n");
-      list_head->printAll();
-    // }
-    exit(1);
+    // printf("%d-th delete\n", i);
+    // // if (debug){
+    //   printf("prev list node:\n");
+    //   prev->printAll();
+    //   printf("current list node:\n");
+    //   cur->printAll();
+    //   printf("list head:\n");
+    //   list_head->printAll();
+    // // }
+    // exit(1);
     goto retry;
   } else {
     // Delete it.
