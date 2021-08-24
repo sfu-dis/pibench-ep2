@@ -1038,6 +1038,8 @@ btree::btree(){
   printf("list_head=%p\n", list_head);
   list_head->next = NULL;
   height = 1;
+
+  printf("Cardinality: %d\n", cardinality);
 }
 
 btree::~btree() { 
