@@ -254,7 +254,7 @@ class page{
             records[i].ptr = (char *)hdr.leftmost_ptr;
           }
           else {
-            records[i].ptr = records[i - 1].ptr;
+            records[i].ptr = records[i + 1].ptr;
           }
           records[i].key = records[i + 1].key;
           // records[i].ptr = (i == 0) ? 
