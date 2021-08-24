@@ -248,19 +248,21 @@ class page{
 
       bool shift = false;
       int i;
-      for(i = 0; records[i].ptr != NULL; ++i) {
+      for(i = 0; i < hdr.last_index; ++i) {
+        if (records[i].ptr == NULL)
+          printf("Empty slots between records?\n");
         if(!shift && records[i].key == key) {
-          if (i == 0) {
-            records[i].ptr = (char *)hdr.leftmost_ptr;
-          }
-          else {
-            records[i].ptr = records[i + 1].ptr;
-          }
-          records[i].key = records[i + 1].key;
+          shift = true;
+          // if (i == 0) {
+          //   records[i].ptr = (char *)hdr.leftmost_ptr;
+          // }
+          // else {
+          //   records[i].ptr = records[i + 1].ptr;
+          // }
+          // records[i].key = records[i + 1].key;
           // records[i].ptr = (i == 0) ? 
           //   (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
-          shift = true;
-          continue;
+          // continue;
         }
 
         if(shift) {
