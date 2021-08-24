@@ -1075,7 +1075,10 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
 
   // debug code
   if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
+  {
     printf("Exception found!\n");
+    p->print();
+  }
 
   return (char *)t;
 }
