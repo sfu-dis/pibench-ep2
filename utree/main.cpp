@@ -19,10 +19,12 @@ void shuffle(std::vector<uint64_t>& keys) {
 
 int main()
 {
-	srand(time(NULL));
+	auto x = time(NULL);
+	cout << "Time: " << x << endl;
+	srand(x);
 	vector<uint64_t> keys;
 	keys.reserve(NUM_RECORDS);
-	for (int i = 0; i < NUM_RECORDS; i++)
+	for (int i = 1; i <= NUM_RECORDS; i++)
 		keys.push_back(i);
 
 	shuffle(keys);
