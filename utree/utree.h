@@ -1219,8 +1219,8 @@ retry:
   cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
     printf("%d-th delete\n", i);
-    // printf("Delete key not found.\n");
-    // exit(1);
+    printf("Delete key not found.\n");
+    exit(1);
     return;
   }
   // Debug code

@@ -30,7 +30,7 @@ int main()
 	btree utree;
 
 	for (auto key : keys)
-		utree.insert(key, key);
+		utree.insert(key, (char*)key);
 
 	auto cur = utree.list_head->next;
 	uint64_t prev_key = 0;
