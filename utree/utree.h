@@ -246,6 +246,9 @@ class page{
       if(IS_FORWARD(hdr.switch_counter)) 
         ++hdr.switch_counter;
 
+      if (hdr.leftmost_ptr != NULL)
+        printf("Remove key from non-leaf node!\n");
+
       bool shift = false;
       int i;
       for(i = 0; records[i].ptr != NULL; ++i) {
