@@ -884,13 +884,12 @@ class page{
         } while(hdr.switch_counter != previous_switch_counter);
 
         if(ret) {
+        // debug code
+          if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)ret)
+            printf("Exception found!\n");
           return ret;
         }
-
-          // debug code
-        // if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
-        //   printf("Exception found!\n");
-
+        // debug code
         // if((t = (char *)hdr.sibling_ptr) && key >= ((page *)t)->records[0].key)
         //   return t;
 
