@@ -47,9 +47,10 @@ int main()
 	}
 	printf("%lu records scanned\n", count);
 
+	list_node_t * node;
 	for (auto key : keys)
     {
-        if (utree.search(key) == NULL)
+        if ((node = (list_node_t *)utree.search(key)) == NULL || node->key != key)
             printf("Key not found! %lu\n", key);
     }
     printf("Insert & search test passed, now delete\n\n");
