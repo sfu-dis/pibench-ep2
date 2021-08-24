@@ -1220,35 +1220,35 @@ retry:
     return;
   }
   // Debug code
-  // if (cur->key != key)
-  //   printf("Wrong node to delete!\n");
+  if (cur->key != key)
+    printf("Wrong node to delete!\n");
 
-  // if (prev == NULL) {
-  //   printf("%d-th delete\n", i);
-  //   printf("Previous is null, current node key: %lu\n", cur->key);
-  //   prev = list_head;
-  // }
-  // if (prev->next != cur) { 
-  //   printf("%d-th delete\n", i);
-  //   // if (debug){
-  //     printf("prev list node:\n");
-  //     prev->printAll();
-  //     printf("current list node:\n");
-  //     cur->printAll();
-  //     printf("list head:\n");
-  //     list_head->printAll();
-  //   // }
-  //   exit(1);
-  //   goto retry;
-  // } else {
-  //   // Delete it.
-  //   if (!__sync_bool_compare_and_swap(&(prev->next), cur, cur->next))
-  //     goto retry;
-  //   #ifdef PMEM
-  //   clflush((char *)prev, sizeof(list_node_t));
-  //   #endif
-  //   btree_delete(key);
-  // }
+  if (prev == NULL) {
+    printf("%d-th delete\n", i);
+    printf("Previous is null, current node key: %lu\n", cur->key);
+    prev = list_head;
+  }
+  if (prev->next != cur) { 
+    printf("%d-th delete\n", i);
+    // if (debug){
+      printf("prev list node:\n");
+      prev->printAll();
+      printf("current list node:\n");
+      cur->printAll();
+      printf("list head:\n");
+      list_head->printAll();
+    // }
+    exit(1);
+    goto retry;
+  } else {
+    // Delete it.
+    if (!__sync_bool_compare_and_swap(&(prev->next), cur, cur->next))
+      goto retry;
+    #ifdef PMEM
+    clflush((char *)prev, sizeof(list_node_t));
+    #endif
+    btree_delete(key);
+  }
   
 }
 
@@ -1274,12 +1274,12 @@ void btree::btree_delete(entry_key_t key) {
     p = (page*) p->linear_search(key);
   }
 
-  page *t;
-  while((t = (page *)p->linear_search(key)) == p->hdr.sibling_ptr) {
-    p = t;
-    if(!p)
-      break;
-  }
+  // page *t;
+  // while((t = (page *)p->linear_search(key)) == p->hdr.sibling_ptr) {
+  //   p = t;
+  //   if(!p)
+  //     break;
+  // }
 
   if(p) {
     if(!p->remove(this, key)) {
