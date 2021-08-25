@@ -1225,7 +1225,7 @@ retry:
       printf("current list node:\n");
       cur->printAll();
     // }
-    exit(1);
+    // exit(1);
     goto retry;
   } else {
     // Delete it.
