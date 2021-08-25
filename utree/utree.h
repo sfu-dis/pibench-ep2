@@ -1212,7 +1212,7 @@ void btree::remove(entry_key_t key) {
 retry:
   cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
-    printf("not found.\n");
+    // printf("not found.\n");
     return;
   }
   if (prev == NULL) {
