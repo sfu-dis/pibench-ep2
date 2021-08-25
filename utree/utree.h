@@ -27,7 +27,7 @@
 #define CACHE_LINE_SIZE 64 
 #define IS_FORWARD(c) (c % 2 == 0)
 
-const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
+const uint64_t POOL_SIZE = 10ULL * 1024ULL * 1024ULL * 1024ULL; // 10 GB
 
 const uint64_t IS_DELETED = 1ull << 63;  
 
@@ -1074,6 +1074,8 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   {
     printf("Exception found!\n");
     p->print();
+    printf("\nSearch key: %lu\n", key);
+    printf("\nPrevious key: %lu  next: %x\n", key, (list_node_t *)((list_node_t *)(*prev))->next);
   }
 
   return (char *)t;
