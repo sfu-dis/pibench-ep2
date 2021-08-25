@@ -1163,6 +1163,7 @@ retry:  // try to find target record and set deleted
   if (!p->remove_key(key))
     printf("Error! Did not find key to remove from leaf!\n");
   p->hdr.mtx->unlock();
+  POBJ_FREE(&pmemobj_oid(node))
   // btree_delete(key);
 }
 
