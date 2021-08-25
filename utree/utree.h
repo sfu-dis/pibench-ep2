@@ -1050,7 +1050,7 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
     p = (page *)p->linear_search(key);
   }
   
-  // page *t = (page *)p->linear_search_pred(key, prev, debug);
+  page *t; // = (page *)p->linear_search_pred(key, prev, debug);
   while((t = (page *)p->linear_search_pred(key, prev, debug)) == p->hdr.sibling_ptr) {
     // p = t;
     if(!t) {
