@@ -13,6 +13,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <vector>
+#include <thread>
 #include <gperftools/profiler.h>
 
 #define PMEM
@@ -1129,7 +1130,7 @@ retry:  // try to find target record and set deleted
       while (!prev && previous_page != NULL) {  // if prev is in another leaf to the left (i == 0)
         previous_page->hdr.mtx->lock();
         if (previous_page->hdr.last_index >= 0) { // previous leaf contains record(s)
-          pred = (list_node_t *)previous_page->records[previous_page->hdr.last_index].ptr;
+          prev = (list_node_t *)previous_page->records[previous_page->hdr.last_index].ptr;
         }
         previous_page->hdr.mtx->unlock();
         previous_page = previous_page->hdr.pred_ptr;
@@ -1153,7 +1154,7 @@ retry:  // try to find target record and set deleted
     else { // search from right to left
       printf("Error! Should always search from left to right!\n");
     }
-  } while(hdr.switch_counter != previous_switch_counter);
+  } while(p->hdr.switch_counter != previous_switch_counter);
 
   p->hdr.mtx->lock();
   if (!p->remove_key(key))
