@@ -1070,7 +1070,6 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   {
     printf("Exception found!\n");
     p->print();
-    exit(1);
   }
 
   return (char *)t;
@@ -1227,13 +1226,13 @@ retry:
     prev = list_head;
   }
   if (prev->next != cur) { 
-    if (debug){
+    // if (debug){
       printf("prev list node:\n");
       prev->printAll();
       printf("current list node:\n");
       cur->printAll();
-    }
-    // exit(1);
+    // }
+    exit(1);
     goto retry;
   } else {
     // Delete it.
