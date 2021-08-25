@@ -1049,7 +1049,7 @@ void btree::setNewRoot(char *new_root) {
 
 char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug=false){
   page* p = (page*)root;
-
+  *prev = NULL;
   while(p->hdr.leftmost_ptr != NULL) {
     p = (page *)p->linear_search(key);
   }
