@@ -965,7 +965,7 @@ class page{
         printf("%x ",hdr.leftmost_ptr);
 
       for(int i=0;records[i].ptr != NULL;++i)
-        printf("%ld,%x ", records[i].key, records[i].ptr);
+        printf("%lu,%x ", records[i].key, records[i].ptr);
 
       printf("\n%x ", hdr.sibling_ptr);
 
