@@ -54,7 +54,7 @@ bool utree_wrapper::update(const char *key, size_t key_sz, const char *value, si
 
 bool utree_wrapper::remove(const char *key, size_t key_sz)
 {
-  utree.remove(*reinterpret_cast<const uint64_t*>(key));
+  utree.new_remove(*reinterpret_cast<const uint64_t*>(key));
   return true;
 }
 

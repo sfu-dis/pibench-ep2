@@ -28,6 +28,8 @@
 
 const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
 
+const uint64_t IS_DELETED = 1ull << 63;  
+
 using entry_key_t = uint64_t; //int64_t; // key type
 
 pthread_mutex_t print_mtx;
@@ -117,7 +119,8 @@ class btree{
     void remove(entry_key_t);        // Remove
     char* search(entry_key_t);       // Search
 
-    int scan(entry_key_t, int scan_size, char* result); // Scan
+    int scan(entry_key_t, int scan_size, char* result);
+    void new_remove(entry_key_t);
 
     void print()
     {
@@ -1075,6 +1078,89 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   return (char *)t;
 }
 
+void btree::new_remove(entry_key_t key) {
+
+  page* p = (page*)root;
+
+  while(p->hdr.leftmost_ptr != NULL) {  // while p is inner node
+    p = (page *)p->linear_search(key);
+  }
+
+  bool deleted;
+  int i;
+  uint8_t previous_switch_counter;
+  entry_key_t k;
+  list_node_t *prev, *node, *next;
+
+retry:  // try to find target record and set deleted
+  do {
+    previous_switch_counter = p->hdr.switch_counter;
+    node = NULL;
+    prev = NULL;
+    if(IS_FORWARD(previous_switch_counter)) { // search from left to right
+      p->hdr.mtx->lock();
+      for (i = 0; i <= p->hdr.last_index; i++) {
+        k = p->records[i].key;
+        if (key == k) {  // key = k
+          node = (list_node_t *)p->records[i].ptr;
+          deleted = node->isDelete;
+          if (deleted) {  // already marked delete by other threads. finish
+            node = NULL;
+            break;
+          }
+          else if (!__sync_bool_compare_and_swap(&(node->isDelete), deleted, true)) {  // else try mark it deleted
+            p->hdr.mtx->unlock();
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+            goto retry;
+          }
+          if (i != 0) // set prev if in same leaf
+            prev = (list_node_t *)p->records[i-1].ptr;
+          break;
+        }
+        else if (key < k) { // key not found
+          break;
+        }
+      }
+      p->hdr.mtx->unlock();
+      if (!node) // not found, finish
+        return;
+
+      auto previous_page = p->hdr.pred_ptr;
+      while (!prev && previous_page != NULL) {  // if prev is in another leaf to the left (i == 0)
+        previous_page->hdr.mtx->lock();
+        if (previous_page->hdr.last_index >= 0) { // previous leaf contains record(s)
+          pred = (list_node_t *)previous_page->records[previous_page->hdr.last_index].ptr;
+        }
+        previous_page->hdr.mtx->unlock();
+        previous_page = previous_page->hdr.pred_ptr;
+      }
+      if (!prev) { // no valid prev found, must be left most node
+        prev = list_head;
+      }
+      deleted = (list_node_t *)prev->isDelete;
+      if (deleted || !__sync_bool_compare_and_swap(&(prev->next), node, node->next)) { // prev is marked deleted or set its next failed, retry
+        if (!__sync_bool_compare_and_swap(&(node->isDelete), true, false))
+          printf("Error! Cannot reset deleted flag for retry?\n");
+        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+        goto retry;
+      }
+      else {
+        #ifdef PMEM
+        clflush((char *)prev, sizeof(list_node_t));
+        #endif
+      }
+    }
+    else { // search from right to left
+      printf("Error! Should always search from left to right!\n");
+    }
+  } while(hdr.switch_counter != previous_switch_counter);
+
+  p->hdr.mtx->lock();
+  if (!p->remove_key(key))
+    printf("Error! Did not find key to remove from leaf!\n");
+  p->hdr.mtx->unlock();
+  // btree_delete(key);
+}
 
 char *btree::search(entry_key_t key) {
   bool f = false;
