@@ -1050,13 +1050,13 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
     p = (page *)p->linear_search(key);
   }
   
-  page *t = (page *)p->linear_search_pred(key, prev, debug);
-  // while((t = (page *)p->linear_search_pred(key, prev, debug)) == p->hdr.sibling_ptr) {
-  //   p = t;
-  //   if(!p) {
-  //     break;
-  //   }
-  // }
+  // page *t = (page *)p->linear_search_pred(key, prev, debug);
+  while((t = (page *)p->linear_search_pred(key, prev, debug)) == p->hdr.sibling_ptr) {
+    // p = t;
+    if(!t) {
+      break;
+    }
+  }
 
   if(!t) {
     //printf("NOT FOUND %lu, t = %p\n", key, t);
@@ -1216,6 +1216,7 @@ retry:
 void btree::remove(entry_key_t key) {
   bool f, debug=false;
   list_node_t *cur = NULL, *prev = NULL;
+  int i = 0;
 retry:
   cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
