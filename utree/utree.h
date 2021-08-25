@@ -243,7 +243,7 @@ class page{
 
     inline bool remove_key(entry_key_t key) {
       // Set the switch_counter
-      if(IS_FORWARD(hdr.switch_counter)) 
+      if(!IS_FORWARD(hdr.switch_counter)) 
         ++hdr.switch_counter;
 
       bool shift = false;
