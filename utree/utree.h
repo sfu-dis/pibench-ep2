@@ -1219,12 +1219,12 @@ retry:
     prev = list_head;
   }
   if (prev->next != cur) { 
-    // if (debug){
+    if (debug){
       printf("prev list node:\n");
       prev->printAll();
       printf("current list node:\n");
       cur->printAll();
-    // }
+    }
     // exit(1);
     goto retry;
   } else {
