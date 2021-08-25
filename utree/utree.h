@@ -117,7 +117,7 @@ class btree{
     void remove(entry_key_t);        // Remove
     char* search(entry_key_t);       // Search
 
-    int scan(entry_key_t, int scan_size, char* result);
+    int scan(entry_key_t, int scan_size, char* result); // Scan
 
     void print()
     {
@@ -243,20 +243,16 @@ class page{
 
     inline bool remove_key(entry_key_t key) {
       // Set the switch_counter
-      if(!IS_FORWARD(hdr.switch_counter))
-      {
-        printf("Not searched forward!\n"); // debug code
+      if(IS_FORWARD(hdr.switch_counter)) 
         ++hdr.switch_counter;
-      }
 
       bool shift = false;
       int i;
       for(i = 0; records[i].ptr != NULL; ++i) {
-        
         if(!shift && records[i].key == key) {
+          records[i].ptr = (i == 0) ? 
+            (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
           shift = true;
-          // records[i].ptr = (i == 0) ? 
-          //   (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
         }
 
         if(shift) {
@@ -268,7 +264,6 @@ class page{
       if(shift) {
         --hdr.last_index;
       }
-
       return shift;
     }
 
@@ -761,12 +756,9 @@ class page{
       entry_key_t k, k1;
 
       if(hdr.leftmost_ptr == NULL) { // Search a leaf node
-        if (hdr.last_index < 0) // debug code - empty Leaf
-          return NULL;
         do {
           previous_switch_counter = hdr.switch_counter;
           ret = NULL;
-          // *prev = nullptr; // debug code
 
           // search from left to right
           if(IS_FORWARD(previous_switch_counter)) {
@@ -777,7 +769,6 @@ class page{
             }
             k = records[0].key;
             if (key < k) {
-              // debug code
               // if (hdr.pred_ptr != NULL){
               //   *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
               //   if (debug)
@@ -790,6 +781,7 @@ class page{
               if (debug)
                 printf("line 757, *pred=%p\n", *pred);
             }
+              
 
             if(k == key) {
               auto previous_page = hdr.pred_ptr;  // debug code
@@ -828,7 +820,6 @@ class page{
               }
             }
           }else { // search from right to left
-            printf("Search backward???\n"); // debug code
             if (debug){
               printf("search from right to left\n");
               printf("page:\n");
@@ -889,14 +880,13 @@ class page{
         if(ret) {
           return ret;
         }
-        // debug code
-        // if((t = (char *)hdr.sibling_ptr) && key >= ((page *)t)->records[0].key)
-        //   return t;
+
+        if((t = (char *)hdr.sibling_ptr) && key >= ((page *)t)->records[0].key)
+          return t;
 
         return NULL;
       }
       else { // internal node
-        printf("Search in inner node???\n"); // debug code
         do {
           previous_switch_counter = hdr.switch_counter;
           ret = NULL;
@@ -1055,18 +1045,18 @@ void btree::setNewRoot(char *new_root) {
 
 char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug=false){
   page* p = (page*)root;
-  *prev = NULL; // debug code
-  while(p->hdr.leftmost_ptr != NULL) {  // search down to leafnode
+
+  while(p->hdr.leftmost_ptr != NULL) {
     p = (page *)p->linear_search(key);
   }
   
-  page *t = (page *)p->linear_search_pred(key, prev, debug);
-  // while((t = (page *)p->linear_search_pred(key, prev, debug)) != NULL && t == p->hdr.sibling_ptr) { // debug code
-  //   p = t;
-  //   if(!p) {
-  //     break;
-  //   }
-  // }
+  page *t;
+  while((t = (page *)p->linear_search_pred(key, prev, debug)) == p->hdr.sibling_ptr) {
+    p = t;
+    if(!p) {
+      break;
+    }
+  }
 
   if(!t) {
     //printf("NOT FOUND %lu, t = %p\n", key, t);
@@ -1075,14 +1065,6 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   }
 
   *f = true;
-
-  // debug code
-  if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
-  {
-    printf("Exception found!\n");
-    p->print();
-  }
-
   return (char *)t;
 }
 
@@ -1169,9 +1151,9 @@ void btree::insert(entry_key_t key, char *right) {
   else { 
     int retry_number = 0, w=0;
 retry:
-    retry_number += 1;
-    if (retry_number > 10 && w == 3) {
-      return;
+  retry_number += 1;
+  if (retry_number > 10 && w == 3) {
+    return;
     }
     if (rt) {
       // we need to re-search the key!
@@ -1192,7 +1174,6 @@ retry:
         prev = list_head;
       }
       if (prev->isUpdate){
-        printf("Never!\n");
         w = 1;
         goto retry;
       }
@@ -1226,35 +1207,23 @@ retry:
 
 
 void btree::remove(entry_key_t key) {
-  thread_local int i = 0;
-  i++;
-
   bool f, debug=false;
   list_node_t *cur = NULL, *prev = NULL;
 retry:
-  cur = (list_node_t *)btree_search_pred(key, &f, (char **)(&prev), debug);
+  cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
-    printf("%d-th delete\n", i);
-    printf("Delete key not found.\n");
-    exit(1);
+    printf("not found.\n");
     return;
   }
-  // Debug code
-  if (cur->key != key)
-    printf("Wrong node to delete!\n");
-
   if (prev == NULL) {
     prev = list_head;
   }
   if (prev->next != cur) { 
-    printf("%d-th delete\n", i);
     // if (debug){
       printf("prev list node:\n");
       prev->printAll();
       printf("current list node:\n");
       cur->printAll();
-      printf("list head:\n");
-      list_head->printAll();
     // }
     exit(1);
     goto retry;
@@ -1292,17 +1261,15 @@ void btree::btree_delete(entry_key_t key) {
     p = (page*) p->linear_search(key);
   }
 
-  // page *t;
-  // while((t = (page *)p->linear_search(key)) == p->hdr.sibling_ptr) {
-  //   p = t;
-  //   if(!p)
-  //     break;
-  // }
+  page *t;
+  while((t = (page *)p->linear_search(key)) == p->hdr.sibling_ptr) {
+    p = t;
+    if(!p)
+      break;
+  }
 
   if(p) {
     if(!p->remove(this, key)) {
-      printf("First time delete not success?");
-      exit(1);
       btree_delete(key);
     }
   }
