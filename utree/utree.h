@@ -1171,7 +1171,7 @@ retry:  // try to find target record and set deleted
   p->hdr.mtx->unlock();
   #ifdef PMEM
   TOID(list_node_t) n = pmemobj_oid(node);
-  POBJ_FREE(&n)
+  POBJ_FREE(&n);
   #endif
   // btree_delete(key);
 }
