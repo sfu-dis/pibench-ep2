@@ -1076,14 +1076,14 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
 
   *f = true;
 
-  if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
-  {
-    printf("Exception found!\n");
-    p->print();
-    printf("\nSearch key: %lu\n", key);
-    printf("\nNode key: %lu  next: %x\n", ((list_node_t *)t)->key, (list_node_t *)((list_node_t *)t)->next);
-    printf("\nPrevious node key: %lu  next: %x\n", key, (list_node_t *)((list_node_t *)(*prev))->next);
-  }
+  // if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
+  // {
+  //   printf("Exception found!\n");
+  //   p->print();
+  //   printf("\nSearch key: %lu\n", key);
+  //   printf("\nNode key: %lu  next: %x\n", ((list_node_t *)t)->key, (list_node_t *)((list_node_t *)t)->next);
+  //   printf("\nPrevious node key: %lu  next: %x\n", key, (list_node_t *)((list_node_t *)(*prev))->next);
+  // }
 
   return (char *)t;
 }
@@ -1316,7 +1316,6 @@ retry:
 void btree::remove(entry_key_t key) {
   bool f, debug=false;
   list_node_t *cur = NULL, *prev = NULL;
-  int i = 0;
 retry:
   cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
@@ -1327,12 +1326,12 @@ retry:
     prev = list_head;
   }
   if (prev->next != cur) { 
-    // if (debug){
+    if (debug){
       printf("prev list node:\n");
       prev->printAll();
       printf("current list node:\n");
       cur->printAll();
-    // }
+    }
     exit(1);
     goto retry;
   } else {
