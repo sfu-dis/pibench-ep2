@@ -1170,7 +1170,7 @@ retry:  // try to find target record and set deleted
     printf("Error! Did not find key to remove from leaf!\n");
   p->hdr.mtx->unlock();
   #ifdef PMEM
-  TOID(struct list_node_t) n = pmemobj_oid(node);
+  TOID(list_node_t) n = pmemobj_oid(node);
   POBJ_FREE(&n)
   #endif
   // btree_delete(key);
