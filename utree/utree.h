@@ -779,12 +779,11 @@ class page{
             }
             k = records[0].key;
             if (key < k) {
-              // if (hdr.pred_ptr != NULL){
-              //   *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
-              //   if (debug)
-              //     printf("line 752, *pred=%p\n", *pred);
-              // }
-              return NULL;
+              if (hdr.pred_ptr != NULL){
+                *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
+                if (debug)
+                  printf("line 752, *pred=%p\n", *pred);
+              }
             }
             if (key > k){
               *pred = records[0].ptr;
@@ -794,16 +793,11 @@ class page{
               
 
             if(k == key) {
-              auto previous_page = hdr.pred_ptr;  // debug code
-              while (previous_page != NULL && previous_page->hdr.last_index < 0)
-                previous_page = previous_page->hdr.pred_ptr;
-              if (previous_page)
-                *pred = previous_page->records[previous_page->count() - 1].ptr;
-              // if (hdr.pred_ptr != NULL) {
-              //   *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
-              //   if (debug)
-              //     printf("line 772, *pred=%p\n", *pred);
-              // }
+              if (hdr.pred_ptr != NULL) {
+                *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
+                if (debug)
+                  printf("line 772, *pred=%p\n", *pred);
+              }
               if((t = records[0].ptr) != NULL) {
                 if(k == records[0].key) {
                   ret = t;
@@ -1062,8 +1056,8 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
   
   page *t; // = (page *)p->linear_search_pred(key, prev, debug);
   while((t = (page *)p->linear_search_pred(key, prev, debug)) == p->hdr.sibling_ptr) {
-    // p = t;
-    if(!t) {
+    p = t;
+    if(!p) {
       break;
     }
   }
