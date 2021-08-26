@@ -65,6 +65,12 @@ struct list_node_t {
   bool isUpdate;
   bool isDelete;
   struct list_node_t *next; 
+  list_node_t(){
+    ptr = 0;
+    isUpdate = false;
+    isDelete = false;
+    next = NULL;
+  }
   void printAll(void);
 };
 
