@@ -29,8 +29,6 @@ utree_wrapper::~utree_wrapper()
 bool utree_wrapper::find(const char *key, size_t key_sz, char *value_out)
 {
   uint64_t k = *reinterpret_cast<const uint64_t*>(key);
-  if (k == 0)
-    printf("Search key is 0\n");
   auto value = utree.search(k);
   if (value != NULL)
   {
@@ -44,8 +42,6 @@ bool utree_wrapper::find(const char *key, size_t key_sz, char *value_out)
 bool utree_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   uint64_t k = *reinterpret_cast<const uint64_t*>(key);
-  if (k == 0)
-    printf("Search key is 0\n");
   utree.insert(k, (char* )value);
   return true;
 }
@@ -58,7 +54,7 @@ bool utree_wrapper::update(const char *key, size_t key_sz, const char *value, si
 
 bool utree_wrapper::remove(const char *key, size_t key_sz)
 {
-  utree.remove(*reinterpret_cast<const uint64_t*>(key));
+  utree.new_remove(*reinterpret_cast<const uint64_t*>(key));
   return true;
 }
 

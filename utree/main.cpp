@@ -58,7 +58,7 @@ int main()
     shuffle(keys);
     for (auto key : keys)
     {
-        utree.remove(key);
+        utree.new_remove(key);
     }
     printf("All keys deleted!\n");
 

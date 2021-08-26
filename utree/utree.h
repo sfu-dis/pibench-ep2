@@ -13,6 +13,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <vector>
+#include <thread>
 #include <gperftools/profiler.h>
 
 #define PMEM
@@ -26,7 +27,9 @@
 #define CACHE_LINE_SIZE 64 
 #define IS_FORWARD(c) (c % 2 == 0)
 
-const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
+const uint64_t POOL_SIZE = 10ULL * 1024ULL * 1024ULL * 1024ULL; // 10 GB
+
+const uint64_t IS_DELETED = 1ull << 63;  
 
 using entry_key_t = uint64_t; //int64_t; // key type
 
@@ -62,6 +65,12 @@ struct list_node_t {
   bool isUpdate;
   bool isDelete;
   struct list_node_t *next; 
+  list_node_t(){
+    ptr = 0;
+    isUpdate = false;
+    isDelete = false;
+    next = NULL;
+  }
   void printAll(void);
 };
 
@@ -118,6 +127,7 @@ class btree{
     char* search(entry_key_t);       // Search
 
     int scan(entry_key_t, int scan_size, char* result);
+    void new_remove(entry_key_t);
 
     void print()
     {
@@ -243,20 +253,16 @@ class page{
 
     inline bool remove_key(entry_key_t key) {
       // Set the switch_counter
-      if(!IS_FORWARD(hdr.switch_counter))
-      {
-        printf("Not searched forward!\n"); // debug code
+      if(!IS_FORWARD(hdr.switch_counter)) 
         ++hdr.switch_counter;
-      }
 
       bool shift = false;
       int i;
       for(i = 0; records[i].ptr != NULL; ++i) {
-        
         if(!shift && records[i].key == key) {
+          records[i].ptr = (i == 0) ? 
+            (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
           shift = true;
-          // records[i].ptr = (i == 0) ? 
-          //   (char *)hdr.leftmost_ptr : records[i - 1].ptr; 
         }
 
         if(shift) {
@@ -268,7 +274,6 @@ class page{
       if(shift) {
         --hdr.last_index;
       }
-
       return shift;
     }
 
@@ -761,12 +766,9 @@ class page{
       entry_key_t k, k1;
 
       if(hdr.leftmost_ptr == NULL) { // Search a leaf node
-        if (hdr.last_index < 0) // debug code - empty Leaf
-          return NULL;
         do {
           previous_switch_counter = hdr.switch_counter;
           ret = NULL;
-          // *prev = nullptr; // debug code
 
           // search from left to right
           if(IS_FORWARD(previous_switch_counter)) {
@@ -777,7 +779,6 @@ class page{
             }
             k = records[0].key;
             if (key < k) {
-              // debug code
               // if (hdr.pred_ptr != NULL){
               //   *pred = hdr.pred_ptr->records[hdr.pred_ptr->count() - 1].ptr;
               //   if (debug)
@@ -790,6 +791,7 @@ class page{
               if (debug)
                 printf("line 757, *pred=%p\n", *pred);
             }
+              
 
             if(k == key) {
               auto previous_page = hdr.pred_ptr;  // debug code
@@ -828,7 +830,6 @@ class page{
               }
             }
           }else { // search from right to left
-            printf("Search backward???\n"); // debug code
             if (debug){
               printf("search from right to left\n");
               printf("page:\n");
@@ -889,14 +890,13 @@ class page{
         if(ret) {
           return ret;
         }
-        // debug code
-        // if((t = (char *)hdr.sibling_ptr) && key >= ((page *)t)->records[0].key)
-        //   return t;
+
+        if((t = (char *)hdr.sibling_ptr) && key >= ((page *)t)->records[0].key)
+          return t;
 
         return NULL;
       }
       else { // internal node
-        printf("Search in inner node???\n"); // debug code
         do {
           previous_switch_counter = hdr.switch_counter;
           ret = NULL;
@@ -975,7 +975,7 @@ class page{
         printf("%x ",hdr.leftmost_ptr);
 
       for(int i=0;records[i].ptr != NULL;++i)
-        printf("%ld,%x ", records[i].key, records[i].ptr);
+        printf("%lu,%x ", records[i].key, records[i].ptr);
 
       printf("\n%x ", hdr.sibling_ptr);
 
@@ -1055,18 +1055,18 @@ void btree::setNewRoot(char *new_root) {
 
 char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug=false){
   page* p = (page*)root;
-  *prev = NULL; // debug code
-  while(p->hdr.leftmost_ptr != NULL) {  // search down to leafnode
+  *prev = NULL;
+  while(p->hdr.leftmost_ptr != NULL) {
     p = (page *)p->linear_search(key);
   }
   
-  page *t = (page *)p->linear_search_pred(key, prev, debug);
-  // while((t = (page *)p->linear_search_pred(key, prev, debug)) != NULL && t == p->hdr.sibling_ptr) { // debug code
-  //   p = t;
-  //   if(!p) {
-  //     break;
-  //   }
-  // }
+  page *t; // = (page *)p->linear_search_pred(key, prev, debug);
+  while((t = (page *)p->linear_search_pred(key, prev, debug)) == p->hdr.sibling_ptr) {
+    // p = t;
+    if(!t) {
+      break;
+    }
+  }
 
   if(!t) {
     //printf("NOT FOUND %lu, t = %p\n", key, t);
@@ -1076,16 +1076,105 @@ char *btree::btree_search_pred(entry_key_t key, bool *f, char **prev, bool debug
 
   *f = true;
 
-  // debug code
-  if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
-  {
-    printf("Exception found!\n");
-    p->print();
-  }
+  // if (*prev != NULL && (list_node_t *)((list_node_t *)(*prev))->next != (list_node_t *)t)
+  // {
+  //   printf("Exception found!\n");
+  //   p->print();
+  //   printf("\nSearch key: %lu\n", key);
+  //   printf("\nNode key: %lu  next: %x\n", ((list_node_t *)t)->key, (list_node_t *)((list_node_t *)t)->next);
+  //   printf("\nPrevious node key: %lu  next: %x\n", key, (list_node_t *)((list_node_t *)(*prev))->next);
+  // }
 
   return (char *)t;
 }
 
+void btree::new_remove(entry_key_t key) {
+
+  page* p = (page*)root;
+
+  while(p->hdr.leftmost_ptr != NULL) {  // while p is inner node
+    p = (page *)p->linear_search(key);
+  }
+
+  bool deleted;
+  int i;
+  uint8_t previous_switch_counter;
+  entry_key_t k;
+  list_node_t *prev, *node, *next;
+
+retry:  // try to find target record and set deleted
+  do {
+    previous_switch_counter = p->hdr.switch_counter;
+    node = NULL;
+    prev = NULL;
+    if(IS_FORWARD(previous_switch_counter)) { // search from left to right
+      p->hdr.mtx->lock();
+      for (i = 0; i <= p->hdr.last_index; i++) {
+        k = p->records[i].key;
+        if (key == k) {  // key = k
+          node = (list_node_t *)p->records[i].ptr;
+          deleted = node->isDelete;
+          if (deleted) {  // already marked delete by other threads. finish
+            node = NULL;
+            break;
+          }
+          else if (!__sync_bool_compare_and_swap(&(node->isDelete), deleted, true)) {  // else try mark it deleted
+            p->hdr.mtx->unlock();
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+            goto retry;
+          }
+          if (i != 0) // set prev if in same leaf
+            prev = (list_node_t *)p->records[i-1].ptr;
+          break;
+        }
+        else if (key < k) { // key not found
+          break;
+        }
+      }
+      p->hdr.mtx->unlock();
+      if (!node) // not found, finish
+        return;
+
+      auto previous_page = p->hdr.pred_ptr;
+      while (!prev && previous_page != NULL) {  // if prev is in another leaf to the left (i == 0)
+        previous_page->hdr.mtx->lock();
+        if (previous_page->hdr.last_index >= 0) { // previous leaf contains record(s)
+          prev = (list_node_t *)previous_page->records[previous_page->hdr.last_index].ptr;
+        }
+        previous_page->hdr.mtx->unlock();
+        previous_page = previous_page->hdr.pred_ptr;
+      }
+      if (!prev) { // no valid prev found, must be left most node
+        prev = list_head;
+      }
+      deleted = (list_node_t *)prev->isDelete;
+      if (deleted || !__sync_bool_compare_and_swap(&(prev->next), node, node->next)) { // prev is marked deleted or set its next failed, retry
+        if (!__sync_bool_compare_and_swap(&(node->isDelete), true, false))
+          printf("Error! Cannot reset deleted flag for retry?\n");
+        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+        goto retry;
+      }
+      else {
+        #ifdef PMEM
+        clflush((char *)prev, sizeof(list_node_t));
+        #endif
+      }
+    }
+    else { // search from right to left
+      printf("Error! Should always search from left to right!\n");
+    }
+  } while(p->hdr.switch_counter != previous_switch_counter);
+
+  p->hdr.mtx->lock();
+  if (!p->remove_key(key))
+    printf("Error! Did not find key to remove from leaf!\n");
+  p->hdr.mtx->unlock();
+  #ifdef PMEM
+  TOID(list_node_t) n = pmemobj_oid(node);
+  POBJ_FREE(&n);
+  #endif
+  // btree_delete(key);
+}
 
 char *btree::search(entry_key_t key) {
   bool f = false;
@@ -1169,9 +1258,9 @@ void btree::insert(entry_key_t key, char *right) {
   else { 
     int retry_number = 0, w=0;
 retry:
-    retry_number += 1;
-    if (retry_number > 10 && w == 3) {
-      return;
+  retry_number += 1;
+  if (retry_number > 10 && w == 3) {
+    return;
     }
     if (rt) {
       // we need to re-search the key!
@@ -1192,7 +1281,6 @@ retry:
         prev = list_head;
       }
       if (prev->isUpdate){
-        printf("Never!\n");
         w = 1;
         goto retry;
       }
@@ -1226,36 +1314,24 @@ retry:
 
 
 void btree::remove(entry_key_t key) {
-  thread_local int i = 0;
-  i++;
-
   bool f, debug=false;
   list_node_t *cur = NULL, *prev = NULL;
 retry:
-  cur = (list_node_t *)btree_search_pred(key, &f, (char **)(&prev), debug);
+  cur = (list_node_t *)btree_search_pred(key, &f, (char **)&prev, debug);
   if (!f) {
-    printf("%d-th delete\n", i);
-    printf("Delete key not found.\n");
-    exit(1);
+    // printf("not found.\n");
     return;
   }
-  // Debug code
-  if (cur->key != key)
-    printf("Wrong node to delete!\n");
-
   if (prev == NULL) {
     prev = list_head;
   }
   if (prev->next != cur) { 
-    printf("%d-th delete\n", i);
-    // if (debug){
+    if (debug){
       printf("prev list node:\n");
       prev->printAll();
       printf("current list node:\n");
       cur->printAll();
-      printf("list head:\n");
-      list_head->printAll();
-    // }
+    }
     exit(1);
     goto retry;
   } else {
@@ -1292,17 +1368,15 @@ void btree::btree_delete(entry_key_t key) {
     p = (page*) p->linear_search(key);
   }
 
-  // page *t;
-  // while((t = (page *)p->linear_search(key)) == p->hdr.sibling_ptr) {
-  //   p = t;
-  //   if(!p)
-  //     break;
-  // }
+  page *t;
+  while((t = (page *)p->linear_search(key)) == p->hdr.sibling_ptr) {
+    p = t;
+    if(!p)
+      break;
+  }
 
   if(p) {
     if(!p->remove(this, key)) {
-      printf("First time delete not success?");
-      exit(1);
       btree_delete(key);
     }
   }
