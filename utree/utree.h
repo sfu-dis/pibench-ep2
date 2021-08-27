@@ -27,9 +27,7 @@
 #define CACHE_LINE_SIZE 64 
 #define IS_FORWARD(c) (c % 2 == 0)
 
-const uint64_t POOL_SIZE = 10ULL * 1024ULL * 1024ULL * 1024ULL; // 10 GB
-
-const uint64_t IS_DELETED = 1ull << 63;  
+const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
 
 using entry_key_t = uint64_t; //int64_t; // key type
 
@@ -1191,11 +1189,11 @@ int btree::scan(entry_key_t key, int scan_size, char* result) {
   int scanned = 0;
   if (f) {
     list_node_t *n = (list_node_t *)ptr;
-    while (n && n->ptr && scanned < scan_size)
+    while (n && scanned < scan_size)
     {
       memcpy(result, &n->key, 8);
       result += 8;
-      memcpy(result, (char *)n->ptr, 8);
+      memcpy(result, &n->ptr, 8);
       result += 8;
       scanned ++;
       n = n->next;

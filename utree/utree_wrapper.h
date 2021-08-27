@@ -32,7 +32,7 @@ bool utree_wrapper::find(const char *key, size_t key_sz, char *value_out)
   auto value = utree.search(k);
   if (value != NULL)
   {
-    memcpy(value_out, value, key_sz);
+    memcpy(value_out, &value, key_sz);
     return true;
   }
   std::cout << "Key not found!\n";
