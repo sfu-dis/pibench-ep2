@@ -49,7 +49,7 @@
  */
 
 
-//#define PMEM // comment this out for using DRAM as NVM
+#define PMEM // comment this out for using DRAM as NVM
 //#define POOL // comment this out to use malloc (new, delete)
 
 #ifdef PMEM
@@ -178,7 +178,7 @@ public:
       }
       fprintf(stderr, "%s alloc - run out of memory!\n", mempool_name);
       abort();
-   #elif PMEM
+   #elif defined(PMEM)
       if (is_pmem)
       {
          TOID(mempool) p;  // using any class/struct is ok?
