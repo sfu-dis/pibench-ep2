@@ -191,9 +191,15 @@ public:
    #elif defined(PMEM)
       if (pop)
       {
-         TOID(dummy) p;  // using any class/struct is ok?
-         POBJ_ZALLOC(pop, &p, dummy, size);
-         return pmemobj_direct(p.oid);
+         // return pmemobj_xreserve(
+         //    pop, &(_actionsArray[_actionsCounter++]),
+         //    size, VALUE,
+         //    POBJ_CLASS_ID(200));
+         // TOID(dummy) p;  // using any class/struct is ok?
+         // POBJ_ZALLOC(pop, &p, dummy, size);
+         // return pmemobj_direct(p.oid);
+         pobj_action act;
+         return pmemobj_direct(POBJ_XRESERVE_ALLOC(pop, struct dummy, size, &act, POBJ_CLASS_ID(200)).oid);
       }
    #endif
       return new (std::align_val_t(256)) char[size];
