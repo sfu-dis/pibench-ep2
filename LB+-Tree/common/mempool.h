@@ -29,7 +29,6 @@
  * determine the allocated nodes and unused nodes.
  *
  */
-
 #ifndef _BTREE_MEM_POOL_H
 #define _BTREE_MEM_POOL_H
 
@@ -52,9 +51,18 @@
 #define PMEM // comment this out for using DRAM as NVM
 //#define POOL // comment this out to use malloc (new, delete)
 
+struct dummy {
+   int i;
+   int j;
+};
+
 #ifdef PMEM
    #define NVMPOOL_REAL
    #include <libpmem.h>
+   #include <libpmemobj.h>
+   POBJ_LAYOUT_BEGIN(LBtree);
+   POBJ_LAYOUT_TOID(LBtree, dummy);
+   POBJ_LAYOUT_END(LBtree);
 #endif
 
 
@@ -63,6 +71,8 @@
 #ifndef MB
 #define MB (1024LL * 1024LL)
 #endif
+
+
 
 // #ifdef POOL
 
@@ -80,7 +90,7 @@ private:
    char *mempool_end;
    char *mempool_free_node;
    const char *mempool_name;
-   bool is_pmem;
+   PMEMobjpool * pop;
 
 public:
    // ---
@@ -90,11 +100,11 @@ public:
    /**
    * constructor to set all internal states to null
    */
-   mempool(bool pmem = false)
+   mempool(PMEMobjpool * p = NULL)
    {
       mempool_start = mempool_cur = mempool_end = NULL;
       mempool_free_node = NULL;
-      is_pmem = pmem;
+      pop = p;
    }
 
    /**
@@ -179,10 +189,10 @@ public:
       fprintf(stderr, "%s alloc - run out of memory!\n", mempool_name);
       abort();
    #elif defined(PMEM)
-      if (is_pmem)
+      if (pop)
       {
-         TOID(mempool) p;  // using any class/struct is ok?
-         POBJ_ZALLOC(pop, &p, mempool, size);
+         TOID(dummy) p;  // using any class/struct is ok?
+         POBJ_ZALLOC(pop, &p, dummy, size);
          return pmemobj_direct(p.oid);
       }
    #endif

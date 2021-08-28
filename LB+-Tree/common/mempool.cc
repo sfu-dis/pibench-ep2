@@ -151,40 +151,37 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         printf("NVM pool size for each other worker thread: %lld \n", size_per_pool);
         tm_size = size_per_pool * (long long) tm_num_workers + load_pool_size;
         printf("Total NVM pool size: %lld \n", tm_size);
-    #ifdef NVMPOOL_REAL
-        printf("Using actual NVM\n");
-        // pmdk allows PMEM_MMAP_HINT=map_addr to set the map address
-        for (int i = 0; i < tm_num_workers; i++) {
-            tm_pools[i] = mempool(true);
-        }
-        int is_pmem = false;
-        size_t mapped_len = tm_size;
+        #ifdef NVMPOOL_REAL
+            printf("Using actual NVM\n");
+            // pmdk allows PMEM_MMAP_HINT=map_addr to set the map address
+            int is_pmem = false;
+            size_t mapped_len = tm_size;
 
-        tm_buf = (char *)pmem_map_file(tn_nvm_file, tm_size, PMEM_FILE_CREATE, 0666, &mapped_len, &is_pmem);
-        if (tm_buf == NULL || !is_pmem)
-        {
-            perror("pmem_map_file");
-            exit(1);
-        }
+            tm_buf = (char *)pmem_map_file(tn_nvm_file, tm_size, PMEM_FILE_CREATE, 0666, &mapped_len, &is_pmem);
+            if (tm_buf == NULL || !is_pmem)
+            {
+                perror("pmem_map_file");
+                exit(1);
+            }
 
-        printf("NVM mapping address: %p, size: %ld\n", tm_buf, mapped_len);
-        if (tm_size != mapped_len)
-        {
-            fprintf(stderr, "Error: cannot map %lld bytes\n", tm_size);
-            pmem_unmap(tm_buf, mapped_len);
-            exit(1);
-        }
+            printf("NVM mapping address: %p, size: %ld\n", tm_buf, mapped_len);
+            if (tm_size != mapped_len)
+            {
+                fprintf(stderr, "Error: cannot map %lld bytes\n", tm_size);
+                pmem_unmap(tm_buf, mapped_len);
+                exit(1);
+            }
 
-    #else // NVMPOOL_REAL not defined, use DRAM memory
-        printf("Using DRAM as NVM\n");
-        tm_buf = (char *)memalign(4096, tm_size);
-        if (!tm_buf)
-        {
-            perror("malloc");
-            exit(1);
-        }
+        #else // NVMPOOL_REAL not defined, use DRAM memory
+            printf("Using DRAM as NVM\n");
+            tm_buf = (char *)memalign(4096, tm_size);
+            if (!tm_buf)
+            {
+                perror("malloc");
+                exit(1);
+            }
 
-    #endif // NVMPOOL_REAL
+        #endif // NVMPOOL_REAL
 
         // 2. initialize NVM memory pools
         char name[80];
@@ -201,6 +198,12 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         for (long long i = 0; i < tm_size; i += 4096)
         {
             tm_buf[i] = 1; // XXX: need a special signature
+        }
+#elif defined(PMEM)
+        // const uint64_t PMEMOBJ_POOL_SIZE = 14ULL * 1024ULL * 1024ULL * 1024ULL; // 14GB
+        PMEMobjpool * pop = pmemobj_create("./pool", POBJ_LAYOUT_NAME(LBtree), size, 0666);
+        for (int i = 0; i < tm_num_workers; i++) {
+            tm_pools[i] = mempool(pop);
         }
 #endif
 }
