@@ -56,6 +56,8 @@ struct dummy {
    int j;
 };
 
+extern uint64_t class_id;
+
 #ifdef PMEM
    #define NVMPOOL_REAL
    #include <libpmem.h>
@@ -199,7 +201,7 @@ public:
          // POBJ_ZALLOC(pop, &p, dummy, size);
          // return pmemobj_direct(p.oid);
          pobj_action act;
-         return pmemobj_direct(POBJ_XRESERVE_ALLOC(pop, struct dummy, size, &act, POBJ_CLASS_ID(200)).oid);
+         return pmemobj_direct(POBJ_XRESERVE_ALLOC(pop, dummy, size, &act, POBJ_CLASS_ID(class_id)).oid);
       }
    #endif
       return new (std::align_val_t(256)) char[size];

@@ -22,6 +22,8 @@
 
 thread_local int worker_id = -1; /* in Thread Local Storage */
 
+uint64_t class_id = 0;
+
 // #ifdef POOL
 
 threadMemPools the_thread_mempools;
@@ -210,8 +212,9 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         for (int i = 0; i < tm_num_workers; i++) {
             tm_pools[i] = mempool(pop);
         }
-        if (pmemobj_ctl_set(NULL, "heap.alloc_class.[200].desc", &arg) != 0)
+        if (pmemobj_ctl_set(pop, "heap.alloc_class.new.desc", &arg) != 0)
             printf("Creating allocation class failed!\n");
+        class_id = arg.class_id;
 #endif
 }
 
