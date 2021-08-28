@@ -201,6 +201,12 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         }
 #elif defined(PMEM)
         // const uint64_t PMEMOBJ_POOL_SIZE = 14ULL * 1024ULL * 1024ULL * 1024ULL; // 14GB
+        pobj_alloc_class_desc arg;
+        arg.unit_size = 256;
+        arg.alignment = 256;
+        arg.units_per_block = 16;
+        arg.header_type = POBJ_HEADER_NONE;
+        pmemobj_ctl_set(NULL, "heap.alloc_class.new.desc", &arg);
         PMEMobjpool * pop = pmemobj_create("./pool", POBJ_LAYOUT_NAME(LBtree), size, 0666);
         for (int i = 0; i < tm_num_workers; i++) {
             tm_pools[i] = mempool(pop);
