@@ -41,6 +41,7 @@
 #include <signal.h>
 #include <string.h>
 #include <malloc.h>
+#include <stdint.h>
 
 /* -------------------------------------------------------------- */
 /* NVMPOOL_REAL: use pmdk to map NVM
@@ -51,9 +52,8 @@
 #define PMEM // comment this out for using DRAM as NVM
 //#define POOL // comment this out to use malloc (new, delete)
 
-struct dummy {
-   int i;
-   int j;
+struct dummy { // dummy class for using PMDK
+char* arr[32];
 };
 
 extern uint64_t class_id;
@@ -67,16 +67,12 @@ extern uint64_t class_id;
    POBJ_LAYOUT_END(LBtree);
 #endif
 
-
 /* -------------------------------------------------------------- */
 
 #ifndef MB
 #define MB (1024LL * 1024LL)
 #endif
 
-
-
-// #ifdef POOL
 
 /**
  * mempool: allocate memory using malloc-like calls then manage the memory
@@ -193,15 +189,13 @@ public:
    #elif defined(PMEM)
       if (pop)
       {
-         // return pmemobj_xreserve(
-         //    pop, &(_actionsArray[_actionsCounter++]),
-         //    size, VALUE,
-         //    POBJ_CLASS_ID(200));
-         // TOID(dummy) p;  // using any class/struct is ok?
-         // POBJ_ZALLOC(pop, &p, dummy, size);
-         // return pmemobj_direct(p.oid);
-         pobj_action act;
-         return pmemobj_direct(POBJ_XRESERVE_ALLOC(pop, dummy, size, &act, POBJ_CLASS_ID(class_id)).oid);
+         thread_local pobj_action act;
+         auto x = POBJ_XRESERVE_NEW(pop, dummy, &act, POBJ_CLASS_ID(class_id));
+         D_RW(x)->arr[0] = NULL;
+         D_RW(x)->arr[31] = NULL;
+         (((unsigned long long)(D_RW(x)->arr)) & (~(unsigned long long)(64 - 1)));
+         (((unsigned long long)(D_RW(x)->arr+32)) & (~(unsigned long long)(64 - 1)));
+         return pmemobj_direct(x.oid);
       }
    #endif
       return new (std::align_val_t(256)) char[size];
@@ -411,82 +405,5 @@ extern threadNVMPools the_thread_nvmpools;
 #define nvmpool_free the_nvmpool.free
 #define nvmpool_alloc_node the_nvmpool.alloc_node
 #define nvmpool_free_node the_nvmpool.free_node
-
-// #else // #ifdef POOL
-
-// class Allocator
-// {
-// public:
-//    void *alloc(unsigned long long size)
-//    {
-//       return new (std::align_val_t(256)) char[size];
-//    }
-
-//    void free(void *p)
-//    {
-//    }
-
-//    void *alloc_node(int size)
-//    {
-//       return new (std::align_val_t(256)) char[size];
-//    }
-
-//    void free_node(void *p)
-//    {
-//    }
-// }__attribute__((aligned(64)));
-
-// class ThreadAllocator
-// {
-// public:
-//    Allocator *tallocators; /* pools[0..num_workers-1] */
-//    int tm_num_workers;
-
-//    ThreadAllocator()
-//    {
-//       tallocators = NULL;
-//       tm_num_workers = 0;
-//    }
-
-//    ~ThreadAllocator()
-//    {
-//       if (tallocators)
-//       {
-//          delete[] tallocators;
-//          tallocators = NULL;
-//       }
-//    }
-
-//    void init(int num_workers, long long size = 20 * MB, long long align = 4096)
-//    {
-//       tm_num_workers = num_workers;
-//       tallocators = new Allocator[tm_num_workers];
-//    }
-
-//    void init(int num_workers, const char *nvm_file, long long size)
-//    {
-//       tm_num_workers = num_workers;
-//       tallocators = new Allocator[tm_num_workers];
-//    }
-// }__attribute__((aligned(64)));
-
-// extern thread_local int worker_id; /* in Thread Local Storage */
-
-// extern ThreadAllocator the_thread_mempools;
-// extern ThreadAllocator the_thread_nvmpools;
-
-// #define the_mempool (the_thread_mempools.tallocators[worker_id])
-// #define mempool_alloc the_mempool.alloc
-// #define mempool_free the_mempool.free
-// #define mempool_alloc_node the_mempool.alloc_node
-// #define mempool_free_node the_mempool.free_node
-
-// #define the_nvmpool (the_thread_nvmpools.tallocators[worker_id])
-// #define nvmpool_alloc the_nvmpool.alloc
-// #define nvmpool_free the_nvmpool.free
-// #define nvmpool_alloc_node the_nvmpool.alloc_node
-// #define nvmpool_free_node the_nvmpool.free_node
-
-// #endif // #ifdef POOL
 /* -------------------------------------------------------------- */
 #endif /* _BTREE_MEM_POOL_H */

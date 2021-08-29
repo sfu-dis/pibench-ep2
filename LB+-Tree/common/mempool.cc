@@ -24,8 +24,6 @@ thread_local int worker_id = -1; /* in Thread Local Storage */
 
 uint64_t class_id = 0;
 
-// #ifdef POOL
-
 threadMemPools the_thread_mempools;
 threadNVMPools the_thread_nvmpools;
 
@@ -201,8 +199,7 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         {
             tm_buf[i] = 1; // XXX: need a special signature
         }
-#elif defined(PMEM)
-        // const uint64_t PMEMOBJ_POOL_SIZE = 14ULL * 1024ULL * 1024ULL * 1024ULL; // 14GB
+#elif defined(PMEM) // use PMDK, create allocation class
         pobj_alloc_class_desc arg;
         arg.unit_size = 256;
         arg.alignment = 256;
@@ -246,7 +243,3 @@ void threadNVMPools::print_usage(void)
     }
     printf("--------------------\n");
 }
-// #else
-// ThreadAllocator the_thread_mempools;
-// ThreadAllocator the_thread_nvmpools;
-// #endif
