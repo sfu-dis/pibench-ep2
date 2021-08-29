@@ -12,4 +12,4 @@ Some modifications are made to compile dram wrapper
 2. Uncommented backoff in insert to avoid hanging threads (line 665-666 in lbtree.cc)
 3. Modified mempool to support PMDK & DRAM (malloc) allocation scheme
 4. Added range scan (tree.h, lbtree.h, lbtree.cc)
-5. Added min/max to namespace Tree to avoid conflict with std::sort in tree.h
+5. Changed min/max to MIN?MAX to avoid conflict with std::sort in tree.h

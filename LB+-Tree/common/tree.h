@@ -95,10 +95,9 @@ static inline unsigned long long rdtsc(void)
    return ((unsigned long long)lo) | (((unsigned long long)hi) << 32);
 }
 
-namespace Tree{
-   #define min(x, y) ((x) <= (y) ? (x) : (y))
-   #define max(x, y) ((x) <= (y) ? (y) : (x))
-}
+#define MIN(x, y) ((x) <= (y) ? (x) : (y))
+#define MAX(x, y) ((x) <= (y) ? (y) : (x))
+
 
 // compute ceiling(x/y) and floor(x/y)
 #define ceiling(x, y) (((x) + (y)-1) / (y))
