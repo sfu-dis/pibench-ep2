@@ -1629,7 +1629,7 @@ Again2: // find and lock next sibling if necessary
         scanned += range_scan_one_leaf(lp, key, compare, result);
         goto Again2;
     }
-    qsort((IdxEntry*)results, scanned, sizeof(IdxEntry), lbtree::compare);
+    qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compare);
     return scanned > scan_size? scan_size : scanned;
 }
 
