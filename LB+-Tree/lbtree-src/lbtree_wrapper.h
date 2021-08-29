@@ -177,7 +177,7 @@ bool lbtree_wrapper::remove(const char *key, size_t key_sz)
 
 static int compare(const void *a, const void *b)
 {
-  key_type tt = ((IdxEntry *)a->k - (IdxEntry *)b->k);
+    key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
     return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
 }
 
