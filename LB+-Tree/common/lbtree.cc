@@ -1600,7 +1600,7 @@ Scan_one_leaf:
     while (mask) {
         jj = bitScan(mask)-1;  // next candidate
         if (lp->k(jj) >= key) { // found
-            memcpy(result, &leaf->ent[jj], 16);
+            memcpy(result, &lp->ent[jj], 16);
             result += 16;
             scanned ++;
         }
