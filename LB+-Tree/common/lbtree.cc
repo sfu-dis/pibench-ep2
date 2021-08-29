@@ -1645,29 +1645,11 @@ Again2:
         }
         np->lock = 1;
     }
-    // if (scanned < scan_size && lp->nextSibling()) // keep scanning
-    // {
-    //     np = lp->nextSibling();
-    //     LEAF_PREF(np);
-    //     // bool locked = 1;
-    //     // if (!__sync_bool_compare_and_swap(&np->lock))
-        
-    //     // if (np->lock)
-    //     // {
-    //     //     _xabort(2);
-    //     //     goto Again2;
-    //     // }
-    //     // np->lock = 1;
-        
-    //     lp->lock = 0;
-    //     lp = np;
-    //     goto Scan_one_leaf;
-    // }
-    // else
-    // {
-    //     lp->lock = 0;
-    // }
     _xend();
+    lp->lock = 0;
+    if (scanned < scan_size && np) // keep scanning
+        goto Scan_one_leaf;
+    
     // std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
     //       return e1.k < e2.k;
     // });
