@@ -50,6 +50,14 @@ struct ThreadHelper
   }
 };
 
+struct less_than_key
+{
+    inline bool operator() (const IdxEntry& e1, const IdxEntry& e2)
+    {
+        return (e1.key < e2.key);
+    }
+};
+
 static const constexpr auto FIND = "find";
 static const constexpr auto INSERT = "insert";
 static const constexpr auto UPDATE = "update";
@@ -175,9 +183,7 @@ int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&val
   // //FIXME
   values_out = results;
   int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results);
-  std::sort((IdxEntry*)results, (IdxEntry*)results + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
-      return e1.k < e2.k;
-  });
+  std::sort((IdxEntry*)results, (IdxEntry*)results + scanned, less_than_key());
   if (scanned != 100)
     printf("Scanned %d\n", scanned);
   return scanned;
