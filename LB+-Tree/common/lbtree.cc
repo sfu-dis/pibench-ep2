@@ -1538,7 +1538,7 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     bnode *p;
     bleaf *lp, *np;
     int i, t, m, b, scanned = 0;
-    char* begin = result;
+    IdxEntry* begin = (IdxEntry*)result;
     volatile long long sum;
     { /************First critical section*************/
 Again1: // find target leaf and lock it
@@ -1630,7 +1630,7 @@ Again2: // find and lock next sibling if necessary
         goto Again2;
     }
 
-    std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
+    std::sort(begin, begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
           return e1.k < e2.k;
     });
     return scanned > scan_size? scan_size : scanned;
