@@ -1537,8 +1537,7 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     bool compare = true;
     bnode *p;
     bleaf *lp, *np;
-    int i, t, m, b, scanned = 0, jj;
-    unsigned int mask;
+    int i, t, m, b, scanned = 0;
     char* begin = result;
     volatile long long sum;
     { /************First critical section*************/
@@ -1601,8 +1600,46 @@ Again1: // find target leaf and lock it
     _xend();
     }/************End of first critical section*************/
 
-Scan_one_leaf: 
-    mask = (unsigned int)(lp->bitmap);
+    scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
+    compare = false;
+
+Again2:
+    if (_xbegin() != _XBEGIN_STARTED)
+    {
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again2;
+    }
+    np = lp->nextSibling();
+    if (np)
+    {
+        if (np->lock)
+        {
+            _xabort(2);
+            goto Again2;
+        }
+        np->lock = 1;
+    }
+    _xend();
+
+    lp->lock = 0;
+    lp = np;
+    if (scanned < scan_size && lp) // keep scanning
+    {
+        scanned += range_scan_one_leaf(lp, key, compare, result);
+        goto Again2;
+    }
+
+    // std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
+    //       return e1.k < e2.k;
+    // });
+    return scanned > scan_size? scan_size : scanned;
+}
+
+int lbtree::range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result)
+{
+    int jj, scanned = 0;
+    unsigned int mask = (unsigned int)(lp->bitmap);
     if (compare)
     {
         while (mask) {
@@ -1625,35 +1662,7 @@ Scan_one_leaf:
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
     }
-
-    compare = false;
-
-Again2:
-    if (_xbegin() != _XBEGIN_STARTED)
-    {
-        sum= 0;
-        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-        goto Again2;
-    }
-    np = lp->nextSibling();
-    if (np)
-    {
-        if (np->lock)
-        {
-            _xabort(2);
-            goto Again2;
-        }
-        np->lock = 1;
-    }
-    _xend();
-    lp->lock = 0;
-    if (scanned < scan_size && np) // keep scanning
-        goto Scan_one_leaf;
-    
-    // std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
-    //       return e1.k < e2.k;
-    // });
-    return scanned > scan_size? scan_size : scanned;
+    return scanned;
 }
 
 /* ----------------------------------------------------------------- *
