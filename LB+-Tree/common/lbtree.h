@@ -287,9 +287,9 @@ public:
     void del(key_type key);
 
     // // Range scan -- Author: Lu Baotong
-    // int range_scan_by_size(const key_type& key,  uint32_t to_scan, char* result);
-    // int range_scan_in_one_leaf(bleaf *lp, const key_type& key, uint32_t to_scan, std::pair<key_type, void*>* result);
-    // int add_to_sorted_result(std::pair<key_type, void*>* result, std::pair<key_type, void*>* new_record, int total_size, int cur_idx);
+    int range_scan_by_size(const key_type& key,  uint32_t to_scan, char* result);
+    int range_scan_in_one_leaf(bleaf *lp, const key_type& key, uint32_t to_scan, std::pair<key_type, void*>* result);
+    int add_to_sorted_result(std::pair<key_type, void*>* result, std::pair<key_type, void*>* new_record, int total_size, int cur_idx);
 
 private:
     void print(Pointer8B pnode, int level);
