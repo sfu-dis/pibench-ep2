@@ -1532,6 +1532,109 @@ Again1:
 }
 
 
+int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
+{
+    bnode *p;
+    bleaf *lp, *np;
+    int i, t, m, b, scanned = 0, jj;
+    unsigned int mask;
+    char* begin = result;
+    { /************First critical section*************/
+Again1: // find target leaf and lock it
+    // 1. RTM begin
+    if (_xbegin() != _XBEGIN_STARTED)
+        goto Again1;
+
+    // 2. search nonleaf nodes
+    p = tree_meta->tree_root;
+
+    for (i = tree_meta->root_level; i > 0; i--)
+    {
+        // prefetch the entire node
+        NODE_PREF(p);
+        // if the lock bit is set, abort
+        if (p->lock())
+        {
+            _xabort(1);
+            goto Again1;
+        }
+        // binary search to narrow down to at most 8 entries
+        b = 1;
+        t = p->num();
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (key > p->k(m))
+                b = m + 1;
+            else if (key < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
+        // sequential search (which is slightly faster now)
+        for (; b <= t; b++)
+            if (key < p->k(b))
+                break;
+        p = p->ch(b - 1);
+    inner_done:;
+    }
+    lp = (bleaf *)p;
+    // prefetch the entire node
+    LEAF_PREF(lp);
+    // if the lock bit is set, abort
+    if (lp->lock)
+    {
+        _xabort(2);
+        goto Again1;
+    }
+    lp->lock = 1;
+    // 4. RTM commit
+    _xend();
+    }/************End of first critical section*************/
+
+Scan_one_leaf: 
+    mask = (unsigned int)(lp->bitmap);
+    while (mask) {
+        jj = bitScan(mask)-1;  // next candidate
+        if (lp->k(jj) >= key) { // found
+            memcpy(result, &leaf->ent[jj], 16);
+            result += 16;
+            scanned ++;
+        }
+        mask &= ~(0x1<<jj);  // remove this bit
+    } // end while
+
+    if (scanned < scan_size && lp->nextSibling()) // keep scanning
+    {
+Again2:
+        np = lp->nextSibling();
+        if (_xbegin() != _XBEGIN_STARTED)
+            goto Again2;
+        if (np->lock)
+        {
+            _xabort(2);
+            goto Again2;
+        }
+        np->lock = 1;
+        _xend();
+        lp->lock = 0;
+        lp = np;
+        goto Scan_one_leaf;
+    }
+    else
+    {
+        lp->lock = 0;
+    }
+
+    std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
+          return e1.k < e2.k;
+    });
+    return scanned > scan_size? scan_size : scanned;
+}
+
 /* ----------------------------------------------------------------- *
  randomize
  * ----------------------------------------------------------------- */
