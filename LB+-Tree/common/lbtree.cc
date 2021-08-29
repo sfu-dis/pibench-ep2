@@ -1630,16 +1630,17 @@ Scan_one_leaf:
 
     if (scanned < scan_size && lp->nextSibling()) // keep scanning
     {
+        np = lp->nextSibling();
+        LEAF_PREF(np);
 Again2:
+        // bool locked = 1;
+        // if (!__sync_bool_compare_and_swap(&np->lock))
         if (_xbegin() != _XBEGIN_STARTED)
         {
             sum= 0;
             for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
             goto Again2;
         }
-        LEAF_PREF(lp);
-        np = lp->nextSibling();
-        LEAF_PREF(np);
         if (np->lock)
         {
             _xabort(2);
