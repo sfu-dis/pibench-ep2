@@ -1646,7 +1646,7 @@ Again2:
             _xabort(2);
             goto Again2;
         }
-        np->lock = 1;
+        // np->lock = 1;
         _xend();
         lp->lock = 0;
         lp = np;
