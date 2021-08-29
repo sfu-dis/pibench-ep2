@@ -1702,8 +1702,8 @@ void lbtree::randomize(Pointer8B pnode, int level)
 
             if (aa != bb)
             {
-                swap(lp->fgpt[pos[aa]], lp->fgpt[pos[bb]]);
-                swap(lp->ent[pos[aa]], lp->ent[pos[bb]]);
+                SWAP(lp->fgpt[pos[aa]], lp->fgpt[pos[bb]]);
+                SWAP(lp->ent[pos[aa]], lp->ent[pos[bb]]);
             }
         }
     }
