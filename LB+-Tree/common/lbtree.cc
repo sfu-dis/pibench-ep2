@@ -1539,11 +1539,16 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     int i, t, m, b, scanned = 0, jj;
     unsigned int mask;
     char* begin = result;
+    volatile long long sum;
     { /************First critical section*************/
 Again1: // find target leaf and lock it
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
+    {
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again1;
+    }
 
     // 2. search nonleaf nodes
     p = tree_meta->tree_root;
@@ -1612,7 +1617,11 @@ Scan_one_leaf:
 Again2:
         np = lp->nextSibling();
         if (_xbegin() != _XBEGIN_STARTED)
+        {
+            sum= 0;
+            for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
             goto Again2;
+        }
         if (np->lock)
         {
             _xabort(2);
