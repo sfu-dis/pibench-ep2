@@ -175,6 +175,11 @@ bool lbtree_wrapper::remove(const char *key, size_t key_sz)
   return true;
 }
 
+static int compare(const void *a, const void *b)
+{
+  return ( (IdxEntry*)a->k - (IdxEntry*)b->k );
+}
+
 int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&values_out)
 {
   thread_local ThreadHelper t{SCAN};
@@ -183,8 +188,9 @@ int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&val
   // //FIXME
   values_out = results;
   int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results);
-  std::vector<IdxEntry> vec((IdxEntry*)results, (IdxEntry*)results + scanned);
-  std::sort(vec.begin(), vec.end(), less_than_key());
+  // std::vector<IdxEntry> vec((IdxEntry*)results, (IdxEntry*)results + scanned);
+  // std::sort(vec.begin(), vec.end(), less_than_key());
+  qsort((IdxEntry*)results, scanned, compare);
   if (scanned != 100)
     printf("Scanned %d\n", scanned);
   return scanned;
