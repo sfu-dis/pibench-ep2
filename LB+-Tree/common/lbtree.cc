@@ -1625,32 +1625,34 @@ Scan_one_leaf:
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
     }
+
     compare = false;
-//     if (scanned < scan_size && lp->nextSibling()) // keep scanning
-//     {
-// Again2:
+    
+    if (scanned < scan_size && lp->nextSibling()) // keep scanning
+    {
+Again2:
 //         if (_xbegin() != _XBEGIN_STARTED)
 //         {
 //             sum= 0;
 //             for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
 //             goto Again2;
 //         }
-//         np = lp->nextSibling();
-//         if (np->lock)
-//         {
-//             _xabort(2);
-//             goto Again2;
-//         }
-//         np->lock = 1;
-//         _xend();
-//         lp->lock = 0;
-//         lp = np;
-//         goto Scan_one_leaf;
-//     }
-//     else
-//     {
-//         lp->lock = 0;
-//     }
+        np = lp->nextSibling();
+        if (np->lock)
+        {
+            // _xabort(2);
+            goto Again2;
+        }
+        np->lock = 1;
+        // _xend();
+        lp->lock = 0;
+        lp = np;
+        goto Scan_one_leaf;
+    }
+    else
+    {
+        lp->lock = 0;
+    }
 
     // std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
     //       return e1.k < e2.k;
