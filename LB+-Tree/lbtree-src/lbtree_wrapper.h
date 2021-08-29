@@ -3,6 +3,7 @@
 #include "lbtree.h"
 #include <thread>
 #include <sys/types.h>
+#include <algorithm>
 
 auto num_bulkloaded = 1ll;
 float bfill = 1.0;
@@ -174,6 +175,9 @@ int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&val
   // //FIXME
   values_out = results;
   int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results);
+  std::sort(results, results + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
+      return e1.k < e2.k;
+  });
   if (scanned != 100)
     printf("Scanned %d\n", scanned);
   return scanned;

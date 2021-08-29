@@ -1629,10 +1629,6 @@ Again2: // find and lock next sibling if necessary
         scanned += range_scan_one_leaf(lp, key, compare, result);
         goto Again2;
     }
-
-    std::sort(begin, begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
-          return e1.k < e2.k;
-    });
     return scanned > scan_size? scan_size : scanned;
 }
 
