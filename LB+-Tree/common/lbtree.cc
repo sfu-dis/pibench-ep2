@@ -86,10 +86,10 @@ int lbtree::bulkloadSubtree(
 
     // 1. compute leaf and nonleaf number of keys
     int leaf_fill_num = (int)((float)LEAF_KEY_NUM * bfill);
-    leaf_fill_num = max(leaf_fill_num, 1);
+    leaf_fill_num = Tree::max(leaf_fill_num, 1);
 
     int nonleaf_fill_num = (int)((float)NON_LEAF_KEY_NUM * bfill);
-    nonleaf_fill_num = max(nonleaf_fill_num, 1);
+    nonleaf_fill_num = Tree::max(nonleaf_fill_num, 1);
 
     // 2. compute number of nodes
     n_nodes[0] = ceiling(num_key, leaf_fill_num);
@@ -240,7 +240,7 @@ int lbtree::bulkloadToptree(
 
     // 1. compute nonleaf number of keys
     int nonleaf_fill_num = (int)((float)NON_LEAF_KEY_NUM * bfill);
-    nonleaf_fill_num = max(nonleaf_fill_num, 1);
+    nonleaf_fill_num = Tree::max(nonleaf_fill_num, 1);
 
     // 2. compute number of nodes
     n_nodes[cur_level] = num_key;

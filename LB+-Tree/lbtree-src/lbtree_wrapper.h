@@ -54,7 +54,7 @@ struct less_than_key
 {
     inline bool operator() (const IdxEntry& e1, const IdxEntry& e2)
     {
-        return (e1.key < e2.key);
+        return (e1.k < e2.k);
     }
 };
 
