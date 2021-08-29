@@ -1638,9 +1638,9 @@ Scan_one_leaf:
 //         lp->lock = 0;
 //     }
 
-    std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
-          return e1.k < e2.k;
-    });
+    // std::sort((IdxEntry*)begin, (IdxEntry*)begin + scanned, [] (const IdxEntry& e1, const IdxEntry& e2) {
+    //       return e1.k < e2.k;
+    // });
     return scanned > scan_size? scan_size : scanned;
 }
 
