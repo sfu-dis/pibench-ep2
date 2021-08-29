@@ -1636,13 +1636,15 @@ Again2:
         goto Again2;
     }
     np = lp->nextSibling();
-    // if (np->lock)
-    //     // {
-    //     //     _xabort(2);
-    //     //     goto Again2;
-    //     // }
-    //     // np->lock = 1;
-    
+    if (np)
+    {
+        if (np->lock)
+        {
+            _xabort(2);
+            goto Again2;
+        }
+        np->lock = 1;
+    }
     // if (scanned < scan_size && lp->nextSibling()) // keep scanning
     // {
     //     np = lp->nextSibling();
