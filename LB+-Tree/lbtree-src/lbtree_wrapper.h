@@ -3,7 +3,6 @@
 #include "lbtree.h"
 #include <thread>
 #include <sys/types.h>
-#include <algorithm>
 
 auto num_bulkloaded = 1ll;
 float bfill = 1.0;
@@ -48,14 +47,6 @@ struct ThreadHelper
   {
     // printf("destructor worker_id: %d (%s)\n", id_, str);
   }
-};
-
-struct less_than_key
-{
-    inline bool operator() (const IdxEntry& e1, const IdxEntry& e2)
-    {
-        return (e1.k < e2.k);
-    }
 };
 
 static const constexpr auto FIND = "find";
@@ -175,12 +166,6 @@ bool lbtree_wrapper::remove(const char *key, size_t key_sz)
   return true;
 }
 
-static int compare(const void *a, const void *b)
-{
-    key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
-    return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
-}
-
 int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&values_out)
 {
   thread_local ThreadHelper t{SCAN};
@@ -189,9 +174,6 @@ int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&val
   // //FIXME
   values_out = results;
   int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results);
-  // std::vector<IdxEntry> vec((IdxEntry*)results, (IdxEntry*)results + scanned);
-  // std::sort(vec.begin(), vec.end(), less_than_key());
-  qsort((IdxEntry*)results, scanned, sizeof(IdxEntry), compare);
   if (scanned != 100)
     printf("Scanned %d\n", scanned);
   return scanned;

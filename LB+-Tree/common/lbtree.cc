@@ -86,10 +86,10 @@ int lbtree::bulkloadSubtree(
 
     // 1. compute leaf and nonleaf number of keys
     int leaf_fill_num = (int)((float)LEAF_KEY_NUM * bfill);
-    leaf_fill_num = MAX(leaf_fill_num, 1);
+    leaf_fill_num = max(leaf_fill_num, 1);
 
     int nonleaf_fill_num = (int)((float)NON_LEAF_KEY_NUM * bfill);
-    nonleaf_fill_num = MAX(nonleaf_fill_num, 1);
+    nonleaf_fill_num = max(nonleaf_fill_num, 1);
 
     // 2. compute number of nodes
     n_nodes[0] = ceiling(num_key, leaf_fill_num);
@@ -240,7 +240,7 @@ int lbtree::bulkloadToptree(
 
     // 1. compute nonleaf number of keys
     int nonleaf_fill_num = (int)((float)NON_LEAF_KEY_NUM * bfill);
-    nonleaf_fill_num = MAX(nonleaf_fill_num, 1);
+    nonleaf_fill_num = max(nonleaf_fill_num, 1);
 
     // 2. compute number of nodes
     n_nodes[cur_level] = num_key;
@@ -1629,6 +1629,7 @@ Again2: // find and lock next sibling if necessary
         scanned += range_scan_one_leaf(lp, key, compare, result);
         goto Again2;
     }
+    qsort((IdxEntry*)results, scanned, sizeof(IdxEntry), lbtree::compare);
     return scanned > scan_size? scan_size : scanned;
 }
 
@@ -1702,8 +1703,8 @@ void lbtree::randomize(Pointer8B pnode, int level)
 
             if (aa != bb)
             {
-                SWAP(lp->fgpt[pos[aa]], lp->fgpt[pos[bb]]);
-                SWAP(lp->ent[pos[aa]], lp->ent[pos[bb]]);
+                swap(lp->fgpt[pos[aa]], lp->fgpt[pos[bb]]);
+                swap(lp->ent[pos[aa]], lp->ent[pos[bb]]);
             }
         }
     }

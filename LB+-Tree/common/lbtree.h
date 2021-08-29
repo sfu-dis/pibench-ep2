@@ -291,8 +291,15 @@ public:
     int range_scan_in_one_leaf(bleaf *lp, const key_type& key, uint32_t to_scan, std::pair<key_type, void*>* result);
     int add_to_sorted_result(std::pair<key_type, void*>* result, std::pair<key_type, void*>* new_record, int total_size, int cur_idx);
 
+    // Range Scan -- Author: George He
     int rangeScan(key_type key,  uint32_t scan_size, char* result);
     int range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result);
+    static int compare(const void *a, const void *b)
+    {
+        key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
+        return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
+    }
+    
 private:
     void print(Pointer8B pnode, int level);
     void check(Pointer8B pnode, int level, key_type &start, key_type &end, bleaf *&ptr);
