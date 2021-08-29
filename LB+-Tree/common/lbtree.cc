@@ -1603,15 +1603,15 @@ Again1: // find target leaf and lock it
     scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
     compare = false;
 
-Again2:
-    if (_xbegin() != _XBEGIN_STARTED)
+Again2: // find and lock next sibling if necessary
+    if (_xbegin() != _XBEGIN_STARTED)  
     {
         sum= 0;
         for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
     np = lp->nextSibling();
-    if (np)
+    if (np && scanned < scan_size)
     {
         if (np->lock)
         {
@@ -1623,9 +1623,9 @@ Again2:
     _xend();
 
     lp->lock = 0;
-    lp = np;
-    if (scanned < scan_size && lp) // keep scanning
+    if (scanned < scan_size && np) // keep scanning
     {
+        lp = np;
         scanned += range_scan_one_leaf(lp, key, compare, result);
         goto Again2;
     }
