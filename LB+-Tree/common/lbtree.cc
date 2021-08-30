@@ -1612,7 +1612,7 @@ Again2: // find and lock next sibling if necessary
         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
-    np = lp->nextSibling();
+    np = lp->next[lp->alt];
     // if (np && scanned < scan_size)
     // {
     //     if (np->lock)
