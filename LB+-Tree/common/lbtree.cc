@@ -1545,8 +1545,8 @@ Again1: // find target leaf and lock it
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
     {
-        // sum= 0;
-        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again1;
     }
 
