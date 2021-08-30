@@ -1536,7 +1536,7 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
 {
     bool compare = true;
     bnode *p;
-    bleaf *lp, *np;
+    bleaf *lp, *np = nullptr;
     int i, t, m, b, scanned = 0;
     IdxEntry* begin = (IdxEntry*)result;
     volatile long long sum;
@@ -1606,13 +1606,13 @@ Again1: // find target leaf and lock it
 
 
 Again2: // find and lock next sibling if necessary
-    np = lp->nextSibling();
     if (_xbegin() != _XBEGIN_STARTED)  
     {
         // sum= 0;
         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
+    np = lp->nextSibling();
     // if (np && scanned < scan_size)
     // {
     //     if (np->lock)
