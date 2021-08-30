@@ -1537,8 +1537,9 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     bool compare = true;
     bnode *p;
     bleaf *lp, *np = nullptr;
-    int i, t, m, b, scanned = 0;
+    int i, t, m, b, scanned = 0, jj;
     IdxEntry* begin = (IdxEntry*)result;
+    unsigned int mask;
     volatile long long sum;
 
 Again1: // find target leaf and lock it
@@ -1601,9 +1602,18 @@ Again1: // find target leaf and lock it
     // 4. RTM commit
     _xend();
 
-    scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
-    compare = false;
-
+    // scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
+    // compare = false;
+    mask = (unsigned int)(lp->bitmap);
+    while (mask) {
+        jj = bitScan(mask)-1;  // next candidate
+        if (lp->k(jj) >= key) { // found
+            memcpy(result, &lp->ent[jj], 16);
+            result += 16;
+            scanned ++;
+        }
+        mask &= ~(0x1<<jj);  // remove this bit
+    } // end while
 
 // Again2: // find and lock next sibling if necessary
 //     if (_xbegin() != _XBEGIN_STARTED)  
