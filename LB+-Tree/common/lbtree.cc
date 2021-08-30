@@ -1540,7 +1540,6 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     int i, t, m, b, scanned = 0;
     IdxEntry* begin = (IdxEntry*)result;
     volatile long long sum;
-    unsigned char key_hash = hashcode1B(key);
 
 Again1: // find target leaf and lock it
     // 1. RTM begin
@@ -1597,45 +1596,7 @@ Again1: // find target leaf and lock it
         goto Again1;
     }
 
-        // SIMD comparison
-        // a. set every byte to key_hash in a 16B register
-        __m128i key_16B = _mm_set1_epi8((char)key_hash);
-
-        // b. load meta into another 16B register
-        __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
-
-        // c. compare them
-        __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
-
-        // d. generate a mask
-        unsigned int mask = (unsigned int)
-            _mm_movemask_epi8(cmp_res); // 1: same; 0: diff
-
-        // remove the lower 2 bits then AND bitmap
-        mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
-
-        // search every matching candidate
-        while (mask)
-        {
-            int jj = bitScan(mask) - 1; // next candidate
-
-            if (lp->k(jj) == key)
-            { // found: do nothing, return
-            }
-
-            mask &= ~(0x1 << jj); // remove this bit
-            /*  UBSan: implicit conversion from int -33 to unsigned int 
-                changed the value to 4294967263 (32-bit, unsigned)      */
-        } // end while
-
-    lp->lock = 1;
-    compare = lp->isFull();
-        if (compare)
-        {
-            for (i = 1; i <= tree_meta->root_level; i++)
-            {
-            }
-        }
+    lp->lock() = 1;
     // 4. RTM commit
     _xend();
 
