@@ -1608,7 +1608,7 @@ Again1: // find target leaf and lock it
     while (mask) {
         jj = bitScan(mask)-1;  // next candidate
         if (lp->k(jj) >= key) { // found
-            // results[scanned++] = lp->ent[jj];
+            results[scanned++] = lp->ent[jj];
             // memcpy(result, &lp->k(jj), 16);
             // result += 16;
             // scanned ++;
@@ -1616,24 +1616,24 @@ Again1: // find target leaf and lock it
         mask &= ~(0x1<<jj);  // remove this bit
     } // end while
 
-// Again2: // find and lock next sibling if necessary
-//     if (_xbegin() != _XBEGIN_STARTED)  
-//     {
-//         // sum= 0;
-//         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-//         goto Again2;
-//     }
-//     np = lp->next[lp->alt];
-//     // if (np && scanned < scan_size)
-//     // {
-//     //     if (np->lock)
-//     //     {
-//     //         _xabort(2);
-//     //         goto Again2;
-//     //     }
-//     //     ((bnode*)np)->lock() = 1;
-//     // }
-//     _xend();
+Again2: // find and lock next sibling if necessary
+    if (_xbegin() != _XBEGIN_STARTED)  
+    {
+        // sum= 0;
+        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again2;
+    }
+    np = lp->next[lp->alt];
+    // if (np && scanned < scan_size)
+    // {
+    //     if (np->lock)
+    //     {
+    //         _xabort(2);
+    //         goto Again2;
+    //     }
+    //     ((bnode*)np)->lock() = 1;
+    // }
+    _xend();
 
     // lp->lock = 0;
     // if (scanned < scan_size && np) // keep scanning
