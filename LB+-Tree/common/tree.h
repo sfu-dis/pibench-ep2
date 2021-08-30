@@ -205,7 +205,7 @@ public:
       return 0;
    }
 
-   virtual int rangeScan(key_type key,  uint32_t scan_size, char* result)
+   virtual int rangeScan(key_type key,  uint32_t scan_size, IdxEntry* result)
    {
       fprintf(stderr, "Not implemented!\n");
       exit(1);
