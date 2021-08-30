@@ -1540,65 +1540,64 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     int i, t, m, b, scanned = 0;
     IdxEntry* begin = (IdxEntry*)result;
     volatile long long sum;
-//     { /************First critical section*************/
-// Again1: // find target leaf and lock it
-//     // 1. RTM begin
-//     if (_xbegin() != _XBEGIN_STARTED)
-//     {
-//         sum= 0;
-//         for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-//         goto Again1;
-//     }
+    
+Again1: // find target leaf and lock it
+    // 1. RTM begin
+    if (_xbegin() != _XBEGIN_STARTED)
+    {
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again1;
+    }
 
-//     // 2. search nonleaf nodes
-//     p = tree_meta->tree_root;
+    // 2. search nonleaf nodes
+    p = tree_meta->tree_root;
 
-//     for (i = tree_meta->root_level; i > 0; i--)
-//     {
-//         // prefetch the entire node
-//         NODE_PREF(p);
-//         // if the lock bit is set, abort
-//         if (p->lock())
-//         {
-//             _xabort(1);
-//             goto Again1;
-//         }
-//         // binary search to narrow down to at most 8 entries
-//         b = 1;
-//         t = p->num();
-//         while (b + 7 <= t)
-//         {
-//             m = (b + t) >> 1;
-//             if (key > p->k(m))
-//                 b = m + 1;
-//             else if (key < p->k(m))
-//                 t = m - 1;
-//             else
-//             {
-//                 p = p->ch(m);
-//                 goto inner_done;
-//             }
-//         }
-//         // sequential search (which is slightly faster now)
-//         for (; b <= t; b++)
-//             if (key < p->k(b))
-//                 break;
-//         p = p->ch(b - 1);
-//     inner_done:;
-//     }
-//     lp = (bleaf *)p;
-//     // prefetch the entire node
-//     LEAF_PREF(lp);
-//     // if the lock bit is set, abort
-//     if (lp->lock)
-//     {
-//         _xabort(2);
-//         goto Again1;
-//     }
-//     lp->lock = 1;
-//     // 4. RTM commit
-//     _xend();
-//     }/************End of first critical section*************/
+    for (i = tree_meta->root_level; i > 0; i--)
+    {
+        // prefetch the entire node
+        NODE_PREF(p);
+        // if the lock bit is set, abort
+        if (p->lock())
+        {
+            _xabort(1);
+            goto Again1;
+        }
+        // binary search to narrow down to at most 8 entries
+        b = 1;
+        t = p->num();
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (key > p->k(m))
+                b = m + 1;
+            else if (key < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
+        // sequential search (which is slightly faster now)
+        for (; b <= t; b++)
+            if (key < p->k(b))
+                break;
+        p = p->ch(b - 1);
+    inner_done:;
+    }
+    lp = (bleaf *)p;
+    // prefetch the entire node
+    LEAF_PREF(lp);
+    // if the lock bit is set, abort
+    if (lp->lock)
+    {
+        _xabort(2);
+        goto Again1;
+    }
+    lp->lock = 1;
+    // 4. RTM commit
+    _xend();
 
 //     scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
 //     compare = false;
