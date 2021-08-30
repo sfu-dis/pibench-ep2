@@ -1629,6 +1629,13 @@ Again1: // find target leaf and lock it
         } // end while
 
     lp->lock = 1;
+    compare = lp->isFull();
+        if (compare)
+        {
+            for (i = 1; i <= tree_meta->root_level; i++)
+            {
+            }
+        }
     // 4. RTM commit
     _xend();
 
