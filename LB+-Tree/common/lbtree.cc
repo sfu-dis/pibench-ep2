@@ -1607,8 +1607,8 @@ Again1: // find target leaf and lock it
 Again2: // find and lock next sibling if necessary
     if (_xbegin() != _XBEGIN_STARTED)  
     {
-        sum= 0;
-        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        // sum= 0;
+        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
     np = lp->nextSibling();
@@ -1623,13 +1623,13 @@ Again2: // find and lock next sibling if necessary
     }
     _xend();
 
-    lp->lock = 0;
-    if (scanned < scan_size && np) // keep scanning
-    {
-        lp = np;
-        scanned += range_scan_one_leaf(lp, key, compare, result);
-        goto Again2;
-    }
+    // lp->lock = 0;
+    // if (scanned < scan_size && np) // keep scanning
+    // {
+    //     lp = np;
+    //     scanned += range_scan_one_leaf(lp, key, compare, result);
+    //     goto Again2;
+    // }
     // qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compare);
     return scanned > scan_size? scan_size : scanned;
 }
