@@ -1613,15 +1613,15 @@ Again2: // find and lock next sibling if necessary
         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
-    if (np && scanned < scan_size)
-    {
-        if (np->lock)
-        {
-            _xabort(2);
-            goto Again2;
-        }
-        ((bnode*)np)->lock() = 1;
-    }
+    // if (np && scanned < scan_size)
+    // {
+    //     if (np->lock)
+    //     {
+    //         _xabort(2);
+    //         goto Again2;
+    //     }
+    //     ((bnode*)np)->lock() = 1;
+    // }
     _xend();
 
     // lp->lock = 0;
