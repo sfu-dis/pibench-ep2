@@ -1588,7 +1588,7 @@ Again1: // find target leaf and lock it
     }
     lp = (bleaf *)p;
     // prefetch the entire node
-    LEAF_PREF(lp);
+    // LEAF_PREF(lp);
     // if the lock bit is set, abort
     if (lp->lock)
     {
