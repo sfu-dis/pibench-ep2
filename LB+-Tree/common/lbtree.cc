@@ -1532,13 +1532,13 @@ void lbtree::del(key_type key)
 // }
 
 
-int lbtree::rangeScan(key_type key,  uint32_t scan_size, IdxEntry* result)
+int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
 {
     bool compare = true;
     bnode *p;
     bleaf *lp, *np = nullptr;
     int i, t, m, b, scanned = 0, jj;
-    // IdxEntry* results = (IdxEntry*)result;
+    IdxEntry* results = (IdxEntry*)result;
     unsigned int mask;
     volatile long long sum;
 
@@ -1608,7 +1608,7 @@ Again1: // find target leaf and lock it
     while (mask) {
         jj = bitScan(mask)-1;  // next candidate
         if (lp->k(jj) >= key) { // found
-            result[scanned++] = lp->ent[jj];
+            results[scanned++] = lp->ent[jj];
             // memcpy(result, &lp->k(jj), 16);
             // result += 16;
             // scanned ++;

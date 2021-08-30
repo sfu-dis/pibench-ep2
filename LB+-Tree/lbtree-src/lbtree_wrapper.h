@@ -173,7 +173,7 @@ int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&val
   static thread_local char results[ONE_MB];
   // //FIXME
   values_out = results;
-  int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, (IdxEntry*)results); // range_scan_by_size
+  int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results); // range_scan_by_size
   // if (scanned != 100)
   //   printf("Scanned %d\n", scanned);
   return scanned;

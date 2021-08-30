@@ -292,7 +292,7 @@ public:
     // int add_to_sorted_result(std::pair<key_type, void*>* result, std::pair<key_type, void*>* new_record, int total_size, int cur_idx);
 
     // Range Scan -- Author: George He
-    int rangeScan(key_type key,  uint32_t scan_size, IdxEntry* result);
+    int rangeScan(key_type key,  uint32_t scan_size, char* result);
     int range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result);
     static int compareFunc(const void *a, const void *b)
     {
