@@ -1532,135 +1532,135 @@ void lbtree::del(key_type key)
 // }
 
 
-// int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
-// {
-//     bool compare = true;
-//     bnode *p;
-//     bleaf *lp, *np;
-//     int i, t, m, b, scanned = 0;
-//     IdxEntry* begin = (IdxEntry*)result;
-//     volatile long long sum;
-//     { /************First critical section*************/
-// Again1: // find target leaf and lock it
-//     // 1. RTM begin
-//     if (_xbegin() != _XBEGIN_STARTED)
-//     {
-//         sum= 0;
-//         for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-//         goto Again1;
-//     }
+int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
+{
+    bool compare = true;
+    bnode *p;
+    bleaf *lp, *np;
+    int i, t, m, b, scanned = 0;
+    IdxEntry* begin = (IdxEntry*)result;
+    volatile long long sum;
+    { /************First critical section*************/
+Again1: // find target leaf and lock it
+    // 1. RTM begin
+    if (_xbegin() != _XBEGIN_STARTED)
+    {
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again1;
+    }
 
-//     // 2. search nonleaf nodes
-//     p = tree_meta->tree_root;
+    // 2. search nonleaf nodes
+    p = tree_meta->tree_root;
 
-//     for (i = tree_meta->root_level; i > 0; i--)
-//     {
-//         // prefetch the entire node
-//         NODE_PREF(p);
-//         // if the lock bit is set, abort
-//         if (p->lock())
-//         {
-//             _xabort(1);
-//             goto Again1;
-//         }
-//         // binary search to narrow down to at most 8 entries
-//         b = 1;
-//         t = p->num();
-//         while (b + 7 <= t)
-//         {
-//             m = (b + t) >> 1;
-//             if (key > p->k(m))
-//                 b = m + 1;
-//             else if (key < p->k(m))
-//                 t = m - 1;
-//             else
-//             {
-//                 p = p->ch(m);
-//                 goto inner_done;
-//             }
-//         }
-//         // sequential search (which is slightly faster now)
-//         for (; b <= t; b++)
-//             if (key < p->k(b))
-//                 break;
-//         p = p->ch(b - 1);
-//     inner_done:;
-//     }
-//     lp = (bleaf *)p;
-//     // prefetch the entire node
-//     LEAF_PREF(lp);
-//     // if the lock bit is set, abort
-//     if (lp->lock)
-//     {
-//         _xabort(2);
-//         goto Again1;
-//     }
-//     lp->lock = 1;
-//     // 4. RTM commit
-//     _xend();
-//     }/************End of first critical section*************/
+    for (i = tree_meta->root_level; i > 0; i--)
+    {
+        // prefetch the entire node
+        NODE_PREF(p);
+        // if the lock bit is set, abort
+        if (p->lock())
+        {
+            _xabort(1);
+            goto Again1;
+        }
+        // binary search to narrow down to at most 8 entries
+        b = 1;
+        t = p->num();
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (key > p->k(m))
+                b = m + 1;
+            else if (key < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
+        // sequential search (which is slightly faster now)
+        for (; b <= t; b++)
+            if (key < p->k(b))
+                break;
+        p = p->ch(b - 1);
+    inner_done:;
+    }
+    lp = (bleaf *)p;
+    // prefetch the entire node
+    LEAF_PREF(lp);
+    // if the lock bit is set, abort
+    if (lp->lock)
+    {
+        _xabort(2);
+        goto Again1;
+    }
+    lp->lock = 1;
+    // 4. RTM commit
+    _xend();
+    }/************End of first critical section*************/
 
-//     scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
-//     compare = false;
+    scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
+    compare = false;
 
-// Again2: // find and lock next sibling if necessary
-//     if (_xbegin() != _XBEGIN_STARTED)  
-//     {
-//         sum= 0;
-//         for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-//         goto Again2;
-//     }
-//     np = lp->nextSibling();
-//     if (np && scanned < scan_size)
-//     {
-//         if (np->lock)
-//         {
-//             _xabort(2);
-//             goto Again2;
-//         }
-//         np->lock = 1;
-//     }
-//     _xend();
+Again2: // find and lock next sibling if necessary
+    if (_xbegin() != _XBEGIN_STARTED)  
+    {
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again2;
+    }
+    np = lp->nextSibling();
+    if (np && scanned < scan_size)
+    {
+        if (np->lock)
+        {
+            _xabort(2);
+            goto Again2;
+        }
+        np->lock = 1;
+    }
+    _xend();
 
-//     lp->lock = 0;
-//     if (scanned < scan_size && np) // keep scanning
-//     {
-//         lp = np;
-//         scanned += range_scan_one_leaf(lp, key, compare, result);
-//         goto Again2;
-//     }
-//     qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compare);
-//     return scanned > scan_size? scan_size : scanned;
-// }
+    lp->lock = 0;
+    if (scanned < scan_size && np) // keep scanning
+    {
+        lp = np;
+        scanned += range_scan_one_leaf(lp, key, compare, result);
+        goto Again2;
+    }
+    // qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compare);
+    return scanned > scan_size? scan_size : scanned;
+}
 
-// int lbtree::range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result)
-// {
-//     int jj, scanned = 0;
-//     unsigned int mask = (unsigned int)(lp->bitmap);
-//     if (compare)
-//     {
-//         while (mask) {
-//             jj = bitScan(mask)-1;  // next candidate
-//             if (lp->k(jj) >= key) { // found
-//                 memcpy(result, &lp->ent[jj], 16);
-//                 result += 16;
-//                 scanned ++;
-//             }
-//             mask &= ~(0x1<<jj);  // remove this bit
-//         } // end while
-//     }
-//     else
-//     {
-//         while (mask) {
-//             jj = bitScan(mask)-1;  // next candidate
-//             memcpy(result, &lp->ent[jj], 16);
-//             result += 16;
-//             scanned ++;
-//             mask &= ~(0x1<<jj);  // remove this bit
-//         } // end while
-//     }
-//     return scanned;
-// }
+int lbtree::range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result)
+{
+    int jj, scanned = 0;
+    unsigned int mask = (unsigned int)(lp->bitmap);
+    if (compare)
+    {
+        while (mask) {
+            jj = bitScan(mask)-1;  // next candidate
+            if (lp->k(jj) >= key) { // found
+                memcpy(result, &lp->ent[jj], 16);
+                result += 16;
+                scanned ++;
+            }
+            mask &= ~(0x1<<jj);  // remove this bit
+        } // end while
+    }
+    else
+    {
+        while (mask) {
+            jj = bitScan(mask)-1;  // next candidate
+            memcpy(result, &lp->ent[jj], 16);
+            result += 16;
+            scanned ++;
+            mask &= ~(0x1<<jj);  // remove this bit
+        } // end while
+    }
+    return scanned;
+}
 
 /* ----------------------------------------------------------------- *
  randomize
