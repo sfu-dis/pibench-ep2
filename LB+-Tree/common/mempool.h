@@ -50,7 +50,7 @@
 
 
 #define PMEM // comment this out for using DRAM as NVM
-//#define POOL // comment this out to use malloc (new, delete)
+#define POOL // comment this out to use malloc (new, delete)
 
 struct dummy { // dummy class for using PMDK
 char* arr[32];
