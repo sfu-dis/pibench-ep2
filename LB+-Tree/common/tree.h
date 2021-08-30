@@ -98,6 +98,7 @@ static inline unsigned long long rdtsc(void)
 #define min(x, y) ((x) <= (y) ? (x) : (y))
 #define max(x, y) ((x) <= (y) ? (y) : (x))
 
+
 // compute ceiling(x/y) and floor(x/y)
 #define ceiling(x, y) (((x) + (y)-1) / (y))
 #define floor(x, y) ((x) / (y))
@@ -190,19 +191,26 @@ public:
    }
 
    /**
-   * range scan
+   * range scan (Baotong's version)
    *
    * @param key   the index key to begin scan
    * @param to_scan number of records to scan
    * @param result array to store scan results
    * 
    */
-   // virtual int range_scan_by_size(const key_type& key,  uint32_t to_scan, char* result)
-   // {
-   //    fprintf(stderr, "Not implemented!\n");
-   //    exit(1);
-   //    return 0;
-   // }
+   virtual int range_scan_by_size(const key_type& key,  uint32_t to_scan, char* result)
+   {
+      fprintf(stderr, "Not implemented!\n");
+      exit(1);
+      return 0;
+   }
+
+   virtual int rangeScan(key_type key,  uint32_t scan_size, char* result)
+   {
+      fprintf(stderr, "Not implemented!\n");
+      exit(1);
+      return 0;
+   }
 
    /**
    * print the tree structure

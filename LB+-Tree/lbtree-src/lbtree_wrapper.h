@@ -169,10 +169,12 @@ bool lbtree_wrapper::remove(const char *key, size_t key_sz)
 int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&values_out)
 {
   thread_local ThreadHelper t{SCAN};
-  // constexpr size_t ONE_MB = 1ULL << 20;
-  // static thread_local char results[ONE_MB];
+  constexpr size_t ONE_MB = 1ULL << 20;
+  static thread_local char results[ONE_MB];
   // //FIXME
-  // values_out = results;
-  // return lbt->range_scan_by_size(PBkeyToLB(key), scan_sz, results);
-  return 0;
+  values_out = results;
+  int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results); // range_scan_by_size
+  // if (scanned != 100)
+  //   printf("Scanned %d\n", scanned);
+  return scanned;
 }

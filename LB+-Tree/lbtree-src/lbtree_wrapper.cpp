@@ -39,7 +39,7 @@ extern "C" tree_api *create_tree(const tree_options_t &opt)
   end = std::chrono::steady_clock::now();
   ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   printf("nvmpools init time: %lld ms \n", ms.count());
-  char *nvm_addr = (char *)nvmpool_alloc(4 * KB);
+  char *nvm_addr = (char *)nvmpool_alloc(256);
   nvmLogInit(opt.num_threads);
 
   printf("MemPool Size: %lld, NVMPool Size: %lld. Using file %s\n", mempool_size, nvmpool_size, path_ptr->c_str());
