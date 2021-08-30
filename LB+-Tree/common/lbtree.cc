@@ -1608,7 +1608,7 @@ Again1: // find target leaf and lock it
     while (mask) {
         jj = bitScan(mask)-1;  // next candidate
         if (lp->k(jj) >= key) { // found
-            results[scanned++] = lp->ent[jj];
+            // results[scanned++] = lp->ent[jj];
             // memcpy(result, &lp->k(jj), 16);
             // result += 16;
             // scanned ++;
