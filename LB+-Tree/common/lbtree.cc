@@ -1545,6 +1545,7 @@ Again1: // find target leaf and lock it
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
     {
+        // Commented backoff because it will cause infinite abort in mempool mode
         // sum= 0;
         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again1;
@@ -1600,35 +1601,35 @@ Again1: // find target leaf and lock it
     // 4. RTM commit
     _xend();
 
-//     scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
-//     compare = false;
+    scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
+    compare = false;
 
-// Again2: // find and lock next sibling if necessary
-//     if (_xbegin() != _XBEGIN_STARTED)  
-//     {
-//         sum= 0;
-//         for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-//         goto Again2;
-//     }
-//     np = lp->nextSibling();
-//     if (np && scanned < scan_size)
-//     {
-//         if (np->lock)
-//         {
-//             _xabort(2);
-//             goto Again2;
-//         }
-//         np->lock = 1;
-//     }
-//     _xend();
+Again2: // find and lock next sibling if necessary
+    if (_xbegin() != _XBEGIN_STARTED)  
+    {
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again2;
+    }
+    np = lp->nextSibling();
+    if (np && scanned < scan_size)
+    {
+        if (np->lock)
+        {
+            _xabort(2);
+            goto Again2;
+        }
+        np->lock = 1;
+    }
+    _xend();
 
-//     lp->lock = 0;
-//     if (scanned < scan_size && np) // keep scanning
-//     {
-//         lp = np;
-//         scanned += range_scan_one_leaf(lp, key, compare, result);
-//         goto Again2;
-//     }
+    lp->lock = 0;
+    if (scanned < scan_size && np) // keep scanning
+    {
+        lp = np;
+        scanned += range_scan_one_leaf(lp, key, compare, result);
+        goto Again2;
+    }
     // qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compare);
     return scanned > scan_size? scan_size : scanned;
 }
