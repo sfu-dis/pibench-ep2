@@ -1601,8 +1601,8 @@ Again1: // find target leaf and lock it
     // 4. RTM commit
     _xend();
 
-    // scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
-    // compare = false;
+    scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
+    compare = false;
 
 
 // Again2: // find and lock next sibling if necessary
