@@ -1590,13 +1590,13 @@ Again1: // find target leaf and lock it
     // prefetch the entire node
     LEAF_PREF(lp);
     // if the lock bit is set, abort
-    if (lp->lock)
+    if (lp->lock())
     {
         _xabort(2);
         goto Again1;
     }
 
-    lp->lock() = 1;
+    lp->lock = 1;
     // 4. RTM commit
     _xend();
 
