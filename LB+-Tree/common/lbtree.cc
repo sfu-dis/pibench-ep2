@@ -1596,7 +1596,7 @@ Again1: // find target leaf and lock it
         goto Again1;
     }
 
-    (bnode*)lp->lock() = 1;
+    ((bnode*)lp)->lock() = 1;
     // 4. RTM commit
     _xend();
 
