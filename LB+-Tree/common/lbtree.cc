@@ -1600,7 +1600,7 @@ Again1: // find target leaf and lock it
 
     ((bnode*)lp)->lock() = 1;
     // 4. RTM commit
-    _xend();
+    
 
     // scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
     // compare = false;
@@ -1615,25 +1615,26 @@ Again1: // find target leaf and lock it
         }
         mask &= ~(0x1<<jj);  // remove this bit
     } // end while
-
-Again2: // find and lock next sibling if necessary
-    if (_xbegin() != _XBEGIN_STARTED)  
-    {
-        // sum= 0;
-        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-        goto Again2;
-    }
-    np = lp->next[lp->alt];
-    // if (np && scanned < scan_size)
-    // {
-    //     if (np->lock)
-    //     {
-    //         _xabort(2);
-    //         goto Again2;
-    //     }
-    //     ((bnode*)np)->lock() = 1;
-    // }
     _xend();
+
+// Again2: // find and lock next sibling if necessary
+//     if (_xbegin() != _XBEGIN_STARTED)  
+//     {
+//         // sum= 0;
+//         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+//         goto Again2;
+//     }
+//     np = lp->next[lp->alt];
+//     // if (np && scanned < scan_size)
+//     // {
+//     //     if (np->lock)
+//     //     {
+//     //         _xabort(2);
+//     //         goto Again2;
+//     //     }
+//     //     ((bnode*)np)->lock() = 1;
+//     // }
+//     _xend();
 
     // lp->lock = 0;
     // if (scanned < scan_size && np) // keep scanning
