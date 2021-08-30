@@ -62,9 +62,11 @@ extern uint64_t class_id;
    #define NVMPOOL_REAL
    #include <libpmem.h>
    #include <libpmemobj.h>
-   POBJ_LAYOUT_BEGIN(LBtree);
-   POBJ_LAYOUT_TOID(LBtree, dummy);
-   POBJ_LAYOUT_END(LBtree);
+   #ifndef POOL
+      POBJ_LAYOUT_BEGIN(LBtree);
+      POBJ_LAYOUT_TOID(LBtree, dummy);
+      POBJ_LAYOUT_END(LBtree);
+   #endif
 #endif
 
 /* -------------------------------------------------------------- */
