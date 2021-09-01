@@ -1643,7 +1643,7 @@ Again2: // find and lock next sibling if necessary
         } // end while
         goto Again2;
     }
-    qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compareFunc);
+    qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc);
     return scanned > scan_size? scan_size : scanned;
 }
 
