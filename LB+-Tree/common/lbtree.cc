@@ -1566,19 +1566,19 @@ Again1: // find target leaf and lock it
         // binary search to narrow down to at most 8 entries
         b = 1;
         t = p->num();
-        while (b + 7 <= t)
-        {
-            m = (b + t) >> 1;
-            if (key > p->k(m))
-                b = m + 1;
-            else if (key < p->k(m))
-                t = m - 1;
-            else
-            {
-                p = p->ch(m);
-                goto inner_done;
-            }
-        }
+        // while (b + 7 <= t)
+        // {
+        //     m = (b + t) >> 1;
+        //     if (key > p->k(m))
+        //         b = m + 1;
+        //     else if (key < p->k(m))
+        //         t = m - 1;
+        //     else
+        //     {
+        //         p = p->ch(m);
+        //         goto inner_done;
+        //     }
+        // }
         // sequential search (which is slightly faster now)
         for (; b <= t; b++)
             if (key < p->k(b))
