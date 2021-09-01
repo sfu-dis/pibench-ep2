@@ -1551,10 +1551,8 @@ Again1: // find target leaf and lock it
         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again1;
     }
-
     // 2. search nonleaf nodes
     p = tree_meta->tree_root;
-
     for (i = tree_meta->root_level; i > 0; i--)
     {
         // prefetch the entire node
@@ -1597,13 +1595,10 @@ Again1: // find target leaf and lock it
         _xabort(2);
         goto Again1;
     }
-
     ((bnode*)lp)->lock() = 1;
     // 4. RTM commit
     _xend();
 
-    // scanned += range_scan_one_leaf(lp, key, compare, result); // only compares to key in first leaf
-    // compare = false;
     mask = (unsigned int)(lp->bitmap);
     while (mask) {
         jj = bitScan(mask)-1;  // next candidate
