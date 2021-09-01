@@ -1547,8 +1547,8 @@ Again1: // find target leaf and lock it
     if (_xbegin() != _XBEGIN_STARTED)
     {
         // Commented backoff because it will cause infinite abort in mempool mode
-        // sum= 0;
-        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again1;
     }
     // 2. search nonleaf nodes
