@@ -1634,8 +1634,8 @@ Again2: // find and lock next sibling if necessary
     lp->lock = 0;
     if (scanned < scan_size && np) // keep scanning
     {
-        // lp = np;
-        // mask = (unsigned int)(lp->bitmap);
+        lp = np;
+        mask = (unsigned int)(lp->bitmap);
         // while (mask) {
         //     jj = bitScan(mask)-1;  // next candidate
         //     results[scanned++] = lp->ent[jj];
