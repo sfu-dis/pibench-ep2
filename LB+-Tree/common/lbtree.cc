@@ -1636,7 +1636,8 @@ Again2: // find and lock next sibling if necessary
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
             // results[scanned++] = lp->ent[jj];
-            jj = 1;
+            memcpy(results + scanned, &lp->ent[jj], sizeof(IdxEntry));
+            scanned ++;
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
         // goto Again2;
