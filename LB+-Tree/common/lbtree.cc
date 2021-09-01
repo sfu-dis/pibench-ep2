@@ -1644,7 +1644,7 @@ Again2: // find and lock next sibling if necessary
         //     mask &= ~(0x1<<jj);  // remove this bit
         // } // end while
         lp = np;
-        goto Scan_Leaf;
+        // goto Scan_Leaf;
     }
     // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc(const void *a, const void *b)
     // {
