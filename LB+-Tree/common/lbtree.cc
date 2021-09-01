@@ -1631,14 +1631,19 @@ Again2: // find and lock next sibling if necessary
     }
     _xend();
 
-    // lp->lock = 0;
-    // if (scanned < scan_size && np) // keep scanning
-    // {
-    //     lp = np;
-    //     scanned += range_scan_one_leaf(lp, key, compare, result);
-    //     goto Again2;
-    // }
-    // qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compare);
+    lp->lock = 0;
+    if (scanned < scan_size && np) // keep scanning
+    {
+        lp = np;
+        mask = (unsigned int)(lp->bitmap);
+        while (mask) {
+            jj = bitScan(mask)-1;  // next candidate
+            results[scanned++] = lp->ent[jj];
+            mask &= ~(0x1<<jj);  // remove this bit
+        } // end while
+        goto Again2;
+    }
+    qsort((IdxEntry*)begin, scanned, sizeof(IdxEntry), lbtree::compareFunc);
     return scanned > scan_size? scan_size : scanned;
 }
 
