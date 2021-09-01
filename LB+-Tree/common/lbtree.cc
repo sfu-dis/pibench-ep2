@@ -1598,6 +1598,7 @@ Again1: // find target leaf and lock it
     // 4. RTM commit
     _xend();
 
+Scan_Leaf:
     mask = (unsigned int)(lp->bitmap);
     while (mask) {
         jj = bitScan(mask)-1;  // next candidate
@@ -1632,18 +1633,18 @@ Again2: // find and lock next sibling if necessary
     lp->lock = 0;   // unlock previous leaf
     if (np) // keep scanning next sibling
     {
-        mask = (unsigned int)(np->bitmap);
-        while (mask) {
-            jj = bitScan(mask)-1;  // next candidate
-            if (np->k(jj) >= key) { // found
-                results[scanned++] = np->ent[jj];
-            }
-            // memcpy(results + scanned, &lp->ent[jj], sizeof(IdxEntry));
-            // scanned ++;
-            mask &= ~(0x1<<jj);  // remove this bit
-        } // end while
+        // mask = (unsigned int)(np->bitmap);
+        // while (mask) {
+        //     jj = bitScan(mask)-1;  // next candidate
+        //     if (np->k(jj) >= key) { // found
+        //         results[scanned++] = np->ent[jj];
+        //     }
+        //     // memcpy(results + scanned, &lp->ent[jj], sizeof(IdxEntry));
+        //     // scanned ++;
+        //     mask &= ~(0x1<<jj);  // remove this bit
+        // } // end while
         lp = np;
-        // goto Again2;
+        goto Scan_Leaf;
     }
     // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc(const void *a, const void *b)
     // {
