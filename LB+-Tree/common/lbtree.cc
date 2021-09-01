@@ -1540,7 +1540,7 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     int i, t, m, b, scanned = 0, jj;
     IdxEntry* results = (IdxEntry*)result;
     unsigned int mask;
-    // volatile long long sum;
+    volatile long long sum;
 
 Again1: // find target leaf and lock it
     // 1. RTM begin
@@ -1566,19 +1566,19 @@ Again1: // find target leaf and lock it
         // binary search to narrow down to at most 8 entries
         b = 1;
         t = p->num();
-        // while (b + 7 <= t)
-        // {
-        //     m = (b + t) >> 1;
-        //     if (key > p->k(m))
-        //         b = m + 1;
-        //     else if (key < p->k(m))
-        //         t = m - 1;
-        //     else
-        //     {
-        //         p = p->ch(m);
-        //         goto inner_done;
-        //     }
-        // }
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (key > p->k(m))
+                b = m + 1;
+            else if (key < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
         // sequential search (which is slightly faster now)
         for (; b <= t; b++)
             if (key < p->k(b))
@@ -1609,13 +1609,13 @@ Again1: // find target leaf and lock it
     } // end while
 
 Again2: // find and lock next sibling if necessary
+    np = lp->next[lp->alt];
     if (_xbegin() != _XBEGIN_STARTED)  
     {
         // sum= 0;
         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
-    np = lp->next[lp->alt];
     if (np && scanned < scan_size)
     {
         if (np->lock)
@@ -1635,7 +1635,7 @@ Again2: // find and lock next sibling if necessary
         mask = (unsigned int)(lp->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
-            results[scanned++] = lp->ent[jj];
+            // results[scanned++] = lp->ent[jj];
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
         // goto Again2;
