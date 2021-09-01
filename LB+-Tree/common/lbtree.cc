@@ -1641,7 +1641,11 @@ Again2: // find and lock next sibling if necessary
         lp = np;
         // goto Again2;
     }
-    // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc);
+    qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc(const void *a, const void *b)
+    {
+        key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
+        return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
+    });
     return scanned > scan_size? scan_size : scanned;
 }
 
