@@ -294,11 +294,11 @@ public:
     // Range Scan -- Author: George He
     int rangeScan(key_type key,  uint32_t scan_size, char* result);
     // int range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result);
-    static int compareFunc(const void *a, const void *b)
-    {
-        key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
-        return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
-    }
+    // static int compareFunc(const void *a, const void *b)
+    // {
+    //     key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
+    //     return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
+    // }
     
 private:
     void print(Pointer8B pnode, int level);
