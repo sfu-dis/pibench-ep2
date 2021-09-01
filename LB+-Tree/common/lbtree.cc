@@ -1634,13 +1634,13 @@ Again2: // find and lock next sibling if necessary
     lp->lock = 0;
     if (scanned < scan_size && np) // keep scanning
     {
-        lp = np;
-        mask = (unsigned int)(lp->bitmap);
-        while (mask) {
-            jj = bitScan(mask)-1;  // next candidate
-            results[scanned++] = lp->ent[jj];
-            mask &= ~(0x1<<jj);  // remove this bit
-        } // end while
+        // lp = np;
+        // mask = (unsigned int)(lp->bitmap);
+        // while (mask) {
+        //     jj = bitScan(mask)-1;  // next candidate
+        //     results[scanned++] = lp->ent[jj];
+        //     mask &= ~(0x1<<jj);  // remove this bit
+        // } // end while
         // goto Again2;
     }
     // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc);
