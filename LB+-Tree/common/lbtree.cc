@@ -1540,7 +1540,7 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     int i, t, m, b, scanned = 0, jj;
     IdxEntry* results = (IdxEntry*)result;
     unsigned int mask;
-    volatile long long sum;
+    // volatile long long sum;
 
 Again1: // find target leaf and lock it
     // 1. RTM begin
