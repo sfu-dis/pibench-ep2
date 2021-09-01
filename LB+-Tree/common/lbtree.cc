@@ -1635,7 +1635,8 @@ Again2: // find and lock next sibling if necessary
         mask = (unsigned int)(lp->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
-            results[scanned++] = lp->ent[jj];
+            // results[scanned++] = lp->ent[jj];
+            jj = 1;
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
         // goto Again2;
