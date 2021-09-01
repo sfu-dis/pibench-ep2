@@ -1646,34 +1646,34 @@ Again1: // find target leaf and lock it
     return scanned > scan_size? scan_size : scanned;
 }
 
-int lbtree::range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result)
-{
-    int jj, scanned = 0;
-    unsigned int mask = (unsigned int)(lp->bitmap);
-    if (compare)
-    {
-        while (mask) {
-            jj = bitScan(mask)-1;  // next candidate
-            if (lp->k(jj) >= key) { // found
-                memcpy(result, &lp->ent[jj], 16);
-                result += 16;
-                scanned ++;
-            }
-            mask &= ~(0x1<<jj);  // remove this bit
-        } // end while
-    }
-    else
-    {
-        while (mask) {
-            jj = bitScan(mask)-1;  // next candidate
-            memcpy(result, &lp->ent[jj], 16);
-            result += 16;
-            scanned ++;
-            mask &= ~(0x1<<jj);  // remove this bit
-        } // end while
-    }
-    return scanned;
-}
+// int lbtree::range_scan_one_leaf(bleaf *lp, const key_type& key, bool& compare, char*& result)
+// {
+//     int jj, scanned = 0;
+//     unsigned int mask = (unsigned int)(lp->bitmap);
+//     if (compare)
+//     {
+//         while (mask) {
+//             jj = bitScan(mask)-1;  // next candidate
+//             if (lp->k(jj) >= key) { // found
+//                 memcpy(result, &lp->ent[jj], 16);
+//                 result += 16;
+//                 scanned ++;
+//             }
+//             mask &= ~(0x1<<jj);  // remove this bit
+//         } // end while
+//     }
+//     else
+//     {
+//         while (mask) {
+//             jj = bitScan(mask)-1;  // next candidate
+//             memcpy(result, &lp->ent[jj], 16);
+//             result += 16;
+//             scanned ++;
+//             mask &= ~(0x1<<jj);  // remove this bit
+//         } // end while
+//     }
+//     return scanned;
+// }
 
 /* ----------------------------------------------------------------- *
  randomize
