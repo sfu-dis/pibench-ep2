@@ -1626,7 +1626,8 @@ Again2: // find and lock next sibling if necessary
             _xabort(2);
             goto Again2;
         }
-        ((bnode*)np)->lock() = 1;
+        // ((bnode*)np)->lock() = 1;
+        np->lock = 1;
     }
     _xend();
 
