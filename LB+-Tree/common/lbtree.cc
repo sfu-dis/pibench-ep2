@@ -1534,7 +1534,6 @@ void lbtree::del(key_type key)
 
 int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
 {
-    bool compare = true;
     bnode *p;
     bleaf *lp, *np = nullptr;
     int i, t, m, b, scanned = 0, jj;
