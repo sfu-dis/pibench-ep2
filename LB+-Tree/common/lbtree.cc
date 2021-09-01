@@ -1608,7 +1608,7 @@ Again1: // find target leaf and lock it
     } // end while
 
 Again2: // find and lock next sibling if necessary
-    np = lp->next[lp->alt];
+    np = lp->nextSibling();
     if (_xbegin() != _XBEGIN_STARTED)  
     {
         // sum= 0;
@@ -1625,15 +1625,17 @@ Again2: // find and lock next sibling if necessary
         // ((bnode*)np)->lock() = 1;
         np->lock = 1;
     }
+    else
+        np = NULL;
     _xend();
 
-    lp->lock = 0;
-    if (scanned < scan_size && np) // keep scanning
+    lp->lock = 0;   // unlock previous leaf
+    if (np) // keep scanning next sibling
     {
         mask = (unsigned int)(np->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
-            results[scanned++] = lp->ent[jj];
+            // results[scanned++] = lp->ent[jj];
             // memcpy(results + scanned, &lp->ent[jj], sizeof(IdxEntry));
             // scanned ++;
             mask &= ~(0x1<<jj);  // remove this bit
@@ -1641,11 +1643,11 @@ Again2: // find and lock next sibling if necessary
         lp = np;
         // goto Again2;
     }
-    qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc(const void *a, const void *b)
-    {
-        key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
-        return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
-    });
+    // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc(const void *a, const void *b)
+    // {
+    //     key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
+    //     return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
+    // });
     return scanned > scan_size? scan_size : scanned;
 }
 
