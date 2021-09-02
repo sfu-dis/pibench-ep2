@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <thread>
 #include <atomic>
+#include <vector>
 
 #include <immintrin.h>
 /* ---------------------------------------------------------------------- */
