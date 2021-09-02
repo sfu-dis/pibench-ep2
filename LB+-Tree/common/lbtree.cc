@@ -1643,6 +1643,8 @@ Again2: // find and lock next sibling if necessary
     if (np->lock)
     {
         _xabort(2);
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
     np->lock = 1;
