@@ -1663,6 +1663,7 @@ Again1: // find target leaf and lock it
     //     goto Again2;
     // }
     qsort(vec.data(), vec.size(), sizeof(IdxEntry), compareFunc);
+    memcpy(result, vec.data(), vec.size() * sizeof(IdxEntry));
     return scanned > scan_size? scan_size : scanned;
 }
 
