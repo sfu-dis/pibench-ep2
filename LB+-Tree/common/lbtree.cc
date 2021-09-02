@@ -1531,6 +1531,11 @@ void lbtree::del(key_type key)
 //     return (to_scan - remaining_scan);
 // }
 
+static int compareFunc(const void *a, const void *b)
+{
+    key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
+    return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
+}
 
 int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
 {
@@ -1657,7 +1662,7 @@ Again1: // find target leaf and lock it
     //     
     //     goto Again2;
     // }
-    // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc);
+    qsort(vec.data(), vec.size(), sizeof(IdxEntry), compareFunc);
     return scanned > scan_size? scan_size : scanned;
 }
 
