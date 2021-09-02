@@ -1638,7 +1638,7 @@ Again2: // find and lock next sibling if necessary
             // results[scanned++] = lp->ent[jj];
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
-        // goto Again2;
+        goto Again2;
     }
     // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc);
     return scanned > scan_size? scan_size : scanned;
