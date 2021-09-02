@@ -1608,40 +1608,68 @@ Again1: // find target leaf and lock it
         mask &= ~(0x1<<jj);  // remove this bit
     } // end while
 
-Again2: // find and lock next sibling if necessary
-    np = lp->next[lp->alt];
-    if (_xbegin() != _XBEGIN_STARTED)  
-    {
-        // sum= 0;
-        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-        goto Again2;
-    }
-    if (np && scanned < scan_size)
-    {
-        if (np->lock)
-        {
-            _xabort(2);
-            goto Again2;
-        }
-        // ((bnode*)np)->lock() = 1;
-        np->lock = 1;
-    }
-    _xend();
+// Again2: // find and lock next sibling if necessary
+//     np = lp->next[lp->alt];
+//     if (_xbegin() != _XBEGIN_STARTED)  
+//     {
+//         // sum= 0;
+//         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+//         goto Again2;
+//     }
+//     if (np && scanned < scan_size)
+//     {
+//         if (np->lock)
+//         {
+//             _xabort(2);
+//             goto Again2;
+//         }
+//         // ((bnode*)np)->lock() = 1;
+//         np->lock = 1;
+//     }
+//     _xend();
 
-    lp->lock = 0;
-    if (scanned < scan_size && np) // keep scanning
+    while (scanned < scan_size && lp)
     {
-        lp = np;
         mask = (unsigned int)(lp->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
             // results[scanned++] = lp->ent[jj];
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
-        goto Again2;
+        np = lockSibling(lp);
+        lp->lock = 0;
+        lp = np;
     }
+    if (lp)
+        lp->lock = 0;
+    // lp->lock = 0;
+    // if (scanned < scan_size && np) // keep scanning
+    // {
+    //     lp = np;
+    //     
+    //     goto Again2;
+    // }
     // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc);
     return scanned > scan_size? scan_size : scanned;
+}
+
+bleaf* lbtree::lockSibling(bleaf* lp)
+{
+    bleaf * np = lp->nextSibling();
+    if (!np)
+        return NULL;
+Again2: // find and lock next sibling if necessary
+    if (_xbegin() != _XBEGIN_STARTED)  
+        goto Again2;
+    if (np->lock)
+    {
+        _xabort(2);
+        goto Again2;
+    }
+    // ((bnode*)np)->lock() = 1;
+    np->lock = 1;
+    _xend();
+    return np;
 }
 
 /* ----------------------------------------------------------------- *
