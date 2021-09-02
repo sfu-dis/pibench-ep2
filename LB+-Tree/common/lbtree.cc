@@ -1534,6 +1534,7 @@ void lbtree::del(key_type key)
 
 int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
 {
+    bool compare = true;
     bnode *p;
     bleaf *lp, *np = nullptr;
     int i, t, m, b, scanned = 0, jj;
@@ -1605,49 +1606,41 @@ Again1: // find target leaf and lock it
             results[scanned++] = lp->ent[jj];
         }
         mask &= ~(0x1<<jj);  // remove this bit
-    } // end while    
+    } // end while
 
 Again2: // find and lock next sibling if necessary
-    np = lp->nextSibling();
-    // if (_xbegin() != _XBEGIN_STARTED)  
-    // {
-    //     // sum= 0;
-    //     // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-    //     goto Again2;
-    // }
+    np = lp->next[lp->alt];
+    if (_xbegin() != _XBEGIN_STARTED)  
+    {
+        // sum= 0;
+        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again2;
+    }
     if (np && scanned < scan_size)
     {
         if (np->lock)
         {
-            // _xabort(2);
+            _xabort(2);
             goto Again2;
         }
         // ((bnode*)np)->lock() = 1;
         np->lock = 1;
     }
-    else
-        np = NULL;
-    // _xend();
+    _xend();
 
-    lp->lock = 0;   // unlock previous leaf
-    if (np) // keep scanning next sibling
+    lp->lock = 0;
+    if (scanned < scan_size && np) // keep scanning
     {
-        mask = (unsigned int)(np->bitmap);
+        lp = np;
+        mask = (unsigned int)(lp->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
-            // results[scanned++] = np->ent[jj];
-            // memcpy(results + scanned, &lp->ent[jj], sizeof(IdxEntry));
-            // scanned ++;
+            // results[scanned++] = lp->ent[jj];
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
-        lp = np;
-        goto Again2;
+        // goto Again2;
     }
-    // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc(const void *a, const void *b)
-    // {
-    //     key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
-    //     return ((tt > 0) ? 1 : ((tt < 0) ? -1 : 0));
-    // });
+    // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc);
     return scanned > scan_size? scan_size : scanned;
 }
 
