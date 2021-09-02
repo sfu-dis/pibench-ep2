@@ -1543,7 +1543,7 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     bleaf *lp, *np = nullptr;
     int i, t, m, b, jj;
     unsigned int mask;
-    volatile long long sum;
+    // volatile long long sum;
     std::vector<IdxEntry> vec;
     vec.reserve(scan_size);
 
@@ -1552,8 +1552,8 @@ Again1: // find target leaf and lock it
     if (_xbegin() != _XBEGIN_STARTED)
     {
         // Commented backoff because it will cause infinite abort in mempool mode
-        sum= 0;
-        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        // sum= 0;
+        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again1;
     }
     // 2. search nonleaf nodes
@@ -1631,15 +1631,15 @@ Again1: // find target leaf and lock it
 
 bleaf* lbtree::lockSibling(bleaf* lp)
 {
-    volatile long long sum;
+    // volatile long long sum;
     bleaf * np = lp->nextSibling();
     if (!np)
         return NULL;
 Again2: // find and lock next sibling if necessary
     if (_xbegin() != _XBEGIN_STARTED)
     {
-        sum= 0;
-        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        // sum= 0;
+        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
     }
     if (np->lock)
