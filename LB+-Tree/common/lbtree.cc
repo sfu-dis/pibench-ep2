@@ -1609,17 +1609,17 @@ Again1: // find target leaf and lock it
 
 Again2: // find and lock next sibling if necessary
     np = lp->nextSibling();
-    if (_xbegin() != _XBEGIN_STARTED)  
-    {
-        // sum= 0;
-        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-        goto Again2;
-    }
+    // if (_xbegin() != _XBEGIN_STARTED)  
+    // {
+    //     // sum= 0;
+    //     // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+    //     goto Again2;
+    // }
     if (np && scanned < scan_size)
     {
         if (np->lock)
         {
-            _xabort(2);
+            // _xabort(2);
             goto Again2;
         }
         // ((bnode*)np)->lock() = 1;
@@ -1627,7 +1627,7 @@ Again2: // find and lock next sibling if necessary
     }
     else
         np = NULL;
-    _xend();
+    // _xend();
 
     lp->lock = 0;   // unlock previous leaf
     if (np) // keep scanning next sibling
