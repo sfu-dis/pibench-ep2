@@ -1537,9 +1537,9 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     bool compare = true;
     bnode *p;
     bleaf *lp, *np = nullptr;
-    int i, t, m, b, scanned = 0, jj;
+    int i, t, m, b, jj;
     IdxEntry* results = (IdxEntry*)result;
-    unsigned int mask;
+    unsigned int mask, scanned = 0;
     volatile long long sum;
     std::vector<IdxEntry> vec;
     vec.reserve(scan_size);
@@ -1636,12 +1636,10 @@ Again1: // find target leaf and lock it
         mask = (unsigned int)(lp->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
-            // auto x = lp->ent[jj];
-            // auto y = result[scanned++];
-            vec.push_back(lp->ent[jj]);
+            if (lp->k(jj) >= key) { // found
+                vec.push_back(lp->ent[jj]);
+            }
             // results[scanned++] = lp->ent[jj];
-            // memcpy(result + scanned * sizeof(IdxEntry), &lp->k(jj), sizeof(IdxEntry));
-            // scanned ++;
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
         np = lockSibling(lp);
