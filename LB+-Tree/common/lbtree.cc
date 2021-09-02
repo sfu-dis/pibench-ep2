@@ -1599,14 +1599,14 @@ Again1: // find target leaf and lock it
     // 4. RTM commit
     _xend();
 
-    mask = (unsigned int)(lp->bitmap);
-    while (mask) {
-        jj = bitScan(mask)-1;  // next candidate
-        if (lp->k(jj) >= key) { // found
-            results[scanned++] = lp->ent[jj];
-        }
-        mask &= ~(0x1<<jj);  // remove this bit
-    } // end while
+    // mask = (unsigned int)(lp->bitmap);
+    // while (mask) {
+    //     jj = bitScan(mask)-1;  // next candidate
+    //     if (lp->k(jj) >= key) { // found
+    //         results[scanned++] = lp->ent[jj];
+    //     }
+    //     mask &= ~(0x1<<jj);  // remove this bit
+    // } // end while
 
 // Again2: // find and lock next sibling if necessary
 //     np = lp->next[lp->alt];
