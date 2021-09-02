@@ -1566,6 +1566,7 @@ Again1: // find target leaf and lock it
         if (p->lock())
         {
             _xabort(1);
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1));
             goto Again1;
         }
         // binary search to narrow down to at most 8 entries
@@ -1598,6 +1599,7 @@ Again1: // find target leaf and lock it
     if (lp->lock)
     {
         _xabort(2);
+        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
         goto Again1;
     }
     lp->lock = 1;
@@ -1643,8 +1645,7 @@ Again2: // find and lock next sibling if necessary
     if (np->lock)
     {
         _xabort(2);
-        sum= 0;
-        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
         goto Again2;
     }
     np->lock = 1;
