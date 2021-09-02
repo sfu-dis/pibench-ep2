@@ -1628,8 +1628,8 @@ Again1: // find target leaf and lock it
 //     }
 //     _xend();
 
-    while (scanned < scan_size && lp)
-    {
+    // while (scanned < scan_size && lp)
+    // {
         mask = (unsigned int)(lp->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
@@ -1639,7 +1639,7 @@ Again1: // find target leaf and lock it
         np = lockSibling(lp);
         lp->lock = 0;
         lp = np;
-    }
+    // }
     if (lp)
         lp->lock = 0;
     // lp->lock = 0;
