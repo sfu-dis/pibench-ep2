@@ -1629,12 +1629,17 @@ Again1: // find target leaf and lock it
 
 bleaf* lbtree::lockSibling(bleaf* lp)
 {
+    volatile long long sum;
     bleaf * np = lp->nextSibling();
     if (!np)
         return NULL;
 Again2: // find and lock next sibling if necessary
-    if (_xbegin() != _XBEGIN_STARTED)  
+    if (_xbegin() != _XBEGIN_STARTED)
+    {
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again2;
+    }
     if (np->lock)
     {
         _xabort(2);
