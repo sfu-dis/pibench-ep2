@@ -1634,7 +1634,7 @@ Again1: // find target leaf and lock it
         mask = (unsigned int)(lp->bitmap);
         // while (mask) {
             jj = bitScan(mask)-1;  // next candidate
-            results[scanned++] = lp->ent[jj];
+            // results[scanned++] = lp->ent[jj];
             // memcpy(result + scanned * sizeof(IdxEntry), &lp->k(jj), sizeof(IdxEntry));
             // scanned ++;
             mask &= ~(0x1<<jj);  // remove this bit
