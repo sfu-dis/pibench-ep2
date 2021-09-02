@@ -1541,6 +1541,8 @@ int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
     IdxEntry* results = (IdxEntry*)result;
     unsigned int mask;
     volatile long long sum;
+    std::vector<IdxEntry> vec;
+    vec.reserve(scan_size);
 
 Again1: // find target leaf and lock it
     // 1. RTM begin
@@ -1634,8 +1636,9 @@ Again1: // find target leaf and lock it
         mask = (unsigned int)(lp->bitmap);
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
-            auto x = lp->ent[jj];
-            auto y = result[scanned++];
+            // auto x = lp->ent[jj];
+            // auto y = result[scanned++];
+            vec.push_back(lp->ent[jj]);
             // results[scanned++] = lp->ent[jj];
             // memcpy(result + scanned * sizeof(IdxEntry), &lp->k(jj), sizeof(IdxEntry));
             // scanned ++;
