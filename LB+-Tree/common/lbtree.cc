@@ -1552,8 +1552,8 @@ Again1: // find target leaf and lock it
     if (_xbegin() != _XBEGIN_STARTED)
     {
         // Commented backoff because it will cause infinite abort in mempool mode
-        // sum= 0;
-        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
         goto Again1;
     }
     // 2. search nonleaf nodes
@@ -1600,39 +1600,9 @@ Again1: // find target leaf and lock it
         _xabort(2);
         goto Again1;
     }
-    // ((bnode*)lp)->lock() = 1;
     lp->lock = 1;
     // 4. RTM commit
     _xend();
-
-    // mask = (unsigned int)(lp->bitmap);
-    // while (mask) {
-    //     jj = bitScan(mask)-1;  // next candidate
-    //     if (lp->k(jj) >= key) { // found
-    //         results[scanned++] = lp->ent[jj];
-    //     }
-    //     mask &= ~(0x1<<jj);  // remove this bit
-    // } // end while
-
-// Again2: // find and lock next sibling if necessary
-//     np = lp->next[lp->alt];
-//     if (_xbegin() != _XBEGIN_STARTED)  
-//     {
-//         // sum= 0;
-//         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-//         goto Again2;
-//     }
-//     if (np && scanned < scan_size)
-//     {
-//         if (np->lock)
-//         {
-//             _xabort(2);
-//             goto Again2;
-//         }
-//         // ((bnode*)np)->lock() = 1;
-//         np->lock = 1;
-//     }
-//     _xend();
 
     while (lp)
     {
@@ -1642,7 +1612,6 @@ Again1: // find target leaf and lock it
             if (lp->k(jj) >= key) { // found
                 vec.push_back(lp->ent[jj]);
             }
-            // results[scanned++] = lp->ent[jj];
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
         if (vec.size() >= scan_size)
@@ -1653,13 +1622,6 @@ Again1: // find target leaf and lock it
     }
     if (lp)
         lp->lock = 0;
-    // lp->lock = 0;
-    // if (scanned < scan_size && np) // keep scanning
-    // {
-    //     lp = np;
-    //     
-    //     goto Again2;
-    // }
     qsort(vec.data(), vec.size(), sizeof(IdxEntry), compareFunc);
     memcpy(result, vec.data(), vec.size() * sizeof(IdxEntry));
     return vec.size() > scan_size? scan_size : vec.size();
@@ -1678,7 +1640,6 @@ Again2: // find and lock next sibling if necessary
         _xabort(2);
         goto Again2;
     }
-    // ((bnode*)np)->lock() = 1;
     np->lock = 1;
     _xend();
     return np;
