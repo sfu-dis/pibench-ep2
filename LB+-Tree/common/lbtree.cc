@@ -1598,54 +1598,84 @@ Again1: // find target leaf and lock it
     // 4. RTM commit
     _xend();
 
-Scan_Leaf:
-    mask = (unsigned int)(lp->bitmap);
-    while (mask) {
-        jj = bitScan(mask)-1;  // next candidate
-        if (lp->k(jj) >= key) { // found
-            results[scanned++] = lp->ent[jj];
-        }
-        mask &= ~(0x1<<jj);  // remove this bit
-    } // end while
-
-Again2: // find and lock next sibling if necessary
-    np = lp->nextSibling();
-    if (_xbegin() != _XBEGIN_STARTED)  
+    while (lp && scanned < scan_size)
     {
-        // sum= 0;
-        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-        goto Again2;
-    }
-    if (np && scanned < scan_size)
-    {
-        if (np->lock)
+        mask = (unsigned int)(lp->bitmap);
+        while (mask) {
+            jj = bitScan(mask)-1;  // next candidate
+            if (lp->k(jj) >= key) { // found
+                results[scanned++] = lp->ent[jj];
+            }
+            mask &= ~(0x1<<jj);  // remove this bit
+        } // end while
+        np = lp->nextSibling();
+    Again2: // find and lock next sibling 
+        if (_xbegin() != _XBEGIN_STARTED)  
         {
-            _xabort(2);
+            // sum= 0;
+            // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
             goto Again2;
         }
-        // ((bnode*)np)->lock() = 1;
-        np->lock = 1;
-    }
-    else
-        np = NULL;
-    _xend();
-
-    lp->lock = 0;   // unlock previous leaf
-    if (np) // keep scanning next sibling
-    {
-        // mask = (unsigned int)(np->bitmap);
-        // while (mask) {
-        //     jj = bitScan(mask)-1;  // next candidate
-        //     if (np->k(jj) >= key) { // found
-        //         results[scanned++] = np->ent[jj];
-        //     }
-        //     // memcpy(results + scanned, &lp->ent[jj], sizeof(IdxEntry));
-        //     // scanned ++;
-        //     mask &= ~(0x1<<jj);  // remove this bit
-        // } // end while
+        if (np && scanned < scan_size)
+        {
+            if (np->lock)
+            {
+                _xabort(2);
+                goto Again2;
+            }
+            // ((bnode*)np)->lock() = 1;
+            np->lock = 1;
+        }
+        else
+            np = NULL;
+        _xend();
+        lp->lock = 0;
         lp = np;
-        // goto Scan_Leaf;
     }
+    if (lp->lock)
+        lp->lock = 0;
+    
+// Scan_Leaf:
+    
+
+// Again2: // find and lock next sibling if necessary
+//     np = lp->nextSibling();
+//     if (_xbegin() != _XBEGIN_STARTED)  
+//     {
+//         // sum= 0;
+//         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+//         goto Again2;
+//     }
+//     if (np && scanned < scan_size)
+//     {
+//         if (np->lock)
+//         {
+//             _xabort(2);
+//             goto Again2;
+//         }
+//         // ((bnode*)np)->lock() = 1;
+//         np->lock = 1;
+//     }
+//     else
+//         np = NULL;
+//     _xend();
+
+//     lp->lock = 0;   // unlock previous leaf
+//     if (np) // keep scanning next sibling
+//     {
+//         // mask = (unsigned int)(np->bitmap);
+//         // while (mask) {
+//         //     jj = bitScan(mask)-1;  // next candidate
+//         //     if (np->k(jj) >= key) { // found
+//         //         results[scanned++] = np->ent[jj];
+//         //     }
+//         //     // memcpy(results + scanned, &lp->ent[jj], sizeof(IdxEntry));
+//         //     // scanned ++;
+//         //     mask &= ~(0x1<<jj);  // remove this bit
+//         // } // end while
+//         lp = np;
+//         // goto Scan_Leaf;
+//     }
     // qsort(results, scanned, sizeof(IdxEntry), lbtree::compareFunc(const void *a, const void *b)
     // {
     //     key_type tt = (((IdxEntry *)a)->k - ((IdxEntry *)b)->k);
