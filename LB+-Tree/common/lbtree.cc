@@ -1635,6 +1635,7 @@ Again1: // find target leaf and lock it
         while (mask) {
             jj = bitScan(mask)-1;  // next candidate
             auto x = lp->ent[jj];
+            auto y = results[scanned++];
             // results[scanned++] = lp->ent[jj];
             // memcpy(result + scanned * sizeof(IdxEntry), &lp->k(jj), sizeof(IdxEntry));
             // scanned ++;
