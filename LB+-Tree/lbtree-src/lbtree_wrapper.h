@@ -170,7 +170,7 @@ int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&val
 {
   thread_local ThreadHelper t{SCAN};
   constexpr size_t ONE_MB = 1ULL << 20;
-  static thread_local char* results = new (std::align_val_t(256)) char[ONE_MB];
+  static thread_local char results[ONE_MB];
   // //FIXME
   values_out = results;
   int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results); // range_scan_by_size

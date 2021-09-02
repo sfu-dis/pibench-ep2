@@ -1539,12 +1539,10 @@ static int compareFunc(const void *a, const void *b)
 
 int lbtree::rangeScan(key_type key,  uint32_t scan_size, char* result)
 {
-    bool compare = true;
     bnode *p;
     bleaf *lp, *np = nullptr;
     int i, t, m, b, jj;
-    IdxEntry* results = (IdxEntry*)result;
-    unsigned int mask, scanned = 0;
+    unsigned int mask;
     volatile long long sum;
     std::vector<IdxEntry> vec;
     vec.reserve(scan_size);
@@ -1664,7 +1662,7 @@ Again1: // find target leaf and lock it
     // }
     qsort(vec.data(), vec.size(), sizeof(IdxEntry), compareFunc);
     memcpy(result, vec.data(), vec.size() * sizeof(IdxEntry));
-    return scanned > scan_size? scan_size : scanned;
+    return vec.size() > scan_size? scan_size : vec.size();
 }
 
 bleaf* lbtree::lockSibling(bleaf* lp)
