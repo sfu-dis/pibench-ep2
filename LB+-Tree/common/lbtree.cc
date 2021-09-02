@@ -1631,7 +1631,7 @@ Again1: // find target leaf and lock it
 //     }
 //     _xend();
 
-    while (scanned < scan_size && lp)
+    while (lp)
     {
         mask = (unsigned int)(lp->bitmap);
         while (mask) {
@@ -1642,6 +1642,8 @@ Again1: // find target leaf and lock it
             // results[scanned++] = lp->ent[jj];
             mask &= ~(0x1<<jj);  // remove this bit
         } // end while
+        if (vec.size() >= scan_size)
+            break;
         np = lockSibling(lp);
         lp->lock = 0;
         lp = np;
