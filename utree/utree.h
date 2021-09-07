@@ -124,6 +124,7 @@ class btree{
     void remove(entry_key_t);        // Remove
     char* search(entry_key_t);       // Search
 
+    void update(entry_key_t, char*);
     int scan(entry_key_t, int scan_size, char* result);
     void new_remove(entry_key_t);
 
@@ -1223,6 +1224,31 @@ void btree::btree_insert_pred(entry_key_t key, char* right, char **pred, bool *u
   }
 }
 
+void btree::update(entry_key_t key, char* right) {
+	char *prev = NULL;
+	page* p = (page*)root;
+	while(p->hdr.leftmost_ptr != NULL) { 
+		p = (page*)p->linear_search(key);
+	}
+	p->hdr.mtx->lock();
+	if (!p->hdr.is_deleted) {
+		for (int i = 0; i < num_entries; i++)
+			if (key == p->records[i].key) {
+				prev = p->records[i].ptr;
+				break;
+			}
+	}
+	p->hdr.mtx->unlock();
+	if (prev != NULL) {
+		// Overwrite.
+	    ((list_node_t*)prev)->ptr = (uint64_t)right; 
+	    //flush.
+	    #ifdef PMEM
+	    clflush(prev, sizeof(list_node_t));
+	    #endif
+	}
+}
+
 void btree::insert(entry_key_t key, char *right) {
   #ifdef PMEM
   list_node_t *n = (list_node_t *)alloc(sizeof(list_node_t));
@@ -1241,7 +1267,6 @@ void btree::insert(entry_key_t key, char *right) {
   btree_insert_pred(key, (char *)n, (char **)&prev, &update); 
   if (update && prev != NULL) { 
     // Overwrite.
-    printf("Update!\n");
     prev->ptr = (uint64_t)right; 
     //flush.
     #ifdef PMEM
