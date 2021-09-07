@@ -1241,6 +1241,7 @@ void btree::insert(entry_key_t key, char *right) {
   btree_insert_pred(key, (char *)n, (char **)&prev, &update); 
   if (update && prev != NULL) { 
     // Overwrite.
+    printf("Update!\n");
     prev->ptr = (uint64_t)right; 
     //flush.
     #ifdef PMEM
