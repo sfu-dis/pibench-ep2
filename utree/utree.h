@@ -1231,6 +1231,7 @@ void btree::update(entry_key_t key, char* right) {
 		p = (page*)p->linear_search(key);
 	}
 	p->hdr.mtx->lock();
+	int num_entries = p->count();
 	if (!p->hdr.is_deleted) {
 		for (int i = 0; i < num_entries; i++)
 			if (key == p->records[i].key) {
