@@ -48,7 +48,7 @@ bool utree_wrapper::insert(const char *key, size_t key_sz, const char *value, si
 
 bool utree_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
-  utree.insert(*reinterpret_cast<const uint64_t*>(key), (char* )value); // utree insert --> upsert 
+  utree.update(*reinterpret_cast<const uint64_t*>(key), (char* )value); // utree insert --> upsert 
   return true;
 }
 
