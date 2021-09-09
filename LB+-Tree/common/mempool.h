@@ -248,10 +248,10 @@ public:
    		if (pop)
    		{
    			TOID(dummy) n = pmemobj_oid(p);
-  			POBJ_FREE(&n);
-  			return;
+     			POBJ_FREE(&n);
+     			return;
    		}
-   	  #endif
+   	#endif
    		delete p;
     #else
       *((char **)p) = mempool_free_node;
