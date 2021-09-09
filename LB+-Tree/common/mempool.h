@@ -47,10 +47,11 @@
 /* NVMPOOL_REAL: use pmdk to map NVM
  * undefined:    use memalign to allocate memory to simulate NVM
  */
-
+#include <libpmemobj.h>
 
 #define PMEM // comment this out for using DRAM as NVM
 #define POOL // comment this out to use malloc (new, delete)
+#define FREE_ON_DELETE // comment this out to reuse freed leaves
 
 struct dummy { // dummy class for using PMDK
 char* arr[32];
@@ -61,7 +62,6 @@ extern uint64_t class_id;
 #ifdef PMEM
    #define NVMPOOL_REAL
    #include <libpmem.h>
-   #include <libpmemobj.h>
    #ifndef POOL
       POBJ_LAYOUT_BEGIN(LBtree);
       POBJ_LAYOUT_TOID(LBtree, dummy);
@@ -243,8 +243,20 @@ public:
    */
    void free_node(void *p)
    {
+  	#if defined(FREE_ON_DELETE) && !defined(POOL)
+      #ifdef PMEM
+   		if (pop)
+   		{
+   			TOID(dummy) n = pmemobj_oid(p);
+     			POBJ_FREE(&n);
+     			return;
+   		}
+   	#endif
+   		delete p;
+    #else
       *((char **)p) = mempool_free_node;
       mempool_free_node = (char *)p;
+    #endif
    }
 
    /**
@@ -398,13 +410,13 @@ extern threadNVMPools the_thread_nvmpools;
 
 #define the_mempool (the_thread_mempools.tm_pools[worker_id])
 #define mempool_alloc the_mempool.alloc
-#define mempool_free the_mempool.free
+// #define mempool_free the_mempool.free
 #define mempool_alloc_node the_mempool.alloc_node
 #define mempool_free_node the_mempool.free_node
 
 #define the_nvmpool (the_thread_nvmpools.tm_pools[worker_id])
 #define nvmpool_alloc the_nvmpool.alloc
-#define nvmpool_free the_nvmpool.free
+// #define nvmpool_free the_nvmpool.free
 #define nvmpool_alloc_node the_nvmpool.alloc_node
 #define nvmpool_free_node the_nvmpool.free_node
 /* -------------------------------------------------------------- */
