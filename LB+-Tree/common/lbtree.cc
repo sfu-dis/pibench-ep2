@@ -810,8 +810,12 @@ void lbtree::insert(key_type key, void *ptr)
             {
                 // 1.3.1 write word 0
                 meta.v.bitmap = bitmap;
-                lp->setWord0(&meta);
 
+                #if defined(NVMPOOL_REAL) && defined(NONTEMP) 
+                lp->setWord0_temporal(&meta);
+                #else
+                lp->setWord0(&meta);
+                #endif
                 // 1.3.2 flush
                 #ifdef NVMPOOL_REAL
                 clwb(lp);
@@ -848,7 +852,12 @@ void lbtree::insert(key_type key, void *ptr)
 
                 // 1.4.3 change meta and flush line 0
                 meta.v.bitmap = bitmap;
+                #if defined(NVMPOOL_REAL) && defined(NONTEMP) 
+                lp->setBothWords_temporal(&meta);
+                #else
                 lp->setBothWords(&meta);
+                #endif
+                
                 #ifdef NVMPOOL_REAL
                 clwb(lp);
                 sfence();
@@ -1320,7 +1329,12 @@ void lbtree::del(key_type key)
 
             meta.v.lock = 0;                  // clear lock in temp meta
             meta.v.bitmap &= ~(1 << ppos[0]); // mark the bitmap to delete the entry
+            #if defined(NVMPOOL_REAL) && defined(NONTEMP) 
+            lp->setWord0_temporal(&meta);
+            #else
             lp->setWord0(&meta);
+            #endif
+            
             #ifdef NVMPOOL_REAL
             clwb(lp);
             sfence();
