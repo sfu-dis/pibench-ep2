@@ -24,6 +24,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++17 -lpmem -lpmemobj -ljemall
 
 include_directories(include)
 include_directories(misc)
+include_directories(src)
 
 set (SIMD_FLAGS "-g3 -msse -msse2 -mavx -mrtm")
 execute_process(COMMAND bash "-c" "cat /proc/cpuinfo | grep avx2"
@@ -88,5 +89,6 @@ if (NOT pibench_POPULATED)
 endif ()
 
 
-add_library(dptree_pibench_wrapper SHARED dptree_wrapper.cpp)
+add_library(dptree_pibench_wrapper SHARED dptree_wrapper.cpp
+                                        art_index.cpp)
 
