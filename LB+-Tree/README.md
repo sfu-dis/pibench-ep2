@@ -1,7 +1,10 @@
 # LB+-Tree PiBench Wrapper
 
 ## Installation
-
+1. First configure allocation scheme in mempool.h (PMEM POOL)
+2. (Optional) Set the weak isolation fix type in lbtree.h (NONTEMP or UNLOCK_AFTER)
+make clean
+make
 
 ## Important information
 This repo contains source code from https://github.com/schencoding/lbtree

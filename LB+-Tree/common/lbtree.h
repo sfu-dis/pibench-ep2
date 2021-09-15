@@ -37,6 +37,10 @@
 
 #define LEAF_KEY_NUM (14)
 
+// at most 1 of the following 2 macros may be defined
+//#define NONTEMP
+//#define UNLOCK_AFTER
+
 /* ---------------------------------------------------------------------- */
 /**
  * Pointer8B defines a class that can be assigned to either bnode or bleaf.
@@ -185,6 +189,23 @@ public:
     {
         bleafMeta *my_meta = (bleafMeta *)this;
         my_meta->word8B[0] = m->word8B[0];
+    }
+
+    void movnt64(uint64_t *dest, uint64_t const src, bool front, bool back) {
+        if (front) sfence();
+        _mm_stream_si64((long long int *)dest, (long long int) src);
+        if (back) sfence();
+    }
+
+    void setWord0_temporal(bleafMeta *m){
+       bleafMeta * my_meta= (bleafMeta *)this;
+       movnt64((uint64_t*)&my_meta->word8B[0], m->word8B[0], false, true);
+    }
+
+    void setBothWords_temporal(bleafMeta *m) {
+       bleafMeta * my_meta= (bleafMeta *)this;
+       my_meta->word8B[1]= m->word8B[1];
+       movnt64((uint64_t*)&my_meta->word8B[0], m->word8B[0], false, true);
     }
 
 }; // bleaf
