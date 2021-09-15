@@ -37,7 +37,7 @@ dptree_wrapper::dptree_wrapper()
 
 dptree_wrapper::~dptree_wrapper()
 {
-    std::cout << "Read Anomaly: " << read_anomaly << std::endl;
+    printf("Read Anomaly: %llu\n", read_anomaly);
 }
 
 bool dptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
@@ -76,10 +76,11 @@ bool dptree_wrapper::remove(const char* key, size_t key_sz)
 int dptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& values_out)
 {
     uint64_t k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
-    static thread_local std::vector<uint64_t, scan_sz*2> v;
+    int vec_size = scan_sz*2;
+    static thread_local std::vector<uint64_t, vec_size> v;
     v.clear();
     dptree.scan(k, scan_sz, v);
-    values_out = results.data();
+    values_out = v.data();
     scan_sz = v.size() / 2;
     if (scan_sz != 100)
         printf("%d records scanned!\n", scan_sz);
