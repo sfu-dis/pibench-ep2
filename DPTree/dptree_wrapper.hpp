@@ -76,8 +76,7 @@ bool dptree_wrapper::remove(const char* key, size_t key_sz)
 int dptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& values_out)
 {
     uint64_t k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
-    int vec_size = scan_sz*2;
-    static thread_local std::vector<uint64_t, vec_size> v;
+    static thread_local std::vector<uint64_t> v(scan_sz*2);
     v.clear();
     dptree.scan(k, scan_sz, v);
     values_out = v.data();
