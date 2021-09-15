@@ -79,7 +79,7 @@ int dptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& val
     static thread_local std::vector<uint64_t> v(scan_sz*2);
     v.clear();
     dptree.scan(k, scan_sz, v);
-    values_out = v.data();
+    values_out = (char*)v.data();
     scan_sz = v.size() / 2;
     if (scan_sz != 100)
         printf("%d records scanned!\n", scan_sz);
