@@ -2335,10 +2335,10 @@ class concur_dptree
     {
     #ifdef PMEM
     	printf("use pmdk!\n");
-    	char pathname[100] = "./pool";
-		if (file_exists(pathname) != 0) {
+    	const char *path = "./pool";
+		if (file_pool_exists(path) == 0) {
 			printf("create new pool.\n");
-			if ((pop = pmemobj_create(pathname, POBJ_LAYOUT_NAME(DPTree),
+			if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(DPTree),
 			                          POOL_SIZE, 0666)) == NULL) {
 			  perror("failed to create pool.\n");
 			  exit(1);;

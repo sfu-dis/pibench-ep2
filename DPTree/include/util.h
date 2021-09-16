@@ -7,7 +7,6 @@
 #include <thread>
 #include <string.h>
 #include <immintrin.h>
-#include <fstream>
 
 struct leaf_node;
 
@@ -20,6 +19,11 @@ struct leaf_node;
     POBJ_LAYOUT_END(DPTree);
     PMEMobjpool *pop;
     const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
+
+    inline bool file_pool_exists(const std::string& name) 
+    {
+        return ( access( name.c_str(), F_OK ) != -1 );
+    }
 #endif
 
 #ifdef USE_PAPI
