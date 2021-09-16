@@ -1,7 +1,11 @@
 # DPTree PiBench Wrapper
 
 ## Installation
-1. 
+1. Set # of merge workers in dptree_wrapper.cpp
+2. Set PMEM pool size in include/util.h
+cd build
+cmake ..
+make
 
 ## Important information
 This repo contains source code from https://github.com/zxjcarrot/DPTree-code.git

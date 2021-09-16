@@ -336,7 +336,7 @@ void clflush_len(volatile void *data, int len)
 
 int nvm_dram_alloc(void **ptr, size_t align, size_t size)
 {
-printf("Size: %llu \n", size);
+// printf("Size: %llu \n", size);
 #ifdef PMEM
     TOID(leaf_node) p;
     POBJ_ZALLOC(pop, &p, leaf_node, size);
