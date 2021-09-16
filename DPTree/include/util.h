@@ -18,7 +18,7 @@ struct leaf_node;
     POBJ_LAYOUT_BEGIN(DPTree);
     POBJ_LAYOUT_TOID(DPTree, leaf_node);
     POBJ_LAYOUT_END(DPTree);
-    PMEMobjpool *pop;
+    inline PMEMobjpool *pop;
     const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
 
     inline bool file_pool_exists(const std::string& name) 
