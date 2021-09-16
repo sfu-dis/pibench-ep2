@@ -121,8 +121,8 @@ bool masstree_wrapper::remove(const char *key, size_t key_sz)
   swap_endian(k);
   Masstree::default_table::cursor_type lp(mt.table(), Str((const char*)&k, key_sz));
   bool found = lp.find_locked(*ti);
-  if (!found)
-    std::cout << "Delete Key does not exist!\n";
+  // if (!found)
+  //   std::cout << "Delete Key does not exist!\n";
   lp.finish(-1, *ti);
   return found;
 }
