@@ -7,6 +7,7 @@
 #include <thread>
 #include <string.h>
 #include <immintrin.h>
+#include <fstream>
 
 struct leaf_node;
 
