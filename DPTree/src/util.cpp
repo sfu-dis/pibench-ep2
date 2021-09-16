@@ -340,7 +340,8 @@ printf("Size: %llu \n", size);
 #ifdef PMEM
     TOID(leaf_node) p;
     POBJ_ZALLOC(pop, &p, leaf_node, size);
-    return pmemobj_direct(p.oid);
+    *ptr = pmemobj_direct(p.oid);
+    return 0;
 #else
     assert(size < 1073741824UL);
     int ret = posix_memalign(ptr, align, size);
