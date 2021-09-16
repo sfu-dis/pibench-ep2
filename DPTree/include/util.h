@@ -8,6 +8,19 @@
 #include <string.h>
 #include <immintrin.h>
 
+struct leaf_node;
+
+#define PMEM
+#ifdef PMEM
+    #include <libpmemobj.h>
+    #include <libpmem.h>
+    POBJ_LAYOUT_BEGIN(DPTree);
+    POBJ_LAYOUT_TOID(DPTree, leaf_node);
+    POBJ_LAYOUT_END(DPTree);
+    PMEMobjpool *pop;
+    const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
+#endif
+
 #ifdef USE_PAPI
 #include <papi.h>
 #endif

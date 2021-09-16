@@ -11,3 +11,4 @@ Some modifications are made to compile dptree wrapper
 1. Changed const key_type &key to const key_type &k in concur_dptree.hpp line 2438
 2. Added scan that returns both key and value (lookup_range only returns value)
 3. Modified CMakeLists.txt
+4. Add PMDK allocator in util.h .cpp

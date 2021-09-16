@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++17 -lpmem -lpmemobj -ljemalloc -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -ltbb -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++17 -DNDEBUG -lpmem -lpmemobj -ljemalloc -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -ltbb -pthread")
 
 #macro(use_cxx11)
 #    if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -24,7 +24,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++17 -lpmem -lpmemobj -ljemall
 
 include_directories(include)
 include_directories(misc)
-include_directories(src)
 
 set (SIMD_FLAGS "-g3 -msse -msse2 -mavx -mrtm")
 execute_process(COMMAND bash "-c" "cat /proc/cpuinfo | grep avx2"
@@ -90,5 +89,8 @@ endif ()
 
 
 add_library(dptree_pibench_wrapper SHARED dptree_wrapper.cpp
-                                        art_index.cpp)
+                                        src/art_idx.cpp
+                                        src/util.cpp
+                                        src/bloom.c
+                                        src/MurmurHash2.cpp)
 

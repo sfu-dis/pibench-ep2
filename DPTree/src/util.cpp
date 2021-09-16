@@ -336,14 +336,26 @@ void clflush_len(volatile void *data, int len)
 
 int nvm_dram_alloc(void **ptr, size_t align, size_t size)
 {
+printf("Size: %llu \n", size);
+#ifdef PMEM
+    TOID(leaf_node) p;
+    POBJ_ZALLOC(pop, &p, leaf_node, size);
+    return pmemobj_direct(p.oid);
+#else
     assert(size < 1073741824UL);
     int ret = posix_memalign(ptr, align, size);
     return ret;
+#endif
 }
 
 void nvm_dram_free(void *ptr, size_t size)
 {
+#ifdef PMEM
+  TOID(leaf_node) n = pmemobj_oid(ptr);
+  POBJ_FREE(&n);
+#else
     free(ptr);
+#endif
 }
 
 int nvm_dram_alloc_cacheline_aligned(void **p, size_t size)

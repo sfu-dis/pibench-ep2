@@ -2333,6 +2333,21 @@ class concur_dptree
         : base_tree_inner_rebuild_time(0), base_tree_parallel_merge_work_time(0),
           merge_state(0), merge_time(0), merge_wait_time(0)
     {
+    #ifdef PMEM
+    	printf("use pmdk!\n");
+    	char pathname[100] = "./pool";
+		if (file_exists(pathname) != 0) {
+			printf("create new pool.\n");
+			if ((pop = pmemobj_create(pathname, POBJ_LAYOUT_NAME(DPTree),
+			                          POOL_SIZE, 0666)) == NULL) {
+			  perror("failed to create pool.\n");
+			  exit(1);;
+			}
+		} else {
+			printf("file already exists.\n");
+			exit(1);
+		}
+    #endif
         front_buffer_tree = new buffer_btree_type(1024, &allocator);
         middle_buffer_tree = nullptr;
         rear_base_tree = new base_tree_type(base_tree_inner_rebuild_time,
