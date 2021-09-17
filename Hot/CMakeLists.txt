@@ -11,7 +11,7 @@ execute_process(COMMAND cat /proc/cpuinfo COMMAND grep bmi2 OUTPUT_VARIABLE HAVE
 execute_process(COMMAND cat /proc/cpuinfo COMMAND grep avx512 OUTPUT_VARIABLE HAVE_AVX512)
 
 if(HAVE_AVX2 AND HAVE_BMI2)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ljemalloc -std=c++17 -march=native -mrtm -mcx16 -mavx -mavx2 -mbmi2 -mlzcnt -Wno-deprecated-declarations -Wall -Wextra -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -faligned-new=64 -DNDEBUG")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ljemalloc -std=c++17 -march=native -mrtm -mcx16 -mavx -mavx2 -mbmi2 -mlzcnt -Wno-deprecated-declarations -Wall -Wextra -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -faligned-new=64 -DNDEBUG -ltbb")
 	SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 else()
 	message(FALSE_ERROR "Cannot find avx2 & bmi2 --> cannot run HOT")
@@ -52,4 +52,6 @@ include_directories("libs/hot/commons/include"
 
 
 # Build hot shared library
-add_library(hot_wrapper SHARED ../hot_wrapper.cpp)
+add_library(hot_wrapper SHARED ../hot_wrapper.cpp
+								third-party/tbb/src/old/concurrent_vector_v2.cpp
+								third-party/tbb/src/tbb/concurrent_vector.cpp)
