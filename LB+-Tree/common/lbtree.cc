@@ -790,7 +790,7 @@ void lbtree::insert(key_type key, void *ptr)
         /* 1. leaf is not full */
         if (!isfull[0])
         {
-            #if !defined(UNLOCK_AFTER)
+            #if !defined(NVMPOOL_REAL) || !defined(UNLOCK_AFTER)
             meta.v.lock = 0; // clear lock in temp meta
             #endif
 
@@ -823,7 +823,7 @@ void lbtree::insert(key_type key, void *ptr)
                 sfence();
                 #endif
 
-                #if defined(UNLOCK_AFTER)
+                #if defined(NVMPOOL_REAL) && defined(UNLOCK_AFTER)
                 ((bleafMeta *)lp)->v.lock = 0;
                 #endif
 
@@ -868,7 +868,7 @@ void lbtree::insert(key_type key, void *ptr)
                 sfence();
                 #endif
 
-                #if defined(UNLOCK_AFTER)
+                #if defined(NVMPOOL_REAL) && defined(UNLOCK_AFTER)
                 ((bleafMeta *)lp)->v.lock = 0;
                 #endif
 
@@ -1336,7 +1336,7 @@ void lbtree::del(key_type key)
         {
             bleafMeta meta = *((bleafMeta *)lp);
 
-            #if !defined(UNLOCK_AFTER)
+            #if !defined(NVMPOOL_REAL) || !defined(UNLOCK_AFTER)
             meta.v.lock = 0;                  // clear lock in temp meta
             #endif
 
@@ -1352,7 +1352,7 @@ void lbtree::del(key_type key)
             sfence();
             #endif
 
-            #if defined(UNLOCK_AFTER)
+            #if defined(NVMPOOL_REAL) && defined(UNLOCK_AFTER)
             ((bleafMeta *)lp)->v.lock = 0;
             #endif
 

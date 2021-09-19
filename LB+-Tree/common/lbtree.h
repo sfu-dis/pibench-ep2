@@ -39,7 +39,7 @@
 
 // at most 1 of the following 2 macros may be defined
 //#define NONTEMP
-//#define UNLOCK_AFTER
+#define UNLOCK_AFTER
 
 /* ---------------------------------------------------------------------- */
 /**
