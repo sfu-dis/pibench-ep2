@@ -49,7 +49,7 @@ bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
   Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
 #else
   Key k;
-  k.Init(const_cast<char*>(key), key_sz, value_out, 8);
+  k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value_out), 8);
 #endif
   auto leaf = roart.lookup(&k);
 
@@ -69,7 +69,7 @@ bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, si
   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
 #else
   Key* k = new Key();
-  k->Init(const_cast<char*>(key), key_sz, value, 8);
+  k->Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
 #endif
   Tree::OperationResults result = roart.insert(k);
   if (result != Tree::OperationResults::Success)
@@ -87,7 +87,7 @@ bool roart_wrapper::update(const char *key, size_t key_sz, const char *value, si
   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
 #else
   Key* k = new Key();
-  k->Init(const_cast<char*>(key), key_sz, value, 8);
+  k->Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
 #endif
   Tree::OperationResults result = roart.update(k);
   if (result != Tree::OperationResults::Success)
@@ -105,7 +105,7 @@ bool roart_wrapper::remove(const char *key, size_t key_sz)
   Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
 #else
   Key k;
-  k.Init(const_cast<char*>(key), key_sz, value_out, 8);
+  k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(key), key_sz);
 #endif
   Tree::OperationResults result = roart.remove(&k);
   if (result != Tree::OperationResults::Success)
