@@ -66,12 +66,12 @@ bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, si
 {
   thread_local ThreadHelper t;
 #ifdef KEY_INLINE
-  Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
+  Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
 #else
   Key* k = new Key();
   k->Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
 #endif
-  Tree::OperationResults result = roart.insert(k);
+  Tree::OperationResults result = roart.insert(&k);
   if (result != Tree::OperationResults::Success)
   {
     std::cout << "Insert failed!\n";
