@@ -308,7 +308,9 @@ void *alloc_new_node_from_size(size_t size) {
         dcmm_time = new cpuCycleTimer();
     dcmm_time->start();
 #endif
-
+#ifdef ARTPMDK
+    return PART_ns::allocate_size(size);
+#endif
     void *addr = ti->free_list->alloc_node(size);
 #ifdef COUNT_ALLOC
     dcmm_time->end();
@@ -317,12 +319,18 @@ void *alloc_new_node_from_size(size_t size) {
 }
 
 void free_node_from_type(uint64_t addr, PART_ns::NTypes type) {
+#ifdef ARTPMDK
+    printf("Free node from type called under ARTPMDK mode!\n");
+#endif
     size_t node_size = size_align(get_node_size(type), 64);
     node_size = ti->free_list->get_power_two_size(node_size);
     ti->free_list->insert_into_freelist(addr, node_size);
 }
 
 void free_node_from_size(uint64_t addr, size_t size) {
+#ifdef ARTPMDK
+    printf("Free node from size called under ARTPMDK mode!\n");
+#endif
     size_t node_size = ti->free_list->get_power_two_size(size);
     ti->free_list->insert_into_freelist(addr, node_size);
 }
