@@ -57,7 +57,7 @@ Leaf::Leaf(uint8_t *key_, size_t key_len_, char *value_, size_t val_len_)
 }
 uint16_t Leaf::getFingerPrint() {
     uint16_t re = 0;
-    auto k = GetKey();
+    auto k = (uint8_t *)GetKey();
     for (int i = 0; i < key_len; i++) {
         re = re * 131 + k[i];
     }
