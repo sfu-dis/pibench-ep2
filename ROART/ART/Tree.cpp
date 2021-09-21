@@ -888,7 +888,7 @@ restart:
             // prefix, level to this node
             Prefix prefi = node->getPrefi();
             prefi.prefixCount = nextLevel - level;
-
+printf("[Segfault]\t First ARTPMDK\n");
 #ifdef ARTPMDK
             N4 *newNode = new (allocate_size(sizeof(N4))) N4(nextLevel, prefi);
 #else
@@ -1035,7 +1035,7 @@ restart:
                 return OperationResults::Existed;
             }
             // substring
-
+printf("[Segfault]\t Second ARTPMDK\n");
 #ifdef ARTPMDK
             N4 *n4 = new (allocate_size(sizeof(N4)))
                 N4(level + prefixLength, &k->fkey[level],
