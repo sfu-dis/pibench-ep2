@@ -10,7 +10,7 @@ static const char * pool_path = "./pool.data";
 static const long long pool_size = 64LL * 1024 * 1024 * 1024; // default 16GB
 
 // #define ARTPMDK // PMDK vs nvm_mgr
-// #define KEY_INLINE  // inline for key <= 8B  Read, update is fine
+#define KEY_INLINE  // inline for key <= 8B  Read, update is fine
 #define ZENTRY  // Stores key bytes in inner node pointers
 #define LEAF_ARRAY  // subtree with <= 64 entries will be compact into array of pointers
 // #define SORT_LEAVES

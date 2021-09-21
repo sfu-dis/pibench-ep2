@@ -17,7 +17,6 @@ public:
   virtual bool update(const char *key, size_t key_sz, const char *value, size_t value_sz) override;
   virtual bool remove(const char *key, size_t key_sz) override;
   virtual int scan(const char *key, size_t key_sz, int scan_sz, char *&values_out) override;
-  inline Key createKey(const char *key, size_t key_sz, char *value_out);
 private:
   Tree roart; 
 };
@@ -42,13 +41,13 @@ roart_wrapper::~roart_wrapper()
 {
 }
 
-inline Key createKey(const char *key, size_t key_sz, char *value)
+inline Key* createKey(const char *key, size_t key_sz, char *value)
 {
   #ifdef KEY_INLINE
-    return Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
+    return 
   #else
     Key k;
-    k.Init(key, key_sz, value, 8);
+    k.Init(const_cast<char*>(key), key_sz, value, 8);
     return k;
   #endif
 }
@@ -56,7 +55,12 @@ inline Key createKey(const char *key, size_t key_sz, char *value)
 bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
 {
   thread_local ThreadHelper t;
+#ifdef KEY_INLINE
   Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
+#else
+  Key k;
+  k.Init(const_cast<char*>(key), key_sz, value_out, 8);
+#endif
   auto leaf = roart.lookup(&k);
 
   if (leaf != nullptr)
@@ -70,11 +74,13 @@ bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
 
 bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
-#ifdef KEY_INLINE
-  printf("Key inline!\n");
-#endif
   thread_local ThreadHelper t;
+#ifdef KEY_INLINE
   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
+#else
+  Key* k = new Key();
+  k.Init(const_cast<char*>(key), key_sz, value, 8);
+#endif
   Tree::OperationResults result = roart.insert(k);
   if (result != Tree::OperationResults::Success)
   {
@@ -87,8 +93,13 @@ bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, si
 bool roart_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t;
-  Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
-  Tree::OperationResults result = roart.update(&k);
+#ifdef KEY_INLINE
+  Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
+#else
+  Key* k = new Key();
+  k.Init(const_cast<char*>(key), key_sz, value, 8);
+#endif
+  Tree::OperationResults result = roart.update(k);
   if (result != Tree::OperationResults::Success)
   {
     std::cout << "Update failed!\n";
@@ -100,7 +111,12 @@ bool roart_wrapper::update(const char *key, size_t key_sz, const char *value, si
 bool roart_wrapper::remove(const char *key, size_t key_sz)
 {
   thread_local ThreadHelper t;
+#ifdef KEY_INLINE
   Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
+#else
+  Key k;
+  k.Init(const_cast<char*>(key), key_sz, value_out, 8);
+#endif
   Tree::OperationResults result = roart.remove(&k);
   if (result != Tree::OperationResults::Success)
   {
