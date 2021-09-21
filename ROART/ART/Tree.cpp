@@ -106,8 +106,6 @@ void *allocate_size(size_t size) {
 Tree::Tree() {
     std::cout << "[P-ART]\tnew P-ART\n";
 
-    init_nvm_mgr();
-    register_threadinfo();
     //    Epoch_Mgr * epoch_mgr = new Epoch_Mgr();
 #ifdef ARTPMDK
     const char *layout_name = "DLART";
@@ -132,6 +130,8 @@ Tree::Tree() {
     flush_data((void *)root, sizeof(N256));
 
 #else
+    init_nvm_mgr();
+    register_threadinfo();
     NVMMgr *mgr = get_nvm_mgr();
     if (mgr->first_created) {
         // first open
