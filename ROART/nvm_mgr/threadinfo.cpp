@@ -350,8 +350,6 @@ void register_threadinfo() {
             std::cout << "[THREAD]\tno available threadinfo to allocate\n";
             assert(0);
         }
-#ifdef ARTPMDK
-#else
         NVMMgr *mgr = get_nvm_mgr();
         //        std::cout<<"in thread get mgr meta data addr
         //        "<<mgr->meta_data<<"\n";
@@ -362,7 +360,6 @@ void register_threadinfo() {
 
         // persist thread info
         flush_data((void *)ti, 128);
-#endif
         //std::cout << "[THREAD]\talloc thread info " << ti->id << "\n";
     }
 }
