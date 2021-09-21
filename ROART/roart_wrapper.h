@@ -89,7 +89,7 @@ bool roart_wrapper::update(const char *key, size_t key_sz, const char *value, si
   Key k;
   k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
 #endif
-  Tree::OperationResults result = roart.update(k);
+  Tree::OperationResults result = roart.update(&k);
   if (result != Tree::OperationResults::Success)
   {
     std::cout << "Update failed!\n";
