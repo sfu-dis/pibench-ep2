@@ -107,8 +107,8 @@ Tree::Tree() {
     std::cout << "[P-ART]\tnew P-ART\n";
 #ifndef ARTPMDK
     init_nvm_mgr();
-#endif
     register_threadinfo();
+#endif
     //    Epoch_Mgr * epoch_mgr = new Epoch_Mgr();
 #ifdef ARTPMDK
     const char *layout_name = "DLART";
@@ -128,7 +128,7 @@ Tree::Tree() {
         std::cout << "[DLART]\topen\n";
     }
     std::cout << "[DLART]\topen pmem pool successfully!\n";
-
+    register_threadinfo();
     root = new (allocate_size(sizeof(N256))) N256(0, {});
     flush_data((void *)root, sizeof(N256));
 
