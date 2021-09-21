@@ -17,6 +17,7 @@ public:
   virtual bool update(const char *key, size_t key_sz, const char *value, size_t value_sz) override;
   virtual bool remove(const char *key, size_t key_sz) override;
   virtual int scan(const char *key, size_t key_sz, int scan_sz, char *&values_out) override;
+  
 private:
   Tree roart; 
 };
@@ -39,17 +40,6 @@ roart_wrapper::roart_wrapper()
 
 roart_wrapper::~roart_wrapper()
 {
-}
-
-inline Key* createKey(const char *key, size_t key_sz, char *value)
-{
-  #ifdef KEY_INLINE
-    return 
-  #else
-    Key k;
-    k.Init(const_cast<char*>(key), key_sz, value, 8);
-    return k;
-  #endif
 }
 
 bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
