@@ -291,7 +291,7 @@ void *alloc_new_node_from_type(PART_ns::NTypes type) {
     dcmm_time->start();
 #endif
 #ifdef ARTPMDK
-    return PART_ns::allocate_size(sizeof(type));
+    return PART_ns::allocate_size(get_node_size(type));
 #endif
     size_t node_size = size_align(get_node_size(type), 64);
     void *addr = ti->free_list->alloc_node(node_size);
