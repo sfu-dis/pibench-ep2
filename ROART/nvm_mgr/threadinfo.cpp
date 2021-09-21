@@ -333,7 +333,11 @@ void register_threadinfo() {
     std::lock_guard<std::mutex> lock_guard(ti_lock);
 
     if (pmblock == nullptr) {
+#ifdef ARTPMDK
+        pmblock = new PMBlockAllocator(NULL);
+#else
         pmblock = new PMBlockAllocator(get_nvm_mgr());
+#endif
         std::cout << "[THREAD]\tfirst new pmblock\n";
         //        std::cout<<"PPPPP meta data addr "<<
         //        get_nvm_mgr()->meta_data<<"\n";
@@ -352,7 +356,6 @@ void register_threadinfo() {
         }
 #ifdef ARTPMDK
         ti = new (PART_ns::allocate_size(sizeof(thread_info))) thread_info();
-        
 #else
         NVMMgr *mgr = get_nvm_mgr();
         //        std::cout<<"in thread get mgr meta data addr
