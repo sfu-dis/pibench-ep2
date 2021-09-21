@@ -360,7 +360,7 @@ void register_threadinfo() {
 
         // persist thread info
         flush_data((void *)ti, 128);
-        std::cout << "[THREAD]\talloc thread info " << ti->id << "\n";
+        //std::cout << "[THREAD]\talloc thread info " << ti->id << "\n";
     }
 }
 
