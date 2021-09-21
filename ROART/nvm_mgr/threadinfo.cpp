@@ -351,7 +351,7 @@ void register_threadinfo() {
             assert(0);
         }
 #ifdef ARTPMDK
-        ti = new (allocate_size(sizeof(thread_info))) thread_info();
+        ti = new (PART_ns::allocate_size(sizeof(thread_info))) thread_info();
         
 #else
         NVMMgr *mgr = get_nvm_mgr();
