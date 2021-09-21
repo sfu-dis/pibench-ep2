@@ -24,4 +24,6 @@ Some modifications are made in order to compile pibench wrapper
 * Modified k->value into &k->value in line 27 of N.cpp
 
 ## Comment
-Tree.cpp --> insert
+KEY_INLINE --> Insert, Read, Update, Delete
+KEY_INLINE + ZENTRY --> Segfault
+KEY_INLINE + ZENTRY + LEAF_ARRAY --> Insert no error, read always fail, update segfault, delete no error

@@ -30,7 +30,7 @@ struct ThreadHelper
   }
   ~ThreadHelper()
   {
-    NVMMgr_ns::unregister_threadinfo();
+    // NVMMgr_ns::unregister_threadinfo();
   }
 };
 
@@ -59,6 +59,9 @@ bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
 
 bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
+#ifdef KEY_INLINE
+  printf("Key inline!\n");
+#endif
   thread_local ThreadHelper t;
   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
   Tree::OperationResults result = roart.insert(k);
@@ -90,7 +93,7 @@ bool roart_wrapper::remove(const char *key, size_t key_sz)
   Tree::OperationResults result = roart.remove(&k);
   if (result != Tree::OperationResults::Success)
   {
-    std::cout << "Remove failed!\n";
+    // std::cout << "Remove failed!\n";
     return false;
   }
   return true;
