@@ -290,7 +290,9 @@ void *alloc_new_node_from_type(PART_ns::NTypes type) {
         dcmm_time = new cpuCycleTimer();
     dcmm_time->start();
 #endif
-
+#ifdef ARTPMDK
+    return PART_ns::allocate_size(sizeof(type));
+#endif
     size_t node_size = size_align(get_node_size(type), 64);
     void *addr = ti->free_list->alloc_node(node_size);
 
@@ -333,11 +335,7 @@ void register_threadinfo() {
     std::lock_guard<std::mutex> lock_guard(ti_lock);
 
     if (pmblock == nullptr) {
-#ifdef ARTPMDK
-        pmblock = new PMBlockAllocator(NULL);
-#else
         pmblock = new PMBlockAllocator(get_nvm_mgr());
-#endif
         std::cout << "[THREAD]\tfirst new pmblock\n";
         //        std::cout<<"PPPPP meta data addr "<<
         //        get_nvm_mgr()->meta_data<<"\n";
@@ -354,14 +352,11 @@ void register_threadinfo() {
             std::cout << "[THREAD]\tno available threadinfo to allocate\n";
             assert(0);
         }
-#ifdef ARTPMDK
-        ti = new (PART_ns::allocate_size(sizeof(thread_info))) thread_info();
-#else
         NVMMgr *mgr = get_nvm_mgr();
         //        std::cout<<"in thread get mgr meta data addr
         //        "<<mgr->meta_data<<"\n";
+
         ti = new (mgr->alloc_thread_info()) thread_info();
-#endif
         ti->next = ti_list_head;
         ti_list_head = ti;
 
