@@ -17,7 +17,7 @@ public:
   virtual bool update(const char *key, size_t key_sz, const char *value, size_t value_sz) override;
   virtual bool remove(const char *key, size_t key_sz) override;
   virtual int scan(const char *key, size_t key_sz, int scan_sz, char *&values_out) override;
-  
+
 private:
   Tree roart; 
 };
@@ -69,7 +69,7 @@ bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, si
   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
 #else
   Key* k = new Key();
-  k.Init(const_cast<char*>(key), key_sz, value, 8);
+  k->Init(const_cast<char*>(key), key_sz, value, 8);
 #endif
   Tree::OperationResults result = roart.insert(k);
   if (result != Tree::OperationResults::Success)
@@ -87,7 +87,7 @@ bool roart_wrapper::update(const char *key, size_t key_sz, const char *value, si
   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
 #else
   Key* k = new Key();
-  k.Init(const_cast<char*>(key), key_sz, value, 8);
+  k->Init(const_cast<char*>(key), key_sz, value, 8);
 #endif
   Tree::OperationResults result = roart.update(k);
   if (result != Tree::OperationResults::Success)
