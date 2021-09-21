@@ -353,8 +353,11 @@ void register_threadinfo() {
         NVMMgr *mgr = get_nvm_mgr();
         //        std::cout<<"in thread get mgr meta data addr
         //        "<<mgr->meta_data<<"\n";
-
+#ifdef ARTPMDK
         ti = new (mgr->alloc_thread_info()) thread_info();
+#else
+        ti = new (allocate_size(sizeof(thread_info))) thread_info();
+#endif
         ti->next = ti_list_head;
         ti_list_head = ti;
 

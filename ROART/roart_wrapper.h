@@ -26,9 +26,7 @@ struct ThreadHelper
 {
   ThreadHelper()
   {
-  #ifndef ARTPMDK
     NVMMgr_ns::register_threadinfo();
-  #endif
   }
   ~ThreadHelper()
   {
