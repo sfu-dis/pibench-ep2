@@ -344,7 +344,7 @@ void register_threadinfo() {
 #ifdef ARTPMDK
     if (ti == nullptr)
     {
-        ti = PART_ns::allocate_size(sizeof(thread_info));
+        ti = new (PART_ns::allocate_size(sizeof(thread_info))) thread_info();
         ti->next = ti_list_head;
         ti_list_head = ti;
         // persist thread info
