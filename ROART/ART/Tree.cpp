@@ -860,7 +860,6 @@ restart:
     N *parentNode = nullptr;
     uint8_t parentKey, nodeKey = 0;
     uint32_t level = 0;
-printf("[Segfault]\t Entering while loop!\n");
     while (true) {
         parentNode = node;
         parentKey = nodeKey;
@@ -873,7 +872,6 @@ printf("[Segfault]\t Entering while loop!\n");
 
         uint8_t nonMatchingKey;
         Prefix remainingPrefix;
-printf("[Segfault]\t Going to check prefix\n");
         switch (
             checkPrefixPessimistic(node, k, nextLevel, nonMatchingKey,
                                    remainingPrefix)) { // increases nextLevel
@@ -889,7 +887,6 @@ printf("[Segfault]\t Going to check prefix\n");
             // prefix, level to this node
             Prefix prefi = node->getPrefi();
             prefi.prefixCount = nextLevel - level;
-printf("[Segfault]\t ARTPMDK in switch\n");
 #ifdef ARTPMDK
             N4 *newNode = new (allocate_size(sizeof(N4))) N4(nextLevel, prefi);
 #else
@@ -945,7 +942,6 @@ printf("[Segfault]\t ARTPMDK in switch\n");
         case CheckPrefixPessimisticResult::Match:
             break;
         }
-printf("[Segfault]\t Prefix checked\n");
         assert(nextLevel < k->getKeyLen()); // prevent duplicate key
         // TODO: maybe one string is substring of another, so it fkey[level]
         // will be 0 solve problem of substring
@@ -1037,7 +1033,6 @@ printf("[Segfault]\t Prefix checked\n");
                 return OperationResults::Existed;
             }
             // substring
-printf("[Segfault]\t Second ARTPMDK\n");
 #ifdef ARTPMDK
             N4 *n4 = new (allocate_size(sizeof(N4)))
                 N4(level + prefixLength, &k->fkey[level],
@@ -1283,7 +1278,6 @@ Tree::checkPrefixPessimistic(N *n, const Key *k, uint32_t &level,
             return CheckPrefixPessimisticResult::SkippedLevel;
         }
     }
-printf("[Segfault]\t First if in checkPrefixPessimistic\n");
     if (p.prefixCount > 0) {
         uint32_t prevLevel = level;
         Leaf *kt = nullptr;
@@ -1330,7 +1324,6 @@ printf("[Segfault]\t First if in checkPrefixPessimistic\n");
             ++level;
         }
     }
-printf("[Segfault]\t Second if in checkPrefixPessimistic\n");
     return CheckPrefixPessimisticResult::Match;
 }
 

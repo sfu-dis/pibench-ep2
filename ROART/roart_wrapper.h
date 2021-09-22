@@ -77,9 +77,7 @@ bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, si
 //   Key* k = new Key();
 //   k->Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
 // #endif
-  printf("[Segfault]\t Before insert\n");
   Tree::OperationResults result = roart.insert(&k);
-  printf("[Segfault]\t After insert\n");
   if (result != Tree::OperationResults::Success)
   {
     std::cout << "Insert failed!\n";
