@@ -1283,7 +1283,7 @@ Tree::checkPrefixPessimistic(N *n, const Key *k, uint32_t &level,
             return CheckPrefixPessimisticResult::SkippedLevel;
         }
     }
-
+printf("[Segfault]\t First if in checkPrefixPessimistic\n");
     if (p.prefixCount > 0) {
         uint32_t prevLevel = level;
         Leaf *kt = nullptr;
@@ -1330,6 +1330,7 @@ Tree::checkPrefixPessimistic(N *n, const Key *k, uint32_t &level,
             ++level;
         }
     }
+printf("[Segfault]\t Second if in checkPrefixPessimistic\n");
     return CheckPrefixPessimisticResult::Match;
 }
 
