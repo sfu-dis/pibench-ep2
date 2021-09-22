@@ -26,9 +26,7 @@ struct ThreadHelper
 {
   ThreadHelper()
   {
-  #ifndef ARTPMDK
     NVMMgr_ns::register_threadinfo();
-  #endif
   }
   ~ThreadHelper()
   {
@@ -67,20 +65,20 @@ bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
 bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t;
-// #ifdef KEY_INLINE
-//   Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
-// #else
-//   Key k;
-//   k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
-// #endif
 #ifdef KEY_INLINE
-  Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
+  Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
 #else
-  Key* k = new Key();
-  k->Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
+  Key k;
+  k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
 #endif
+// #ifdef KEY_INLINE
+//   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
+// #else
+//   Key* k = new Key();
+//   k->Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
+// #endif
   printf("[Segfault]\t Before insert\n");
-  Tree::OperationResults result = roart.insert(k);
+  Tree::OperationResults result = roart.insert(&k);
   printf("[Segfault]\t After insert\n");
   if (result != Tree::OperationResults::Success)
   {

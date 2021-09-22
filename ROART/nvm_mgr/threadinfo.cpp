@@ -341,7 +341,17 @@ void register_threadinfo() {
     thread_generation = mgr->get_generation_version();
 #endif
     std::lock_guard<std::mutex> lock_guard(ti_lock);
-
+#ifdef ARTPMDK
+    if (ti == nullptr)
+    {
+        ti = PART_ns::allocate_size(sizeof(thread_info));
+        ti->next = ti_list_head;
+        ti_list_head = ti;
+        // persist thread info
+        flush_data((void *)ti, 128);
+    }
+    return;
+#endif
     if (pmblock == nullptr) {
         pmblock = new PMBlockAllocator(get_nvm_mgr());
         std::cout << "[THREAD]\tfirst new pmblock\n";
