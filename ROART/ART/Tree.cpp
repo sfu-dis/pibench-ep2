@@ -860,7 +860,7 @@ restart:
     N *parentNode = nullptr;
     uint8_t parentKey, nodeKey = 0;
     uint32_t level = 0;
-    
+printf("[Segfault]\t Entering while loop!\n");
     while (true) {
         parentNode = node;
         parentKey = nodeKey;
@@ -873,6 +873,7 @@ restart:
 
         uint8_t nonMatchingKey;
         Prefix remainingPrefix;
+printf("[Segfault]\t Going to check prefix\n");
         switch (
             checkPrefixPessimistic(node, k, nextLevel, nonMatchingKey,
                                    remainingPrefix)) { // increases nextLevel
@@ -888,7 +889,7 @@ restart:
             // prefix, level to this node
             Prefix prefi = node->getPrefi();
             prefi.prefixCount = nextLevel - level;
-printf("[Segfault]\t First ARTPMDK\n");
+printf("[Segfault]\t ARTPMDK in switch\n");
 #ifdef ARTPMDK
             N4 *newNode = new (allocate_size(sizeof(N4))) N4(nextLevel, prefi);
 #else
@@ -944,6 +945,7 @@ printf("[Segfault]\t First ARTPMDK\n");
         case CheckPrefixPessimisticResult::Match:
             break;
         }
+printf("[Segfault]\t Prefix checked\n");
         assert(nextLevel < k->getKeyLen()); // prevent duplicate key
         // TODO: maybe one string is substring of another, so it fkey[level]
         // will be 0 solve problem of substring
