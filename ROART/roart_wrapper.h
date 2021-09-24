@@ -127,15 +127,18 @@ int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
   thread_local ThreadHelper t;
   constexpr size_t TWO_MB = 1ULL << 21;
   static thread_local char results[TWO_MB];
-  int scanned = 0;
+  size_t scanned = 0;
   values_out = results;
+  uint64_t max = (uint64_t)-1;
 #ifdef KEY_INLINE
   Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
+  Key end_k = Key(max, key_sz, 0);
 #else
-  Key k;
+  Key k, end_k;
   k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(key), key_sz);
+  end_k.init((char*)&max, key_sz, (char*)&max, key_sz);
 #endif
-  roart.lookupRange(k, nullptr, nullptr, results, scan_sz, scanned);
+  roart.lookupRange(&k, &end_k, nullptr, (PART_ns::Leaf**)&results, scan_sz, scanned);
   if (scanned != 100)
     printf("%d records scanned.\n", scanned);
 
