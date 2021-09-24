@@ -407,7 +407,7 @@ bool Tree::lookupRange(const Key *start, const Key *end, const Key *continueKey,
                        Leaf *result[], std::size_t resultSize,
                        std::size_t &resultsFound) const {
     if (!N::key_key_lt(start, end)) {
-        printf("Start key should be less than end key!\n");
+        printf("Start key: %llu should be less than end key: %llu!\n", start->key, end->key);
         resultsFound = 0;
         return false;
     }
