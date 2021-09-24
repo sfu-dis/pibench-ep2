@@ -1003,7 +1003,7 @@ void N::unchecked_insert(N *node, uint8_t key_byte, N *child, bool flush) {
 bool N::key_keylen_lt(char *a, const int alen, char *b, const int blen,
                       const int compare_level) {
     printf("Key a: %llu, Key b: %llu \n", *(uint64_t*)a, *(uint64_t*)b);
-    pritnf("Min length: %d \n", std::min(alen, blen));
+    printf("Min length: %d \n", std::min(alen, blen));
     for (int i = compare_level; i < std::min(alen, blen); i++) {
         if (a[i] != b[i]) {
             return a[i] < b[i];
