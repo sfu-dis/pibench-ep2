@@ -26,4 +26,5 @@ Some modifications are made in order to compile pibench wrapper
 * Modified k->value into &k->value in line 27 of N.cpp
 * Applied a fix from github https://github.com/MiracleMa/ROART/issues/2
 * Modified allocator functions when #ARTPMDK is defined
+* Modified max_threads to 100 in nvm_mgr.h
 
