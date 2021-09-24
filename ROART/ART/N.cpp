@@ -1006,6 +1006,7 @@ bool N::key_keylen_lt(char *a, const int alen, char *b, const int blen,
     printf("Min length: %d \n", std::min(alen, blen));
     for (int i = compare_level; i < std::min(alen, blen); i++) {
         if (a[i] != b[i]) {
+            printf("Byte of a: %d  Byte of b: %d \n", a[i], b[i]);
             return a[i] < b[i];
         }
     }
