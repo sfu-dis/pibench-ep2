@@ -125,9 +125,20 @@ bool roart_wrapper::remove(const char *key, size_t key_sz)
 int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&values_out)
 {
   thread_local ThreadHelper t;
-  //FIXME
+  constexpr size_t TWO_MB = 1ULL << 21;
+  static thread_local char results[TWO_MB];
   int scanned = 0;
-  // Iterator is not supported by roart.
+  values_out = results;
+#ifdef KEY_INLINE
+  Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
+#else
+  Key k;
+  k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(key), key_sz);
+#endif
+  roart.lookupRange(k, nullptr, nullptr, results, scan_sz, scanned);
+  if (scanned != 100)
+    printf("%d records scanned.\n", scanned);
+
   return scanned;
 }
 

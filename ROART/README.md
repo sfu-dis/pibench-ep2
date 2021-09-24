@@ -3,7 +3,9 @@
 Mostly working PiBench wrapper for ROART.
 
 ## Installation
-1. Modify pool_path and pool_size in Key.h
+1. (optional) Configure pool_path and pool_size in Key.h
+2. Set allocator (#define ARTPMDK)
+3. 
 make
 
 
@@ -22,8 +24,6 @@ Some modifications are made in order to compile pibench wrapper
 * Removed node->old_pointer.store(0); from rebuild_node() in N.cpp
 * Added macros to Key.h
 * Modified k->value into &k->value in line 27 of N.cpp
+* Applied a fix from github https://github.com/MiracleMa/ROART/issues/2
+* Modified allocator functions when #ARTPMDK is defined
 
-## Comment
-KEY_INLINE --> Insert, Read, Update, Delete
-KEY_INLINE + ZENTRY --> Segfault
-KEY_INLINE + ZENTRY + LEAF_ARRAY --> Insert no error, read always fail, update segfault, delete no error
