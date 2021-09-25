@@ -1006,7 +1006,7 @@ bool N::key_keylen_lt(char *a, const int alen, char *b, const int blen,
     for (int i = 7; i >= 0; i--) {
         if (a[i] != b[i]) {
             // printf("Byte of a: %d  Byte of b: %d \n", a[i], b[i]);
-            return a[i] < b[i];
+            return (uint8_t)a[i] < (uint8_t)b[i];
         }
     }
     return false;
