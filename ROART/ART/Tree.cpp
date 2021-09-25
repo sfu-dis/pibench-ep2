@@ -40,7 +40,7 @@ void *allocate_size(size_t size) {
 #endif
 
 #ifdef DRAM_MODE
-    return new (std::align_val_t(64)) char[size];
+    void *addr = new (std::align_val_t(64)) char[size];
 #else
     PMEMoid ptr;
     pmemobj_zalloc(pmem_pool, &ptr, size, TOID_TYPE_NUM(char));
