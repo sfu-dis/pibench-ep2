@@ -5,8 +5,8 @@ Mostly working PiBench wrapper for ROART.
 ## Installation
 1. (optional) Configure pool_path and pool_size in Key.h
 2. Set Mode (#define DRAM_MODE if running entirely in dram) in Key.h and util.h
-3. Set allocator (#define ARTPMDK) only when DRAM_MODE is not defined
-make
+3. Toggle allocator (#define ARTPMDK) only when DRAM_MODE is not defined
+4. make
 
 
 ## Important information
