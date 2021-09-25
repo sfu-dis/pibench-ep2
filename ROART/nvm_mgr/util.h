@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+// #define DRAM_MODE
 
 #define MOR __ATOMIC_SEQ_CST
 #define ATM_GET(var) (var)
@@ -64,11 +64,13 @@ static __always_inline uint64_t rdtsc() {
 #define CACHE_ALIGN 64
 
 static void flush_data(void *addr, size_t len) {
+#ifndef DRAM_MODE
     char *end = (char *)(addr) + len;
     char *ptr = (char *)((unsigned long)addr & ~(CACHE_ALIGN - 1));
     for (; ptr < end; ptr += CACHE_ALIGN)
         asm_clwb(ptr);
     asm_mfence();
+#endif
 }
 
 // prefetch instruction

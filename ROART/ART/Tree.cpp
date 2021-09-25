@@ -38,9 +38,14 @@ void *allocate_size(size_t size) {
         alloc_time = new cpuCycleTimer();
     alloc_time->start();
 #endif
+
+#ifdef DRAM_MODE
+    return new (std::align_val_t(64)) char[size];
+#else
     PMEMoid ptr;
     pmemobj_zalloc(pmem_pool, &ptr, size, TOID_TYPE_NUM(char));
     void *addr = (void *)pmemobj_direct(ptr);
+#endif
 
 #ifdef COUNT_ALLOC
     alloc_time->end();
@@ -105,16 +110,13 @@ void *allocate_size(size_t size) {
 
 Tree::Tree() {
     std::cout << "[P-ART]\tnew P-ART\n";
-#ifndef ARTPMDK
-    init_nvm_mgr();
-    register_threadinfo();
-#endif
-    //    Epoch_Mgr * epoch_mgr = new Epoch_Mgr();
-#ifdef ARTPMDK
+//    Epoch_Mgr * epoch_mgr = new Epoch_Mgr();
+#ifdef DRAM_MODE
+    root = new (std::align_val_t(64)) N256(0, {});
+#elif defined(ARTPMDK) 
     const char *layout_name = "DLART";
     if (pool_size == 0)
         std::cout << "[DLART]\tpool size is 0\n";
-        // pool_size = 64LL * 1024 * 1024 * 1024; // 16GB
 
     if (access(pool_path, 0)) {
         pmem_pool = pmemobj_create(pool_path, layout_name, pool_size, 0666);
@@ -132,6 +134,8 @@ Tree::Tree() {
     flush_data((void *)root, sizeof(N256));
 
 #else
+    init_nvm_mgr();
+    register_threadinfo();
     NVMMgr *mgr = get_nvm_mgr();
     if (mgr->first_created) {
         // first open
@@ -142,9 +146,9 @@ Tree::Tree() {
     } else {
         // recovery
         root = reinterpret_cast<N256 *>(mgr->alloc_tree_root());
-#ifdef INSTANT_RESTART
+    #ifdef INSTANT_RESTART
         root->check_generation();
-#endif
+    #endif
         std::cout << "[RECOVERY]\trecovery P-ART and reclaim the memory, root "
                      "addr is "
                   << (uint64_t)root << "\n";

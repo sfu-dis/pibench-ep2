@@ -4,8 +4,8 @@ Mostly working PiBench wrapper for ROART.
 
 ## Installation
 1. (optional) Configure pool_path and pool_size in Key.h
-2. Set allocator (#define ARTPMDK)
-3. 
+2. Set Mode (#define DRAM_MODE if running entirely in dram) in Key.h and util.h
+3. Set allocator (#define ARTPMDK) only when DRAM_MODE is not defined
 make
 
 
@@ -28,3 +28,5 @@ Some modifications are made in order to compile pibench wrapper
 * Modified allocator functions when #ARTPMDK is defined
 * Modified max_threads to 100 in nvm_mgr.h
 * Modified N::key_keylen_lt in N.cpp for little endian machines
+* Added DRAM_MODE in Key.h and util.h
+

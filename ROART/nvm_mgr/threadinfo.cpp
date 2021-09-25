@@ -290,7 +290,7 @@ void *alloc_new_node_from_type(PART_ns::NTypes type) {
         dcmm_time = new cpuCycleTimer();
     dcmm_time->start();
 #endif
-#ifdef ARTPMDK
+#if defined(ARTPMDK) || defined(DRAM_MODE)
     return PART_ns::allocate_size(get_node_size(type));
 #endif
     size_t node_size = size_align(get_node_size(type), 64);
@@ -341,7 +341,7 @@ void register_threadinfo() {
     thread_generation = mgr->get_generation_version();
 #endif
     std::lock_guard<std::mutex> lock_guard(ti_lock);
-#ifdef ARTPMDK
+#if defined(ARTPMDK) || defined(DRAM_MODE)
     if (ti == nullptr)
     {
         ti = new (PART_ns::allocate_size(sizeof(thread_info))) thread_info();
