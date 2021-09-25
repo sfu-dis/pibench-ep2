@@ -1004,6 +1004,21 @@ bool N::key_keylen_lt(char *a, const int alen, char *b, const int blen,
                       const int compare_level) {
     printf("Key a: %llu, Key b: %llu \n", *(uint64_t*)a, *(uint64_t*)b);
     printf("Min length: %d \n", std::min(alen, blen));
+#ifdef KEY_INLINE
+    for (int i = 7; i >= 0; i--) {
+        if (a[i] != b[i]) {
+            printf("Byte of a: %d  Byte of b: %d \n", a[i], b[i]);
+            return a[i] < b[i];
+        }
+    }
+    return false;
+#endif
+    for (int i = compare_level; i < std::min(alen, blen); i++) {
+        if (a[i] != b[i]) {
+            printf("Byte of a: %d  Byte of b: %d \n", a[i], b[i]);
+            return a[i] < b[i];
+        }
+    }
     for (int i = compare_level; i < std::min(alen, blen); i++) {
         if (a[i] != b[i]) {
             printf("Byte of a: %d  Byte of b: %d \n", a[i], b[i]);
