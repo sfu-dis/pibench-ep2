@@ -141,7 +141,7 @@ int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
   roart.lookupRange(&k, &end_k, nullptr, (PART_ns::Leaf**)&results, scan_sz, scanned);
   if (scanned != 100)
     printf("%d records scanned.\n", scanned);
-
+  
   return scanned;
 }
 
