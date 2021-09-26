@@ -10,9 +10,9 @@
 #include <shared_mutex>
 #include <libpmemobj.h>
 
-extern int parallel_merge_worker_num;
+// #define DEBUG_MSG
 
-uint64_t read_anomaly = 0; // debug
+extern int parallel_merge_worker_num;
 
 class dptree_wrapper : public tree_api
 {
@@ -37,14 +37,18 @@ dptree_wrapper::dptree_wrapper()
 
 dptree_wrapper::~dptree_wrapper()
 {
-    printf("Read Anomaly: %llu\n", read_anomaly);
 }
 
 bool dptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 {
     uint64_t v, k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
     if (!dptree.lookup(k, v))
-        read_anomaly ++;
+    {
+#ifdef DEBUG_MSG
+        printf("Key not found!\n");
+#endif
+        return false;
+    }
     v = v >> 1;
     memcpy(value_out, &v, sizeof(v));
     return true;
@@ -81,8 +85,10 @@ int dptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& val
     dptree.scan(k, scan_sz, v);
     values_out = (char*)v.data();
     scan_sz = v.size() / 2;
+#ifdef DEBUG_MSG
     if (scan_sz != 100)
         printf("%d records scanned!\n", scan_sz);
+#endif
     return scan_sz;
 }
 

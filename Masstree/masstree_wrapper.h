@@ -13,6 +13,8 @@
 #include "masstree-beta/masstree_insert.hh"
 #include "masstree-beta/kvthread.hh"
 
+// #define DEBUG_MSG
+
 using namespace Masstree;
 
 class masstree_wrapper : public tree_api
@@ -78,8 +80,11 @@ bool masstree_wrapper::find(const char *key, size_t key_sz, char *value_out)
   bool found = lp.find_unlocked(*ti);
   if (found)
     memcpy(value_out, lp.value()->col(0).s, key_sz);
-  else
+  else{
+#ifdef DEBUG_MSG
     std::cout << "Search Key not found!\n";
+#endif
+  }
   return found;
 }
 
@@ -91,7 +96,11 @@ bool masstree_wrapper::insert(const char *key, size_t key_sz, const char *value,
   Masstree::default_table::cursor_type lp(mt.table(), Str((const char*)&k, key_sz));
   bool found = lp.find_insert(*ti);
   if (found)
+  {
+#ifdef DEBUG_MSG
     std::cout << "Insert Key already exists!\n";
+#endif
+  }
   else
     lp.value() = row_type::create1(Str(value, value_sz), 2, *ti);
   lp.finish(1, *ti);
@@ -106,7 +115,11 @@ bool masstree_wrapper::update(const char *key, size_t key_sz, const char *value,
   Masstree::default_table::cursor_type lp(mt.table(), Str((const char*)&k, key_sz));
   bool found = lp.find_insert(*ti);
   if (!found)
+  {
+#ifdef DEBUG_MSG
     std::cout << "Update Key does not exist!\n";
+#endif
+  }
   else
     lp.value()->deallocate_rcu(*ti);
   lp.value() = row_type::create1(Str(value, value_sz), 2, *ti);
@@ -121,8 +134,10 @@ bool masstree_wrapper::remove(const char *key, size_t key_sz)
   swap_endian(k);
   Masstree::default_table::cursor_type lp(mt.table(), Str((const char*)&k, key_sz));
   bool found = lp.find_locked(*ti);
-  // if (!found)
-  //   std::cout << "Delete Key does not exist!\n";
+#ifdef DEBUG_MSG
+  if (!found)
+    std::cout << "Delete Key does not exist!\n";
+#endif
   lp.finish(-1, *ti);
   return found;
 }
@@ -162,7 +177,10 @@ int masstree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&v
   scanner s(values_out, scan_sz, key_sz, key_sz);
 
   scanned = mt.table().scan(Str((const char*)&k, key_sz), true, s, *ti);
-
+#ifdef DEBUG_MSG
+  if (scanned != 100)
+    printf("%d records scanned.\n", scanned);
+#endif
   return scanned;
 }
 

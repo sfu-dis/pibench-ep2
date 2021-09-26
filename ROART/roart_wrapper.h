@@ -4,6 +4,8 @@
 #include "threadinfo.h"
 #include <sys/types.h>
 
+// #define DEBUG_MSG
+
 using namespace PART_ns;
 
 class roart_wrapper : public tree_api
@@ -58,7 +60,9 @@ bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
     memcpy(value_out, leaf->GetValue(), key_sz);
     return true;
   }
+#ifdef DEBUG_MSG
   std::cout << "Key not found!\n";
+#endif 
   return false;
 }
 
@@ -71,16 +75,12 @@ bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, si
   Key k;
   k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
 #endif
-// #ifdef KEY_INLINE
-//   Key* k = new Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
-// #else
-//   Key* k = new Key();
-//   k->Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
-// #endif
   Tree::OperationResults result = roart.insert(&k);
   if (result != Tree::OperationResults::Success)
   {
+#ifdef DEBUG_MSG
     std::cout << "Insert failed!\n";
+#endif
     return false;
   }
   return true;
@@ -98,7 +98,9 @@ bool roart_wrapper::update(const char *key, size_t key_sz, const char *value, si
   Tree::OperationResults result = roart.update(&k);
   if (result != Tree::OperationResults::Success)
   {
+#ifdef DEBUG_MSG
     std::cout << "Update failed!\n";
+#endif
     return false;
   }
   return true;
@@ -116,7 +118,9 @@ bool roart_wrapper::remove(const char *key, size_t key_sz)
   Tree::OperationResults result = roart.remove(&k);
   if (result != Tree::OperationResults::Success)
   {
-    // std::cout << "Remove failed!\n";
+#ifdef DEBUG_MSG
+    std::cout << "Remove failed!\n";
+#endif
     return false;
   }
   return true;
@@ -139,8 +143,10 @@ int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
   end_k.init((char*)&max, key_sz, (char*)&max, key_sz);
 #endif
   roart.lookupRange(&k, &end_k, nullptr, (PART_ns::Leaf**)&results, scan_sz, scanned);
-  // if (scanned != 100)
-    // printf("%d records scanned.\n", scanned);
+#ifdef DEBUG_MSG
+  if (scanned != 100)
+    printf("%d records scanned.\n", scanned);
+#endif
   
   return scanned;
 }
