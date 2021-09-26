@@ -4,6 +4,8 @@
 #include <thread>
 #include <sys/types.h>
 
+// #define DEBUG_MSG
+
 auto num_bulkloaded = 1ll;
 float bfill = 1.0;
 class lbtree_wrapper : public tree_api
@@ -121,6 +123,9 @@ bool lbtree_wrapper::find(const char *key, size_t key_sz, char *value_out)
     memcpy(value_out, &recptr, ITEM_SIZE);
     return true;
   }
+#ifdef DEBUG_MSG
+  printf("Search key not found!\n");
+#endif
   return false;
 }
 
@@ -142,6 +147,9 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
   p = lbt->lookup(PBkeyToLB(key), &pos);
   if (pos >= 0)
   {
+#ifdef DEBUG_MSG
+    printf("Update key not found!\n");
+#endif
     return false;
   }
   void *recptr = lbt->get_recptr(p, pos);
@@ -174,7 +182,9 @@ int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&val
   // //FIXME
   values_out = results;
   int scanned = lbt->rangeScan(PBkeyToLB(key), scan_sz, results); // range_scan_by_size
-  // if (scanned != 100)
-  //   printf("Scanned %d\n", scanned);
+#ifdef DEBUG_MSG
+  if (scanned != 100)
+    printf("%d records scanned\n", scanned);
+#endif
   return scanned;
 }

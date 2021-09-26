@@ -2,6 +2,8 @@
 #include "utree.h"
 #include <sys/types.h>
 
+// #define DEBUG_MSG
+
 class utree_wrapper : public tree_api
 {
 public:
@@ -35,7 +37,9 @@ bool utree_wrapper::find(const char *key, size_t key_sz, char *value_out)
     memcpy(value_out, &value, key_sz);
     return true;
   }
+#ifdef DEBUG_MSG
   std::cout << "Key not found!\n";
+#endif
   return false;
 }
 
@@ -62,5 +66,10 @@ int utree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
 {
   constexpr size_t ONE_MB = 1ULL << 20;
   static thread_local char results[ONE_MB];
-  return utree.scan(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), scan_sz, results);
+  int scanned = utree.scan(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), scan_sz, results);
+#ifdef DEBUG_MSG
+  if (scanned != 100)
+    printf("%d records scanned\n", scanned);
+#endif
+  return 
 }

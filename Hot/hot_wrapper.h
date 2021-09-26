@@ -4,6 +4,7 @@
 #include <idx/contenthelpers/OptionalValue.hpp>
 #include "tree_api.hpp"
 
+// #define DEBUG_MSG
 
 struct KV {
   uint64_t key;
@@ -66,8 +67,12 @@ bool hot_wrapper::find(const char *key, size_t key_sz, char *value_out)
   idx::contenthelpers::OptionalValue<KV*> ret = hot.lookup(k);
   if (ret.mIsValid)
     memcpy(value_out, &ret.mValue->value, key_sz);
-  // else
-  //   printf("Key not found %llu \n", k);
+  else
+  {
+#ifdef DEBUG_MSG
+    printf("Key not found %llu \n", k);
+#endif
+  }
   return ret.mIsValid;
 }
 
@@ -78,8 +83,10 @@ bool hot_wrapper::insert(const char *key, size_t key_sz, const char *value, size
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   records.emplace_back(k, v);
   bool ret = hot.insert(&records.back());
-  // if (!ret)
-  //   printf("Insert failed, Key %llu  Value %llu \n", k, v);
+#ifdef DEBUG_MSG
+  if (!ret)
+    printf("Insert failed, Key %llu  Value %llu \n", k, v);
+#endif
   return ret;
 }
 
@@ -90,8 +97,10 @@ bool hot_wrapper::update(const char *key, size_t key_sz, const char *value, size
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   records.emplace_back(k, v);
   idx::contenthelpers::OptionalValue<KV*> ret = hot.upsert(&records.back());
-  // if (!ret.mIsValid)
-  //   printf("Update failed, Key %llu  Value %llu \n", k, v);
+#ifdef DEBUG_MSG
+  if (!ret.mIsValid)
+    printf("Update failed, Key %llu  Value %llu \n", k, v);
+#endif
   return ret.mIsValid;
 }
 
@@ -119,7 +128,9 @@ int hot_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&values
     ++scanned;
     ++iterator;
   }
-  // if (scanned != 100)
-  //   printf("Scanned: %d\n", scanned);
+#ifdef DEBUG_MSG
+  if (scanned != 100)
+    printf("Scanned: %d\n", scanned);
+#endif
   return scanned;
 }
