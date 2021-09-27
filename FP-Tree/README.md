@@ -1,64 +1,22 @@
-# FPTree
-An open-source [FPTree](https://wwwdb.inf.tu-dresden.de/misc/papers/2016/Oukid_FPTree.pdf) implementation
+# FP+-Tree PiBench Wrapper
 
-```
-I. Oukid, J. Lasperas, A. Nica, T. Willhalm, and W. Lehner. FPTree: A Hybrid SCM-DRAM Persistent and Concurrent B-Tree for Storage Class Memory. 
-In Proceedings of the 2016 International Conference on Management of Data, SIGMOD’16, pages 371–386. ACM, 2016
-```
+## Installation
+1. To achieve better scalability, we are using customly built tbb library for FP-Tree
+(which is also the approach taken by original author). Here are the steps to generate libtbb.so:
+	a. Clone oneTBB from github (https://github.com/oneapi-src/oneTBB.git)
+	b. Modify the read/write retry from 10 to 256 in oneTBB/src/tbb/rtm_mutex.cpp and oneTBB/src/tbb/rtm_rw_mutex.cpp
+	c. cd oneTBB & mkdir build & cd build & cmake .. & make -j N
+	d. check that libtbb.so exists in oneTBB/build/gnu_11.1_cxx11_64_release
+1. mkdir build
+2. cd build
+3. cmake -DPMEM_BACKEND=${BACKEND} -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. // BACKEND = DRAM/PMEM
+4. make
 
-## Build
+## Important information
+This repo contains source code from https://github.com/sfu-dis/fptree.git
+commit 98c25fa65070fe188ec4ae163e8b440c00cceaaf
 
-### Build PMEM Version
+Some modifications are made to compile pibench wrapper
 
-```bash
-mkdir build & cd build
-cmake -DPMEM_BACKEND=PMEM ..
-```
-
-### Build DRAM Version
-
-```bash
-mkdir build & cd build
-cmake -DPMEM_BACKEND=DRAM ..
-```
-
-All executables are in `build/src` folder
-
-#### Interative executable
-Above command help you build `fptree` executable
-
-It will pre-load 100 keys and then let you play with
-
-```Enter the key to insert, delete or update (-1):```
-
-Enter `exit` to leave the program and then it will perform the scan operation from the header leaf node
-
-#### Inspector executable
-```bash
-mkdir build & cd build
-cmake -DPMEM_BACKEND=${BACKEND} -DBUILD_INSPECTOR=1 ..
-```
-
-Run `inspector` to check the correctness of single/multi-threaded insert, delete operations for both leaf nodes and inner nodes 
-
-If you want to check performance of this implementation, please see PiBench instruction below 
-
-#### Other build options
-`-DBUILD_INSPECTOR=1` to build inspector executable which can check the correctness of single/multi-threaded operations (insert, delete..)
-
-`-DTEST_MODE=1` to set the size of leaf nodes & inner nodes. (TEST MODE: MAX_INNER_SIZE=3 MAX_LEAF_SIZE=4 for debug usage)
-
-`-DNDEBUG=1` to disable the assertion statements (set to 0 for debug usage)
-
-## Benchmark on PiBench
-
-We officially support FPTree wrapper for pibench:
-
-Checkout PiBench here: https://github.com/wangtzh/pibench
-
-### Build/Create FPTree shared lib
-
-```bash
-mkdir Release & cd Release
-cmake -DPMEM_BACKEND=${BACKEND} -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 ..
-```
+1. Modified CMakeLists.txt to use custom tbb (with # retries increased to 256)
+2. Changed header files in fptree.h to include those from custom tbb

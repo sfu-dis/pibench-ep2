@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++17 -lpmem -lpmemobj -ljemalloc -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -ltbb -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17 -lpmem -lpmemobj -ljemalloc -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -pthread")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
@@ -55,25 +55,29 @@ if(${BUILD_INSPECTOR})
   )
 else()
   message(STATUS "BUILD_INSPECTOR: not defined")
-  add_executable(
-    fptree
-    fptree.cpp
-    fptree.h
-  )
+  #add_executable(
+  #  fptree
+  #  fptree.cpp
+  #  fptree.h
+  #)
 endif()
 
 ##################### PiBench #########################
 FetchContent_Declare(
-        pibench 
+        pibench
         GIT_REPOSITORY https://github.com/sfu-dis/pibench.git
-        GIT_TAG master 
+        GIT_TAG master
 )
 if (NOT pibench_POPULATED)
   FetchContent_Populate(pibench)
   include_directories(${pibench_SOURCE_DIR}/include)
 endif ()
 
+link_directories(oneTBB/build/gnu_11.1_cxx11_64_release)
+include_directories(/mnt/pmem0/georgehe/oneTBB/include)
+
 
 add_library(fptree_pibench_wrapper SHARED fptree_wrapper.cpp
-						fptree.cpp)
+                                                fptree.cpp)
 
+target_link_libraries(fptree_pibench_wrapper libtbb.so)
