@@ -106,6 +106,7 @@ do
 	for i in 1 2 # 2 trials
 	do
 		echo "${command}"
+		echo -e "\n${command}\n" >> file
 		eval "${command}"
 		sleep 1
 		if [ "${pool_name}" != "" ]; then
