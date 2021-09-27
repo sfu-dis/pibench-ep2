@@ -33,8 +33,8 @@ using entry_key_t = uint64_t; //int64_t; // key type
 
 pthread_mutex_t print_mtx;
 
-const uint64_t SPACE_PER_THREAD = 1ULL * 1024ULL * 1024ULL * 1024ULL;
-const uint64_t SPACE_OF_MAIN_THREAD = 1ULL * 1024ULL * 1024ULL * 1024ULL;
+// const uint64_t SPACE_PER_THREAD = 1ULL * 1024ULL * 1024ULL * 1024ULL;
+// const uint64_t SPACE_OF_MAIN_THREAD = 1ULL * 1024ULL * 1024ULL * 1024ULL;
 // extern __thread char *start_addr;
 // extern __thread char *curr_addr;
 

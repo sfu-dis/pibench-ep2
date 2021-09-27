@@ -36,7 +36,7 @@ private:
   hot::rowex::HOTRowex<KV*, KeyExtractor> hot;
 };
 
-static thread_local std::vector<KV> records;
+// static thread_local std::vector<KV> records;
 
 static const uint64_t offset = (1ull << 63ull) - 1ull;
 
@@ -45,10 +45,10 @@ struct InsertHelper
   InsertHelper()
   {
     int id = omp_get_thread_num();
-    if (id == 0)
-      records.reserve(150000000u); // load thread needs more memory to hold 100M index + 50M insert ops
-    else
-      records.reserve(50000000u);
+    // if (id == 0)
+    //   records.reserve(150000000u); // load thread needs more memory to hold 100M index + 50M insert ops
+    // else
+    //   records.reserve(50000000u);
   }
   ~InsertHelper() {}
 };
@@ -81,8 +81,9 @@ bool hot_wrapper::insert(const char *key, size_t key_sz, const char *value, size
   thread_local InsertHelper i;
   uint64_t k = *reinterpret_cast<const uint64_t*>(key) & offset; // at most 63 bits can be embedded into the index
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
-  records.emplace_back(k, v);
-  bool ret = hot.insert(&records.back());
+  // records.emplace_back(k, v);
+  KV* record = new KV(k, v)
+  bool ret = hot.insert(record);
 #ifdef DEBUG_MSG
   if (!ret)
     printf("Insert failed, Key %llu  Value %llu \n", k, v);
@@ -95,8 +96,9 @@ bool hot_wrapper::update(const char *key, size_t key_sz, const char *value, size
   thread_local InsertHelper i;
   uint64_t k = *reinterpret_cast<const uint64_t*>(key) & offset; // at most 63 bits can be embedded into the index
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
-  records.emplace_back(k, v);
-  idx::contenthelpers::OptionalValue<KV*> ret = hot.upsert(&records.back());
+  // records.emplace_back(k, v);
+  KV* record = new KV(k, v)
+  idx::contenthelpers::OptionalValue<KV*> ret = hot.upsert(record);
 #ifdef DEBUG_MSG
   if (!ret.mIsValid)
     printf("Update failed, Key %llu  Value %llu \n", k, v);

@@ -6,7 +6,7 @@ PiBench wrapper for Masstree.
 ```bash
 cd masstree-beta 
 ./bootstrap.sh    
-./configure --disable-assertions --with-malloc=<jemalloc|tcmalloc|flow|hoard>   
+./configure --disable-assertions --with-malloc=jemalloc
 make
 ```
 

@@ -19,12 +19,9 @@ make
 of every key is cleared before insertion (see offset in wrapper.h)
 2. Since hot only stores the pointer to entire record. The key/value struct 
 needs to be in scope until benchmark finishes. The current approach is to 
-reserve a large vector for insert & update threads (see InsertHelper)
-Loading thread can hold up to 150M records and other insert/update thread can
-hold 50M records. Tune these parameters to suit your benchmark.
+create new record on heap upon insert/update.
 3. Current version of HOT using ROWEX does not support delete operation
-4. The Scan operation in hot may not be thread-safe
 
 ## This repo contains souce code from https://github.com/speedskater/hot.git
 The following modifications are made in order to compile the pibench wrapper
-1. Modified CMakeLists.txt in hot/ to include libhot_wrapper
+1. Modified CMakeLists.txt to include libhot_wrapper
