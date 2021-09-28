@@ -10,7 +10,7 @@ CFLAGS=-g -ljemalloc -std=c++17 -pthread -mrtm -msse4.1 -mavx2 -Wall -O3
 #CFLAGS=-g -std=c++17 -pthread -msse4.1 -mavx2 -Wall -O3 -fsanitize=undefined,implicit-conversion,nullability,float-divide-by-zero,unsigned-integer-overflow,bounds,bool
 
 INCLUDE=-I./common
-LIB=-lpmem
+LIB=-lpmem -lpmemobj -ltbb
 
 COMMON_DEPENDS= ./common/tree_api.hpp ./common/lbtree.h ./common/lbtree.cc ./common/tree.h ./common/tree.cc ./common/keyinput.h ./common/mempool.h ./common/mempool.cc ./common/nodepref.h ./common/nvm-common.h ./common/nvm-common.cc ./common/performance.h
 COMMON_SOURCES= ./common/lbtree.cc ./common/tree.cc ./common/mempool.cc ./common/nvm-common.cc
