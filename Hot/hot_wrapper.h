@@ -82,7 +82,7 @@ bool hot_wrapper::insert(const char *key, size_t key_sz, const char *value, size
   uint64_t k = *reinterpret_cast<const uint64_t*>(key) & offset; // at most 63 bits can be embedded into the index
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   // records.emplace_back(k, v);
-  KV* record = new KV(k, v)
+  KV* record = new KV(k, v);
   bool ret = hot.insert(record);
 #ifdef DEBUG_MSG
   if (!ret)
@@ -97,7 +97,7 @@ bool hot_wrapper::update(const char *key, size_t key_sz, const char *value, size
   uint64_t k = *reinterpret_cast<const uint64_t*>(key) & offset; // at most 63 bits can be embedded into the index
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   // records.emplace_back(k, v);
-  KV* record = new KV(k, v)
+  KV* record = new KV(k, v);
   idx::contenthelpers::OptionalValue<KV*> ret = hot.upsert(record);
 #ifdef DEBUG_MSG
   if (!ret.mIsValid)
