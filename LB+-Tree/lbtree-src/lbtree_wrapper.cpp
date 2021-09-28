@@ -8,7 +8,7 @@ extern "C" tree_api *create_tree(const tree_options_t &opt)
 #ifdef TSX_FAKE
   puts("Using Faked TSX Instructions! Multithreaded not valid");
 #endif
-  long long mempool_size = (long long)6 * (long long)1024 * (long long)MB; // 6 GB for inner nodes
+  long long mempool_size = (long long)16 * (long long)1024 * (long long)MB; // 16 GB for inner nodes
   if (const char *env_p = std::getenv("MEMPOOL"))
   {
     mempool_size = atoll(env_p);
@@ -16,7 +16,7 @@ extern "C" tree_api *create_tree(const tree_options_t &opt)
   initUseful();
   worker_id = 0;
   worker_thread_num = opt.num_threads;
-  long long nvmpool_size = (opt.pool_size == 0) ? (long long)14 * (long long)1024 * (long long)MB : opt.pool_size; // 14 for leaves
+  long long nvmpool_size = (opt.pool_size == 0) ? (long long)32 * (long long)1024 * (long long)MB : opt.pool_size; // 32 for leaves
   if (const char *env_p = std::getenv("NVMSIZE"))
   {
     nvmpool_size = atoll(env_p);

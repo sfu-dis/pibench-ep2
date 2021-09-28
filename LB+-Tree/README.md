@@ -2,8 +2,9 @@
 
 ## Installation
 1. First configure allocation scheme in mempool.h (#define PMEM, #define POOL)
-2. (Optional) Set the weak isolation fix type in lbtree.h (NONTEMP or UNLOCK_AFTER, the later is the default)
-3. make
+2. Modify mempool and nvmpool size in lbtree_wrapper.cpp if necessary (Only if running in PMEM)
+3. (Optional) Set the weak isolation fix type in lbtree.h (NONTEMP or UNLOCK_AFTER, the later is the default)
+4. make
 
 ## Important information
 This repo contains source code from https://github.com/schencoding/lbtree
