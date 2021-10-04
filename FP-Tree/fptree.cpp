@@ -51,7 +51,13 @@ InnerNode::InnerNode(const InnerNode& inner)
 
 InnerNode::~InnerNode()
 {
-    for (size_t i = 0; i < this->nKey; i++) { delete this->p_children[i]; }
+    for (size_t i = 0; i < this->nKey; i++) { 
+    #ifdef POOL
+        mempool_free(this->p_children[i]);
+    #else
+        delete this->p_children[i];
+    #endif
+    }
 }
 
 #ifndef PMEM
@@ -257,7 +263,11 @@ FPtree::~FPtree()
         pmemobj_close(pop);
     #else
         if (root != nullptr)
+        #ifdef POOL
+            mempool_free(root);
+        #else
             delete root;
+        #endif
     #endif  
 }
 
@@ -447,7 +457,11 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
         lock_split.acquire(speculative_lock);
         if (!root->isInnerNode) // splitting when tree has only root 
         {
+        #ifdef POOL
+            cur = new (mempool_alloc(sizeof(InnerNode))) InnerNode();
+        #else
             cur = new InnerNode();
+        #endif
             cur->init(splitKey, reachedLeafNode, newLeafNode);
             root = cur;
         }
@@ -475,7 +489,11 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
                 }
                 else 
                 {
+                #ifdef POOL
+                    newInnerNode = new (mempool_alloc(sizeof(InnerNode))) InnerNode();
+                #else
                     newInnerNode = new InnerNode();
+                #endif
                     parent->nKey = mid;
                     if (insert_pos != mid)
                     {
@@ -499,7 +517,11 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
                     splitKey = new_splitKey;
                     if (parent == root)
                     {
+                    #ifdef POOL
+                        cur = new (mempool_alloc(sizeof(InnerNode))) InnerNode(splitKey, parent, newInnerNode);
+                    #else
                         cur = new InnerNode(splitKey, parent, newInnerNode);
+                    #endif
                         root = cur;
                         break;
                     }
@@ -529,7 +551,11 @@ void FPtree::updateParents(uint64_t splitKey, InnerNode* parent, BaseNode* child
         }
         else 
         {
+        #ifdef POOL
+            InnerNode* newInnerNode = new (mempool_alloc(sizeof(InnerNode))) InnerNode();
+        #else
             InnerNode* newInnerNode = new InnerNode();
+        #endif
             insert_pos = std::lower_bound(parent->keys, parent->keys + MAX_INNER_SIZE, splitKey) - parent->keys;
 
             if (insert_pos < mid) {  // insert into parent node
@@ -561,7 +587,11 @@ void FPtree::updateParents(uint64_t splitKey, InnerNode* parent, BaseNode* child
 
             if (parent == root)
             {
+            #ifdef POOL
+                root = new (mempool_alloc(sizeof(InnerNode))) InnerNode(splitKey, parent, newInnerNode);
+            #else
                 root = new InnerNode(splitKey, parent, newInnerNode);
+            #endif
                 return;
             }
             parent = stack_innerNodes.pop();
@@ -619,7 +649,11 @@ bool FPtree::insert(struct KV kv)
                 pmemobj_persist(pop, &D_RO(ListHead)->head, sizeof(D_RO(ListHead)->head));
                 root = (struct BaseNode *) pmemobj_direct((*dst).oid);
             #else
-                root = new LeafNode();
+                #ifdef POOL
+                    root = new (mempool_alloc(sizeof(LeafNode))) LeafNode();
+                #else
+                    root = new LeafNode();
+                #endif
                 reinterpret_cast<LeafNode*>(root)->lock = 1;
                 reinterpret_cast<LeafNode*> (root)->addKV(kv);
                 reinterpret_cast<LeafNode*>(root)->lock = 0;
@@ -714,7 +748,11 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
         pmemobj_persist(pop, &(log->PLeaf), SIZE_PMEM_POINTER);
         splitLogQueue.push(log);
     #else
-        LeafNode* newLeafNode = new LeafNode(*leaf);
+        #ifdef POOL
+            LeafNode* newLeafNode = new (mempool_alloc(sizeof(LeafNode))) LeafNode(*leaf);
+        #else
+            LeafNode* newLeafNode = new LeafNode(*leaf);
+        #endif
 
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {
@@ -833,7 +871,11 @@ void FPtree::removeLeafAndMergeInnerNodes(short i, short indexNode_level)
         {
             temp = reinterpret_cast<InnerNode*> (root);
             root = parent->p_children[0];
+        #ifdef POOL
+            mempool_free(temp);
+        #else
             delete temp;
+        #endif
             break;         
         }
         parent = inners[--i];
@@ -850,13 +892,21 @@ void FPtree::removeLeafAndMergeInnerNodes(short i, short indexNode_level)
             if (left->nKey == 0)
             {
                 right->addKey(0, parent->keys[left_idx], left->p_children[0], false);
+            #ifdef POOL
+                mempool_free(left);
+            #else
                 delete left;
+            #endif
                 parent->removeKey(left_idx, false);
             }
             else
             {
                 left->addKey(left->nKey, parent->keys[left_idx], right->p_children[0]);
+            #ifdef POOL
+                mempool_free(right);
+            #else
                 delete right;
+            #endif
                 parent->removeKey(left_idx);
             }
         }
@@ -996,7 +1046,11 @@ bool FPtree::deleteKey(uint64_t key)
             }
             else if (!parent)
                 root = nullptr;
-            delete leaf;
+            #ifdef POOL
+                mempool_free(leaf);
+            #else
+                delete leaf;
+            #endif
         #endif
     }
     return decision != Result::NotFound;
@@ -1223,7 +1277,11 @@ uint64_t FPtree::rangeScan(uint64_t key, uint64_t scan_size, char* result)
         total_leaves = min_keys.size();
         min_keys.erase(min_keys.begin());
 
+    #ifdef POOL
+        InnerNode* new_root = new (mempool_alloc(sizeof(InnerNode))) InnerNode();
+    #else
         InnerNode* new_root = new InnerNode();
+    #endif
         uint64_t idx = 0;
         uint64_t root_size = total_leaves <= MAX_INNER_SIZE ? 
                              total_leaves : MAX_INNER_SIZE + 1;
