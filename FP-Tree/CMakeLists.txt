@@ -78,6 +78,7 @@ include_directories(/mnt/pmem0/georgehe/oneTBB/include)
 
 
 add_library(fptree_pibench_wrapper SHARED fptree_wrapper.cpp
-                                                fptree.cpp)
+                                                fptree.cpp
+                                                mempool.cc)
 
 target_link_libraries(fptree_pibench_wrapper libtbb.so)

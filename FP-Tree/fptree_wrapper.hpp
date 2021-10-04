@@ -27,6 +27,19 @@ private:
     FPtree tree_;
 };
 
+struct ThreadHelper
+{
+  int id_ = -1;
+  ThreadHelper()
+  {
+    if (worker_id < 0)
+      id_ = omp_get_thread_num();
+    worker_id = id_;
+  }
+  ~ThreadHelper()
+  {
+  }
+};
 
 fptree_wrapper::fptree_wrapper()
 {
@@ -38,6 +51,9 @@ fptree_wrapper::~fptree_wrapper()
 
 bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 {
+#ifdef POOL
+    ThreadHelper t;
+#endif
     // For now only support 8 bytes key and value (uint64_t)
     uint64_t value = tree_.find(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)));
     if (value == 0)
@@ -54,6 +70,9 @@ bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 
 bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
+#ifdef POOL
+    ThreadHelper t;
+#endif
     KV kv = KV(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
     if (!tree_.insert(kv))
     {
@@ -67,6 +86,9 @@ bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, s
 
 bool fptree_wrapper::update(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
+#ifdef POOL
+    ThreadHelper t;
+#endif
     KV kv = KV(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
     if (!tree_.update(kv))
     {
@@ -80,6 +102,9 @@ bool fptree_wrapper::update(const char* key, size_t key_sz, const char* value, s
 
 bool fptree_wrapper::remove(const char* key, size_t key_sz)
 {
+#ifdef POOL
+    ThreadHelper t;
+#endif
     if (!tree_.deleteKey(*reinterpret_cast<uint64_t*>(const_cast<char*>(key))))
     {
 #ifdef DEBUG_MSG
@@ -92,6 +117,9 @@ bool fptree_wrapper::remove(const char* key, size_t key_sz)
 
 int fptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& values_out)
 {
+#ifdef POOL
+    ThreadHelper t;
+#endif
     constexpr size_t ONE_MB = 1ULL << 20;
     static thread_local char results[ONE_MB];
     int scanned = tree_.rangeScan(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), (uint64_t)scan_sz, results);
