@@ -4,6 +4,7 @@
 #include "tree_api.hpp"
 #include "fptree.h"
 
+#include <omp.h>
 #include <cstring>
 #include <mutex>
 #include <shared_mutex>
@@ -41,6 +42,8 @@ struct ThreadHelper
   }
 };
 
+extern thread_local int worker_id;
+
 fptree_wrapper::fptree_wrapper()
 {
 }
@@ -52,7 +55,7 @@ fptree_wrapper::~fptree_wrapper()
 bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 {
 #ifdef POOL
-    ThreadHelper t;
+    thread_local ThreadHelper t;
 #endif
     // For now only support 8 bytes key and value (uint64_t)
     uint64_t value = tree_.find(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)));
@@ -71,7 +74,7 @@ bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
 #ifdef POOL
-    ThreadHelper t;
+    thread_local ThreadHelper t;
 #endif
     KV kv = KV(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
     if (!tree_.insert(kv))
@@ -87,7 +90,7 @@ bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, s
 bool fptree_wrapper::update(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
 #ifdef POOL
-    ThreadHelper t;
+    thread_local ThreadHelper t;
 #endif
     KV kv = KV(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
     if (!tree_.update(kv))
@@ -103,7 +106,7 @@ bool fptree_wrapper::update(const char* key, size_t key_sz, const char* value, s
 bool fptree_wrapper::remove(const char* key, size_t key_sz)
 {
 #ifdef POOL
-    ThreadHelper t;
+    thread_local ThreadHelper t;
 #endif
     if (!tree_.deleteKey(*reinterpret_cast<uint64_t*>(const_cast<char*>(key))))
     {
@@ -118,7 +121,7 @@ bool fptree_wrapper::remove(const char* key, size_t key_sz)
 int fptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& values_out)
 {
 #ifdef POOL
-    ThreadHelper t;
+    thread_local ThreadHelper t;
 #endif
     constexpr size_t ONE_MB = 1ULL << 20;
     static thread_local char results[ONE_MB];

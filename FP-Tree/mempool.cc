@@ -78,7 +78,7 @@ void threadMemPools::print(void)
     for (int i = 0; i < tm_num_workers; i++)
     {
         tm_pools[i].print_params();
-        tm_pools[i].print_free_nodes();
+        // tm_pools[i].print_free_nodes();
         printf("--------------------\n");
     }
 }
