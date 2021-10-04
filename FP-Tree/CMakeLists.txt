@@ -44,6 +44,13 @@ else()
   message(STATUS "NDEBUG: not defined")
 endif()
 
+if(${POOL})
+  add_definitions(-DPOOL)
+  message(STATUS "POOL: defined")
+else()
+  message(STATUS "POOL: not defined")
+endif()
+
 if(${BUILD_INSPECTOR})
   add_definitions(-DBUILD_INSPECTOR)
   message(STATUS "BUILD_INSPECTOR: defined")
