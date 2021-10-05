@@ -5,7 +5,7 @@
 #include <cstring>
 #include <memory>
 #include <stdint.h>
-#include "mempool.h"
+#include "../mempool.h"
 
 static const char * pool_path = "./pool.data";
 static const long long pool_size = 64LL * 1024 * 1024 * 1024; // default 64GB
