@@ -18,6 +18,10 @@ extern "C" tree_api *create_tree(const tree_options_t &opt)
   // }
   // if (*path_ptr == "")
   //   path_ptr->assign("./pool"); // default pool path
+#ifdef POOL
+  worker_id = 0;
+  the_thread_mempools.init(opt.num_threads, pool_size, 64);
+#endif
 
   return new roart_wrapper();
 }

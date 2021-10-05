@@ -33,9 +33,9 @@ struct ThreadHelper
   int id_ = -1;
   ThreadHelper()
   {
-    if (worker_id < 0)
-      id_ = omp_get_thread_num();
+    id_ = omp_get_thread_num();
     worker_id = id_;
+    // printf("ThreadHelper %d created\n", id_);
   }
   ~ThreadHelper()
   {

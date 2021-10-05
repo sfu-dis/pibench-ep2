@@ -1,4 +1,4 @@
-// #include <omp.h>
+#include <omp.h>
 #include "tree_api.hpp"
 #include "Tree.h"
 #include "threadinfo.h"
@@ -26,8 +26,11 @@ private:
 
 struct ThreadHelper
 {
+  int id_;
   ThreadHelper()
   {
+    id_ = omp_get_thread_num();
+    worker_id = id_;
     NVMMgr_ns::register_threadinfo();
   }
   ~ThreadHelper()
@@ -35,6 +38,8 @@ struct ThreadHelper
     // NVMMgr_ns::unregister_threadinfo();
   }
 };
+
+extern thread_local int worker_id;
 
 roart_wrapper::roart_wrapper()
 {
