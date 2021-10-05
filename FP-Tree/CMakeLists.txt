@@ -77,8 +77,8 @@ if (NOT pibench_POPULATED)
   include_directories(${pibench_SOURCE_DIR}/include)
 endif ()
 
-link_directories(/home/khuang/projects/oneTBB/build/gnu_11.1_cxx11_64_release)
-include_directories(/home/khuang/projects/oneTBB/include)
+link_directories(/home/$USER/projects/oneTBB/build/gnu_11.1_cxx11_64_release)
+include_directories(/home/$USER/projects/oneTBB/include)
 
 
 add_library(fptree_pibench_wrapper SHARED fptree_wrapper.cpp
