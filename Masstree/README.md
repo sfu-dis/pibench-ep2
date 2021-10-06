@@ -4,6 +4,7 @@ PiBench wrapper for Masstree.
 
 ## Installation
 ```bash
+#if wish to use thread-local mempool, add CPPFLAGS += -DPOOL in GNUmakefile.in
 cd masstree-beta 
 ./bootstrap.sh    
 ./configure --disable-assertions --with-malloc=jemalloc

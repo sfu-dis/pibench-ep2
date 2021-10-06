@@ -34,7 +34,7 @@ all: libmasstree_wrapper
 
 libmasstree_wrapper:
 	$(CXX) -o libmasstree_wrapper.so $(CXXFLAGS) -fPIC -shared -I./ \
-	../masstree_wrapper.cpp straccum.cc string.cc compiler.cc kvthread.cc ../mempool.cc\
+	../masstree_wrapper.cpp straccum.cc string.cc compiler.cc kvthread.cc ../mempool.cc \
 	$(MEMMGR) $(LDFLAGS) $(LIBS)
 
 libjson.a: json.o string.o straccum.o str.o msgpack.o \
