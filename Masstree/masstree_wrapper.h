@@ -47,6 +47,7 @@ struct ThreadHelper
     if (masstree_wrapper::ti == nullptr)
     {
       int id = omp_get_thread_num();
+      worker_id = id;
       if (id == 0)
         masstree_wrapper::ti = main_threadinfo;
       else
@@ -58,6 +59,7 @@ struct ThreadHelper
   }
 };
 
+extern thread_local int worker_id;
 
 masstree_wrapper::masstree_wrapper()
 {

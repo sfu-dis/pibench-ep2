@@ -8,7 +8,7 @@
 	c. cd oneTBB & mkdir build & cd build & cmake -DCMAKE_BUILD_TYPE=Release .. & make -j N
 	d. check that libtbb.so exists in oneTBB/build/gnu_11.1_cxx11_64_release
 2. `$ cd FP-Tree & mkdir build & cd build`
-3. `$ cmake -DPMEM_BACKEND=${BACKEND} -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. # BACKEND = DRAM/PMEM`
+3. `$ cmake -DPMEM_BACKEND=${BACKEND} -DPOOL=${MEMPOOL} -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. # BACKEND = DRAM/PMEM  MEMPOOL should be 0 when BACKEND = PMEM, can be 0/1 when BACKEND = DRAM`
 4. `$ make`
 
 ## Important information

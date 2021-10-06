@@ -18,6 +18,7 @@
 #include "compiler.hh"
 #include "str.hh"
 #include "ksearch.hh"
+#include "../mempool.h"
 
 namespace Masstree {
 using lcdf::Str;

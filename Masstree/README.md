@@ -17,3 +17,4 @@ The following modifications are made in order to compile the pibench wrappers
 
 1. Added #include "config.h" at top of compiler.hh file 
 2. Modified GNUMakefile.in to include libmasstree_wrapper
+3. Included customized dram mempool in masstree.hh

@@ -156,7 +156,11 @@ struct logrec_kvdelta {
 logset* logset::make(int size) {
     static_assert(sizeof(loginfo) == 2 * CACHE_LINE_SIZE, "unexpected sizeof(loginfo)");
     assert(size > 0 && size <= 64);
+#ifdef POOL
+    char* x = (char*)mempool_alloc(sizeof(loginfo) * size + sizeof(loginfo::logset_info) + CACHE_LINE_SIZE);
+#else
     char* x = new char[sizeof(loginfo) * size + sizeof(loginfo::logset_info) + CACHE_LINE_SIZE];
+#endif
     char* ls_pos = x + sizeof(loginfo::logset_info);
     uintptr_t left = reinterpret_cast<uintptr_t>(ls_pos) % CACHE_LINE_SIZE;
     if (left)

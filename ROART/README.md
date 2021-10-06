@@ -5,6 +5,8 @@ Mostly working PiBench wrapper for ROART.
 ## Installation
 1. (optional) Configure pool_path and pool_size in Key.h
 2. Set Mode (#define DRAM_MODE if running entirely in dram) in Key.h and util.h
+If running in DRAM_MODE and you wish to run using thread-local mempool instead of just malloc/jemalloc,
+add -DPOOL at end of CFLAGS in Makefile.
 3. Toggle allocator (#define ARTPMDK) only when DRAM_MODE is not defined.
 If DRAM_MODE is defined then malloc will be used for all allocation.
 4. make

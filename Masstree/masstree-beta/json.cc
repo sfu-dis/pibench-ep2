@@ -64,7 +64,11 @@ static const String object_string("[Object]", 8);
 
 Json::ArrayJson* Json::ArrayJson::make(int n) {
     int cap = n < 8 ? 8 : n;
+#ifdef POOL
+    char* buf = (char*)mempool_alloc(sizeof(ArrayJson) + cap * sizeof(Json));
+#else
     char* buf = new char[sizeof(ArrayJson) + cap * sizeof(Json)];
+#endif
     return new((void*) buf) ArrayJson(cap);
 }
 
@@ -72,7 +76,9 @@ void Json::ArrayJson::destroy(ArrayJson* aj) {
     if (aj)
         for (int i = 0; i != aj->size; ++i)
             aj->a[i].~Json();
+#ifndef POOL
     delete[] reinterpret_cast<char*>(aj);
+#endif
 }
 
 
@@ -281,15 +287,27 @@ void Json::hard_uniqueify_object(bool convert) {
         precondition(is_null() || is_object());
     ObjectJson* noj;
     if (u_.x.type == j_object && u_.o.x) {
+    #ifdef POOL
+        noj = new (mempool_alloc(sizeof(ObjectJson))) ObjectJson(*u_.o.x);
+    #else
         noj = new ObjectJson(*u_.o.x);
+    #endif
         u_.o.x->deref(j_object);
     } else if (u_.x.type == j_array && u_.a.x) {
+    #ifdef POOL
+        noj = new (mempool_alloc(sizeof(ObjectJson))) ObjectJson();
+    #else
         noj = new ObjectJson;
+    #endif
         for (int i = 0; i != u_.a.x->size; ++i)
             noj->find_insert(String(i), u_.a.x->a[i]);
         u_.a.x->deref(j_array);
     } else {
+    #ifdef POOL
+        noj = new (mempool_alloc(sizeof(ObjectJson))) ObjectJson();
+    #else
         noj = new ObjectJson;
+    #endif
         if (u_.x.type < 0)
             u_.str.deref();
     }

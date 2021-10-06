@@ -510,8 +510,13 @@ void String::memo_type::account_destroy() {
 
 inline String::memo_type* String::create_memo(int capacity, int dirty) {
     assert(capacity > 0 && capacity >= dirty);
+#ifdef POOL
+    memo_type *memo =
+        reinterpret_cast<memo_type *>((char*)mempool_alloc(capacity + MEMO_SPACE));
+#else
     memo_type *memo =
         reinterpret_cast<memo_type *>(new char[capacity + MEMO_SPACE]);
+#endif
     if (memo)
         memo->initialize(capacity, dirty);
     return memo;

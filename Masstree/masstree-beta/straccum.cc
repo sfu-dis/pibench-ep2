@@ -90,8 +90,11 @@ char* StringAccum::grow(int ncap) {
         ncap = (r_.cap + memo_space) * 2 - memo_space;
     else if (r_.cap >= (1 << 20) && ncap < r_.cap + (1 << 19))
         ncap = r_.cap + (1 << 19);
-
+#ifdef POOL
+    char* n = (char*)mempool_alloc(ncap + memo_space);
+#else
     char* n = new char[ncap + memo_space];
+#endif
     if (!n) {
         assign_out_of_memory();
         errno = ENOMEM;
