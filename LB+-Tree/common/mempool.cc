@@ -35,6 +35,9 @@ void threadMemPools::init(int num_workers, long long size, long long align)
     // 1. allocate memory
     tm_num_workers = num_workers;
     tm_pools = new mempool[tm_num_workers];
+    for (int i = 0; i < tm_num_workers; i++) {
+        tm_pools[i] = mempool(NULL);
+    }
 #ifdef POOL
     long long load_pool_size = (size / 2LL / align) * align;
     long long size_per_pool = (load_pool_size / (long long) tm_num_workers / align) * align;
@@ -207,7 +210,7 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         arg.header_type = POBJ_HEADER_NONE;
         PMEMobjpool * pop = pmemobj_create("./pool", POBJ_LAYOUT_NAME(LBtree), size, 0666);
         if (pop)
-            printf("PMEM pool of size %llu created!\n", size);
+            printf("PMDK pool of size %llu created!\n", size);
         else
             exit(1);
         for (int i = 0; i < tm_num_workers; i++) {

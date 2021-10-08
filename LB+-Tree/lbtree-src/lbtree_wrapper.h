@@ -145,7 +145,7 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
   void *p;
   int pos = -1;
   p = lbt->lookup(PBkeyToLB(key), &pos);
-  if (pos >= 0)
+  if (pos < 0)
   {
 #ifdef DEBUG_MSG
     printf("Update key not found!\n");
