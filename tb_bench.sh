@@ -74,7 +74,7 @@ do
 	n=100000000
 
 	command="hog-machine.sh numactl --cpunodebind=0 --membind=0 sudo LD_PRELOAD=/usr/lib64/libjemalloc.so \
-./PiBench ${binary_path} -n ${n} ${op} --mode time --time 10 -t ${t} >> ${file}"
+./PiBench ${binary_path} -n ${n} ${op} --mode time --seconds 10 -t ${t} >> ${file}"
 
 	# for i in 1 2 # 2 trials
 	# do
