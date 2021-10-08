@@ -206,11 +206,18 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         arg.units_per_block = 16;
         arg.header_type = POBJ_HEADER_NONE;
         PMEMobjpool * pop = pmemobj_create("./pool", POBJ_LAYOUT_NAME(LBtree), size, 0666);
+        if (pop)
+            printf("PMEM pool of size %llu created!\n", size);
+        else
+            exit(1);
         for (int i = 0; i < tm_num_workers; i++) {
             tm_pools[i] = mempool(pop);
         }
         if (pmemobj_ctl_set(pop, "heap.alloc_class.new.desc", &arg) != 0)
+        {
             printf("Creating allocation class failed!\n");
+            exit(1);
+        }
         class_id = arg.class_id;
 #endif
 }
