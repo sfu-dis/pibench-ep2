@@ -142,20 +142,42 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
   thread_local ThreadHelper t{UPDATE};
   //FIXME
   // Try to find the record first.
-  void *p;
+  bleaf *p;
   int pos = -1;
-  p = lbt->lookup(PBkeyToLB(key), &pos);
-  if (pos < 0)
+  p = (bleaf *)lbt->lookup(PBkeyToLB(key), &pos);
+  if (!p || pos < 0)
   {
 #ifdef DEBUG_MSG
     printf("Update key not found!\n");
 #endif
     return false;
   }
-  void *recptr = lbt->get_recptr(p, pos);
-  // In reality a persistent pointer should be stored in the tree
-  // but we don't so take the address of recptr instead.
-  memcpy(&recptr, value, ITEM_SIZE);
+  volatile long long sum;
+  void *recptr;
+  {
+    Again:
+    // 1. RTM begin
+    if (_xbegin() != _XBEGIN_STARTED)
+    {
+      sum = 0;
+      for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+      goto Again;
+    }
+    if (p->lock)
+    {
+      _xabort(4);
+      goto Again;
+    }
+    p->lock = 1;
+    recptr = lbt->get_recptr(p, pos);
+    memcpy(&recptr, value, ITEM_SIZE);
+    _xend();
+  }
+  #ifdef NVMPOOL_REAL
+    clwb(p);
+    sfence();
+  #endif
+  p->lock = 0;
   return true;
 }
 
