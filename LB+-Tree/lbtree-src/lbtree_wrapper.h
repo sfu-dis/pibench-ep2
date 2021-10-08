@@ -169,14 +169,14 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
       goto Again;
     }
     p->lock = 1;
-    recptr = lbt->get_recptr(p, pos);
-    memcpy(&recptr, value, ITEM_SIZE);
     _xend();
   }
-  #ifdef NVMPOOL_REAL
-    clwb(p);
-    sfence();
-  #endif
+  recptr = lbt->get_recptr(p, pos);
+  memcpy(&recptr, value, ITEM_SIZE);
+#ifdef NVMPOOL_REAL
+  clwb(p);
+  sfence();
+#endif
   p->lock = 0;
   return true;
 }
