@@ -1790,7 +1790,7 @@ Again1:
     //     lp->lock = 1;
     //     lp->ent[pos].ch = Pointer8B(ptr);
     // }
-    lp->lock = 1;
+    // lp->lock = 1;
 
     // 5. RTM commit
     _xend();
