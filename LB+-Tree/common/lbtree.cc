@@ -715,7 +715,7 @@ Again2:
 
     // 5. RTM commit
     _xend();
-    
+}
     // if (pos >= 0)
     // {
     //     lp->ent[pos].ch = Pointer8B(ptr);
