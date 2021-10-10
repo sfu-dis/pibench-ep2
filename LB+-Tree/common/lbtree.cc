@@ -1795,16 +1795,16 @@ Again1:
     // 5. RTM commit
     _xend();
     
-    if (pos >= 0)
-    {
-        lp->ent[pos].ch = Pointer8B(ptr);
-    #ifdef NVMPOOL_REAL
-        clwb(lp);
-        sfence();
-    #endif
-        lp->lock = 0;
-        return true;
-    }
+    // if (pos >= 0)
+    // {
+    //     lp->ent[pos].ch = Pointer8B(ptr);
+    // #ifdef NVMPOOL_REAL
+    //     clwb(lp);
+    //     sfence();
+    // #endif
+    //     lp->lock = 0;
+    //     return true;
+    // }
     lp->lock = 0;
     // if (lp->lock)
     // {
