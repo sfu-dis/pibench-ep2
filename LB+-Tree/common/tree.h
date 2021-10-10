@@ -206,11 +206,32 @@ public:
       return 0;
    }
 
+   /**
+   * range scan (George's version)
+   *
+   * @param key  the index key to begin scan
+   * @param scan_size   number of records to scan
+   * @param result array to store scan results (assume allocated)
+   * 
+   */
    virtual int rangeScan(key_type key,  uint32_t scan_size, char* result)
    {
       fprintf(stderr, "Not implemented!\n");
       exit(1);
       return 0;
+   }
+
+   /**
+   * Update an index entry (George added this function for pibench wrapper)
+   *
+   * @param key   the index key
+   * @param ptr   the record pointer
+   */
+   virtual bool update(key_type key, void *ptr)
+   {
+      fprintf(stderr, "Not implemented!\n");
+      exit(1);
+      return false;
    }
 
    /**

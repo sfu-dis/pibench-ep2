@@ -1683,6 +1683,129 @@ Again2: // find and lock next sibling if necessary
     return np;
 }
 
+bool update(key_type key, void *ptr)
+{
+    bnode *p;
+    bleaf *lp;
+    int i, t, m, b;
+    unsigned char key_hash = hashcode1B(key);
+    int pos;
+
+Again1:
+    // 1. RTM begin
+    if (_xbegin() != _XBEGIN_STARTED)
+        goto Again1;
+
+    // 2. search nonleaf nodes
+    p = tree_meta->tree_root;
+
+    for (i = tree_meta->root_level; i > 0; i--)
+    {
+        // prefetch the entire node
+        NODE_PREF(p);
+
+        // if the lock bit is set, abort
+        if (p->lock())
+        {
+            _xabort(1);
+            goto Again1;
+        }
+
+        // binary search to narrow down to at most 8 entries
+        b = 1;
+        t = p->num();
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (key > p->k(m))
+                b = m + 1;
+            else if (key < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
+
+        // sequential search (which is slightly faster now)
+        for (; b <= t; b++)
+            if (key < p->k(b))
+                break;
+        p = p->ch(b - 1);
+
+    inner_done:;
+    }
+
+    // 3. search leaf node
+    lp = (bleaf *)p;
+
+    // prefetch the entire node
+    LEAF_PREF(lp);
+
+    // if the lock bit is set, abort
+    if (lp->lock)
+    {
+        _xabort(2);
+        goto Again1;
+    }
+
+    // SIMD comparison
+    // a. set every byte to key_hash in a 16B register
+    __m128i key_16B = _mm_set1_epi8((char)key_hash);
+
+    // b. load meta into another 16B register
+    __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
+
+    // c. compare them
+    __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
+
+    // d. generate a mask
+    unsigned int mask = (unsigned int)
+        _mm_movemask_epi8(cmp_res); // 1: same; 0: diff
+
+    // remove the lower 2 bits then AND bitmap
+    mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
+
+    // search every matching candidate
+    pos = -1;
+    while (mask)
+    {
+        int jj = bitScan(mask) - 1; // next candidate
+
+        if (lp->k(jj) == key)
+        { // found
+            pos = jj;
+            break;
+        }
+
+        mask &= ~(0x1 << jj); // remove this bit
+        /*  UBSan: implicit conversion from int -65 to unsigned int
+            changed the value to 4294967231 (32-bit, unsigned)      */
+    } // end while
+
+    // 4. Update value
+    if (pos >= 0)   // key found
+    {
+        lp->lock = 1;
+        lp->ent[pos].ch = Pointer8B(ptr);
+    }
+
+    // 5. RTM commit
+    _xend();
+
+    if (lp->lock)
+    {
+    #ifdef NVMPOOL_REAL
+        clwb(lp);
+        sfence();
+    #endif
+        lp->lock = 0;
+        return true;
+    }
+    return false;
+}
+
 /* ----------------------------------------------------------------- *
  randomize
  * ----------------------------------------------------------------- */

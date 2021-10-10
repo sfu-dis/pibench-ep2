@@ -140,47 +140,8 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
 bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t{UPDATE};
-  //FIXME
-  // Try to find the record first.
-  bleaf *p;
-  int pos = -1;
-  p = (bleaf *)lbt->lookup(PBkeyToLB(key), &pos);
-  if (!p || pos < 0)
-  {
-#ifdef DEBUG_MSG
-    printf("Update key not found!\n");
-#endif
-    return false;
-  }
-  volatile long long sum;
-  void *recptr;
-  {
-    Again:
-    // 1. RTM begin
-    if (_xbegin() != _XBEGIN_STARTED)
-    {
-      // sum = 0;
-      // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-      goto Again;
-    }
-    if (p->lock)
-    {
-      _xabort(4);
-      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-      goto Again;
-    }
-    p->lock = 1;
-    _xend();
-  }
-  recptr = lbt->get_recptr(p, pos);
-  memcpy(&recptr, value, ITEM_SIZE);
-#ifdef NVMPOOL_REAL
-  clwb(p);
-  sfence();
-#endif
-  p->lock = 0;
-  return true;
+  return lbt->update(PBkeyToLB(key), PBvalToLB(value));
+
 }
 
 bool lbtree_wrapper::remove(const char *key, size_t key_sz)

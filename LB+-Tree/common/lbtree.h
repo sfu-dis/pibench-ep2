@@ -312,8 +312,10 @@ public:
     // int range_scan_in_one_leaf(bleaf *lp, const key_type& key, uint32_t to_scan, std::pair<key_type, void*>* result);
     // int add_to_sorted_result(std::pair<key_type, void*>* result, std::pair<key_type, void*>* new_record, int total_size, int cur_idx);
 
-    // Range Scan -- Author: George He
+    // Range Scan & update -- Author: George He
     int rangeScan(key_type key,  uint32_t scan_size, char* result);
+    bool update(key_type key, void *ptr);
+
     bleaf* lockSibling(bleaf* lp);
     
 private:
