@@ -173,7 +173,7 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
   //   p->lock = 1;
   //   _xend();
   // }
-  recptr = lbt->get_recptr(p, pos);
+  void *recptr = lbt->get_recptr(p, pos);
   memcpy(&recptr, value, ITEM_SIZE);
 #ifdef NVMPOOL_REAL
   clwb(p);
