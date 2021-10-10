@@ -1683,7 +1683,7 @@ Again2: // find and lock next sibling if necessary
     return np;
 }
 
-bool update(key_type key, void *ptr)
+bool lbtree::update(key_type key, void *ptr)
 {
     bnode *p;
     bleaf *lp;
