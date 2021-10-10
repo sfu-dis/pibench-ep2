@@ -1785,17 +1785,19 @@ Again1:
     } // end while
 
     // 4. Update value
-    if (pos >= 0)   // key found
-    {
-        lp->lock = 1;
-        lp->ent[pos].ch = Pointer8B(ptr);
-    }
+    // if (pos >= 0)   // key found
+    // {
+    //     lp->lock = 1;
+    //     lp->ent[pos].ch = Pointer8B(ptr);
+    // }
+    lp->lock = 1;
 
     // 5. RTM commit
     _xend();
-
-    if (lp->lock)
+    
+    if (pos >= 0)
     {
+        lp->ent[pos].ch = Pointer8B(ptr);
     #ifdef NVMPOOL_REAL
         clwb(lp);
         sfence();
@@ -1803,6 +1805,16 @@ Again1:
         lp->lock = 0;
         return true;
     }
+    lp->lock = 0;
+    // if (lp->lock)
+    // {
+    // #ifdef NVMPOOL_REAL
+    //     clwb(lp);
+    //     sfence();
+    // #endif
+    //     lp->lock = 0;
+    //     return true;
+    // }
     return false;
 }
 
