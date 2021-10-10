@@ -604,7 +604,7 @@ bool lbtree::update(key_type key, void *ptr)
     bnode *p;
     bleaf *lp;
     int i, t, m, b, jj;
-
+    volatile long long sum;
 Again2:
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
@@ -631,9 +631,6 @@ Again2:
             goto Again2;
         }
 
-        parray[i] = p;
-        isfull[i] = (p->num() == NON_LEAF_KEY_NUM);
-
         // binary search to narrow down to at most 8 entries
         b = 1;
         t = p->num();
@@ -647,7 +644,6 @@ Again2:
             else
             {
                 p = p->ch(m);
-                ppos[i] = m;
                 goto inner_done;
             }
         }
@@ -657,7 +653,6 @@ Again2:
             if (key < p->k(b))
                 break;
         p = p->ch(b - 1);
-        ppos[i] = b - 1;
 
     inner_done:;
     }
@@ -674,8 +669,6 @@ Again2:
         _xabort(4);
         goto Again2;
     }
-
-    parray[0] = lp;
 
     // SIMD comparison
     // a. set every byte to key_hash in a 16B register
@@ -701,8 +694,7 @@ Again2:
 
         if (lp->k(jj) == key)
         { // found: do nothing, return
-            _xend();
-            return;
+            break;
         }
 
         mask &= ~(0x1 << jj); // remove this bit
