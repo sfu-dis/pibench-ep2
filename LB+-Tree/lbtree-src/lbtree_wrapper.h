@@ -152,34 +152,34 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
 #endif
     return false;
   }
-  volatile long long sum;
-  void *recptr;
-  {
-    Again:
-    // 1. RTM begin
-    if (_xbegin() != _XBEGIN_STARTED)
-    {
-      // sum = 0;
-      // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-      goto Again;
-    }
-    if (p->lock)
-    {
-      _xabort(4);
-      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-      goto Again;
-    }
-    p->lock = 1;
-    _xend();
-  }
+  // volatile long long sum;
+  // void *recptr;
+  // {
+  //   Again:
+  //   // 1. RTM begin
+  //   if (_xbegin() != _XBEGIN_STARTED)
+  //   {
+  //     // sum = 0;
+  //     // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+  //     std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+  //     goto Again;
+  //   }
+  //   if (p->lock)
+  //   {
+  //     _xabort(4);
+  //     std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+  //     goto Again;
+  //   }
+  //   p->lock = 1;
+  //   _xend();
+  // }
   recptr = lbt->get_recptr(p, pos);
   memcpy(&recptr, value, ITEM_SIZE);
 #ifdef NVMPOOL_REAL
   clwb(p);
   sfence();
 #endif
-  p->lock = 0;
+  // p->lock = 0;
   return true;
 }
 
