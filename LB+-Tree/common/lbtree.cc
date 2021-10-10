@@ -614,46 +614,46 @@ Again2:
     }
 
     // 2. search nonleaf nodes
-    // p = tree_meta->tree_root;
+    p = tree_meta->tree_root;
 
-    // for (i = tree_meta->root_level; i > 0; i--)
-    // {
+    for (i = tree_meta->root_level; i > 0; i--)
+    {
 
-    //     // prefetch the entire node
-    //     NODE_PREF(p);
+        // prefetch the entire node
+        NODE_PREF(p);
 
-    //     // if the lock bit is set, abort
-    //     if (p->lock())
-    //     {
-    //         _xabort(3);
-    //         goto Again2;
-    //     }
+        // if the lock bit is set, abort
+        if (p->lock())
+        {
+            _xabort(3);
+            goto Again2;
+        }
 
-    //     // binary search to narrow down to at most 8 entries
-    //     b = 1;
-    //     t = p->num();
-    //     while (b + 7 <= t)
-    //     {
-    //         m = (b + t) >> 1;
-    //         if (key > p->k(m))
-    //             b = m + 1;
-    //         else if (key < p->k(m))
-    //             t = m - 1;
-    //         else
-    //         {
-    //             p = p->ch(m);
-    //             goto inner_done;
-    //         }
-    //     }
+        // binary search to narrow down to at most 8 entries
+        b = 1;
+        t = p->num();
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (key > p->k(m))
+                b = m + 1;
+            else if (key < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
 
-    //     // sequential search (which is slightly faster now)
-    //     for (; b <= t; b++)
-    //         if (key < p->k(b))
-    //             break;
-    //     p = p->ch(b - 1);
+        // sequential search (which is slightly faster now)
+        for (; b <= t; b++)
+            if (key < p->k(b))
+                break;
+        p = p->ch(b - 1);
 
-    // inner_done:;
-    // }
+    inner_done:;
+    }
 
     // // 3. search leaf node
     // lp = (bleaf *)p;
