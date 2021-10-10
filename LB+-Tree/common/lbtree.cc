@@ -1805,7 +1805,7 @@ Again1:
     //     lp->lock = 0;
     //     return true;
     // }
-    lp->lock = 0;
+    // lp->lock = 0;
     // if (lp->lock)
     // {
     // #ifdef NVMPOOL_REAL
