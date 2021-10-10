@@ -22,6 +22,7 @@ op="-r 1"
 tree="hot" # name of index (masstree/hot/fptree/lbtree/dptree/roart/utree etc)
 
 pool_name="" # name of pool file to delete (assume on pmem0), set to "" if running dram index
+# lbtree: pool
 
 binary_path="../../../../index-wrappers/Hot/hot/build/libhot_wrapper.so"
 
@@ -69,7 +70,7 @@ fi
 echo "Index binary path: ${binary_path}"
 
 
-for t in 1 5 15 20 30 40
+for t in 40 30 20 15 5 1
 do
 	n=100000000
 
