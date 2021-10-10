@@ -597,31 +597,42 @@ Again1:
 
 bool lbtree::update(key_type key, void *ptr)
 {
-    bnode *p;
-    bleaf *lp;
-    int i, t, m, b;
     unsigned char key_hash = hashcode1B(key);
     int pos;
 
-Again1:
+{
+    bnode *p;
+    bleaf *lp;
+    int i, t, m, b, jj;
+
+Again2:
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
-        goto Again1;
+    {
+        // random backoff
+        sum= 0;
+        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again2;
+    }
 
     // 2. search nonleaf nodes
     p = tree_meta->tree_root;
 
     for (i = tree_meta->root_level; i > 0; i--)
     {
+
         // prefetch the entire node
         NODE_PREF(p);
 
         // if the lock bit is set, abort
         if (p->lock())
         {
-            _xabort(1);
-            goto Again1;
+            _xabort(3);
+            goto Again2;
         }
+
+        parray[i] = p;
+        isfull[i] = (p->num() == NON_LEAF_KEY_NUM);
 
         // binary search to narrow down to at most 8 entries
         b = 1;
@@ -636,6 +647,7 @@ Again1:
             else
             {
                 p = p->ch(m);
+                ppos[i] = m;
                 goto inner_done;
             }
         }
@@ -645,6 +657,7 @@ Again1:
             if (key < p->k(b))
                 break;
         p = p->ch(b - 1);
+        ppos[i] = b - 1;
 
     inner_done:;
     }
@@ -658,9 +671,11 @@ Again1:
     // if the lock bit is set, abort
     if (lp->lock)
     {
-        _xabort(2);
-        goto Again1;
+        _xabort(4);
+        goto Again2;
     }
+
+    parray[0] = lp;
 
     // SIMD comparison
     // a. set every byte to key_hash in a 16B register
@@ -680,21 +695,23 @@ Again1:
     mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
 
     // search every matching candidate
-    pos = -1;
     while (mask)
     {
-        int jj = bitScan(mask) - 1; // next candidate
+        jj = bitScan(mask) - 1; // next candidate
 
         if (lp->k(jj) == key)
-        { // found
-            pos = jj;
-            break;
+        { // found: do nothing, return
+            _xend();
+            return;
         }
 
         mask &= ~(0x1 << jj); // remove this bit
-        /*  UBSan: implicit conversion from int -65 to unsigned int
-            changed the value to 4294967231 (32-bit, unsigned)      */
+        /*  UBSan: implicit conversion from int -33 to unsigned int 
+            changed the value to 4294967263 (32-bit, unsigned)      */
     } // end while
+
+    // 4. set lock bits before exiting the RTM transaction
+    // lp->lock = 1;
 
     // 4. Update value
     // if (pos >= 0)   // key found
