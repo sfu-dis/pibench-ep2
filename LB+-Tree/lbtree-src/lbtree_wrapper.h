@@ -153,7 +153,7 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
     sfence();
   #endif
   }
-  (bleaf*)p->lock = 0;
+  ((bleaf*)p)->lock = 0;
   return true;
 }
 
