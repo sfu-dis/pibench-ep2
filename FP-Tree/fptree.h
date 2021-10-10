@@ -65,7 +65,7 @@ enum Result { Insert, Update, Split, Abort, Delete, Remove, NotFound };
 #ifdef PMEM
     #include <libpmemobj.h>
 
-    #define PMEMOBJ_POOL_SIZE ((size_t)(1024 * 1024 * 11) * 1000)  /* 11 GB */
+    #define PMEMOBJ_POOL_SIZE ((size_t)(1024 * 1024 * 64) * 1000)  /* 64 GB */
 
     POBJ_LAYOUT_BEGIN(FPtree);
     POBJ_LAYOUT_ROOT(FPtree, struct List);
