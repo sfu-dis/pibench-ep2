@@ -227,11 +227,11 @@ public:
    * @param key   the index key
    * @param ptr   the record pointer
    */
-   virtual bool update(key_type key, void *ptr)
+   virtual void* find_and_lock(key_type key, int *pos)
    {
       fprintf(stderr, "Not implemented!\n");
       exit(1);
-      return false;
+      return NULL;
    }
 
    /**

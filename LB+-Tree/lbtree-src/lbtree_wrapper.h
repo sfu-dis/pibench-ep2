@@ -140,8 +140,21 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
 bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t{UPDATE};
-  return lbt->update(PBkeyToLB(key), PBvalToLB(value));
-
+  void *p;
+  int pos = -1;
+  auto k = PBkeyToLB(key);
+  p = lbt->find_and_lock(k, &pos);
+  if (pos >= 0)
+  {
+    void *recptr = lbt->get_recptr(p, pos);
+    memcpy(&recptr, value, ITEM_SIZE);
+  #ifdef NVMPOOL_REAL
+    clwb(p);
+    sfence();
+  #endif
+  }
+  (bleaf*)p->lock = 0;
+  return true;
 }
 
 bool lbtree_wrapper::remove(const char *key, size_t key_sz)

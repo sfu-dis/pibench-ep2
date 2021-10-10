@@ -595,23 +595,19 @@ Again1:
 }
 
 
-bool lbtree::update(key_type key, void *ptr)
-{
-    unsigned char key_hash = hashcode1B(key);
+void* lbtree::find_and_lock(key_type key, int *pos)
 {
     bnode *p;
     bleaf *lp;
-    int i, t, m, b, jj;
-    volatile long long sum;
-Again2:
+    int i, t, m, b;
+
+    unsigned char key_hash = hashcode1B(key);
+    int ret_pos;
+
+Again1:
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
-    {
-        // random backoff
-        sum= 0;
-        for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-        goto Again2;
-    }
+        goto Again1;
 
     // 2. search nonleaf nodes
     p = tree_meta->tree_root;
@@ -625,8 +621,8 @@ Again2:
         // if the lock bit is set, abort
         if (p->lock())
         {
-            _xabort(3);
-            goto Again2;
+            _xabort(1);
+            goto Again1;
         }
 
         // binary search to narrow down to at most 8 entries
@@ -655,86 +651,58 @@ Again2:
     inner_done:;
     }
 
-    // // 3. search leaf node
-    // lp = (bleaf *)p;
+    // 3. search leaf node
+    lp = (bleaf *)p;
 
-    // // prefetch the entire node
-    // LEAF_PREF(lp);
+    // prefetch the entire node
+    LEAF_PREF(lp);
 
-    // // if the lock bit is set, abort
-    // if (lp->lock)
-    // {
-    //     _xabort(4);
-    //     goto Again2;
-    // }
+    // if the lock bit is set, abort
+    if (lp->lock)
+    {
+        _xabort(2);
+        goto Again1;
+    }
 
-    // // SIMD comparison
-    // // a. set every byte to key_hash in a 16B register
-    // __m128i key_16B = _mm_set1_epi8((char)key_hash);
+    // SIMD comparison
+    // a. set every byte to key_hash in a 16B register
+    __m128i key_16B = _mm_set1_epi8((char)key_hash);
 
-    // // b. load meta into another 16B register
-    // __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
+    // b. load meta into another 16B register
+    __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
 
-    // // c. compare them
-    // __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
+    // c. compare them
+    __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
 
-    // // d. generate a mask
-    // unsigned int mask = (unsigned int)
-    //     _mm_movemask_epi8(cmp_res); // 1: same; 0: diff
+    // d. generate a mask
+    unsigned int mask = (unsigned int)
+        _mm_movemask_epi8(cmp_res); // 1: same; 0: diff
 
-    // // remove the lower 2 bits then AND bitmap
-    // mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
+    // remove the lower 2 bits then AND bitmap
+    mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
 
-    // // search every matching candidate
-    // while (mask)
-    // {
-    //     jj = bitScan(mask) - 1; // next candidate
+    // search every matching candidate
+    ret_pos = -1;
+    while (mask)
+    {
+        int jj = bitScan(mask) - 1; // next candidate
 
-    //     if (lp->k(jj) == key)
-    //     { // found: do nothing, return
-    //         break;
-    //     }
+        if (lp->k(jj) == key)
+        { // found
+            ret_pos = jj;
+            break;
+        }
 
-    //     mask &= ~(0x1 << jj); // remove this bit
-    //     /*  UBSan: implicit conversion from int -33 to unsigned int 
-    //         changed the value to 4294967263 (32-bit, unsigned)      */
-    // } // end while
-
-    // 4. set lock bits before exiting the RTM transaction
-    // lp->lock = 1;
-
-    // 4. Update value
-    // if (pos >= 0)   // key found
-    // {
-    //     lp->lock = 1;
-    //     lp->ent[pos].ch = Pointer8B(ptr);
-    // }
-    // lp->lock = 1;
-
-    // 5. RTM commit
+        mask &= ~(0x1 << jj); // remove this bit
+        /*  UBSan: implicit conversion from int -65 to unsigned int
+            changed the value to 4294967231 (32-bit, unsigned)      */
+    } // end while
+    lp->lock = 1;
+    // 4. RTM commit
     _xend();
-}
-    // if (pos >= 0)
-    // {
-    //     lp->ent[pos].ch = Pointer8B(ptr);
-    // #ifdef NVMPOOL_REAL
-    //     clwb(lp);
-    //     sfence();
-    // #endif
-    //     lp->lock = 0;
-    //     return true;
-    // }
-    // lp->lock = 0;
-    // if (lp->lock)
-    // {
-    // #ifdef NVMPOOL_REAL
-    //     clwb(lp);
-    //     sfence();
-    // #endif
-    //     lp->lock = 0;
-    //     return true;
-    // }
-    return false;
+
+    *pos = ret_pos;
+    return (void *)lp;
 }
 
 /* ------------------------------------- *
