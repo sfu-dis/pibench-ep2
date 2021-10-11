@@ -619,7 +619,7 @@ Again:
     {
         // NODE_PREF(p);
         // if the lock bit is set, abort
-        if (((bnodeMeta *)(p->ent))->lock != 0)
+        if (*((int*)(p->ent)) != 0)
         {
             _xabort(1);
             goto Again;
