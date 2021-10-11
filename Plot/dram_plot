@@ -1,0 +1,58 @@
+set multiplot layout 2,2
+
+unset key
+set key at graph 1,screen 1 center center maxrows 1
+
+
+set xtics (1,5,10,15,20,30,40)
+set ylabel "Throughput (Mop/s)"
+
+set grid ytics mytics  # draw lines for each ytics and mytics
+set mytics 2           # set the spacing for the mytics
+set grid               # enable the grid
+
+set size 0.5, 0.5
+set origin 0, 0.5
+set xlabel "(a) Read"
+plot './dataset/dram_indexes.dat' using 1:2 title "FPTree" with linespoints linestyle 7 linewidth 1.4 linecolor rgb '#3b518b', \
+     './dataset/dram_indexes.dat' using 1:3 title "LB+Tree" with linespoints linestyle 8 linewidth 1.4 linecolor rgb '#f89441', \
+     './dataset/dram_indexes.dat' using 1:4 title "ROART" with linespoints linestyle 1 linewidth 1.4 linecolor rgb 'red', \
+     './dataset/dram_indexes.dat' using 1:5 title "Hot" with linespoints linestyle 21 linewidth 1.4 linecolor rgb '#21908d', \
+     './dataset/dram_indexes.dat' using 1:6 title "Masstree" with linespoints linestyle 22 linewidth 1.4 linecolor rgb '#b5367a', 
+
+
+unset key
+
+set size 0.5, 0.5 
+set origin 0.5, 0.5
+set xlabel "(b) Insert"
+plot './dataset/dram_indexes.dat' using 1:7 title "FPTree"  with linespoints linestyle 7 linewidth 1.4 linecolor rgb '#3b518b', \
+     './dataset/dram_indexes.dat' using 1:8 title "LB+Tree"  with linespoints linestyle 8 linewidth 1.4 linecolor rgb '#f89441', \
+     './dataset/dram_indexes.dat' using 1:9 title "ROART"  with linespoints linestyle 1 linewidth 1.4 linecolor rgb 'red', \
+     './dataset/dram_indexes.dat' using 1:10 title "Hot"  with linespoints linestyle 21 linewidth 1.4 linecolor rgb '#21908d', \
+     './dataset/dram_indexes.dat' using 1:11 title "Masstree"  with linespoints linestyle 22 linewidth 1.4 linecolor rgb '#b5367a',
+
+unset key
+
+set size 0.5, 0.5 
+set origin 0, 0
+set xlabel "(c) Update"
+plot './dataset/dram_indexes.dat' using 1:12 title "FPTree"  with linespoints linestyle 7 linewidth 1.4 linecolor rgb '#3b518b', \
+     './dataset/dram_indexes.dat' using 1:13 title "LB+Tree"  with linespoints linestyle 8 linewidth 1.4 linecolor rgb '#f89441', \
+     './dataset/dram_indexes.dat' using 1:14 title "ROART"  with linespoints linestyle 1 linewidth 1.4 linecolor rgb 'red', \
+     './dataset/dram_indexes.dat' using 1:15 title "Hot"  with linespoints linestyle 21 linewidth 1.4 linecolor rgb '#21908d', \
+     './dataset/dram_indexes.dat' using 1:16 title "Masstree"  with linespoints linestyle 22 linewidth 1.4 linecolor rgb '#b5367a',
+
+unset key
+
+set size 0.5, 0.5 
+set origin 0.5, 0
+set xlabel "(d) Scan"
+plot './dataset/dram_indexes.dat' using 1:17 title "FPTree"  with linespoints linestyle 7 linewidth 1.4 linecolor rgb '#3b518b', \
+     './dataset/dram_indexes.dat' using 1:18 title "LB+Tree"  with linespoints linestyle 8 linewidth 1.4 linecolor rgb '#f89441', \
+     './dataset/dram_indexes.dat' using 1:19 title "ROART"  with linespoints linestyle 1 linewidth 1.4 linecolor rgb 'red', \
+     './dataset/dram_indexes.dat' using 1:20 title "Hot"  with linespoints linestyle 21 linewidth 1.4 linecolor rgb '#21908d', \
+     './dataset/dram_indexes.dat' using 1:21 title "Masstree"  with linespoints linestyle 22 linewidth 1.4 linecolor rgb '#b5367a',\
+
+
+pause -1 "Hit any key to continue"
