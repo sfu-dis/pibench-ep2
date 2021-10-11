@@ -146,8 +146,7 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
   p = lbt->find_and_lock(k, &pos);
   if (pos >= 0)
   {
-    void *recptr = lbt->get_recptr(p, pos);
-    memcpy(&recptr, value, ITEM_SIZE);
+    p->ent[pos].ch = value;
   #ifdef NVMPOOL_REAL
     clwb(p);
     sfence();
