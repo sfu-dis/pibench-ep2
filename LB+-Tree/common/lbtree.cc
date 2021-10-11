@@ -619,7 +619,7 @@ Again:
     {
         NODE_PREF(p);
         // if the lock bit is set, abort
-        if (*((int*)&(p->ent[0].k)))
+        if (p->lock())
         {
             _xabort(1);
             goto Again;
