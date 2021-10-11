@@ -314,7 +314,7 @@ public:
 
     // Range Scan & update -- Author: George He
     int rangeScan(key_type key,  uint32_t scan_size, char* result);
-    // bool update(key_type key, void *ptr);
+    bool update(key_type key, void *ptr);
 
     bleaf* lockSibling(bleaf* lp);
     
