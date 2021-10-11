@@ -644,35 +644,35 @@ Again:
         goto Again;
     }
 
-    // SIMD comparison
-    // a. set every byte to key_hash in a 16B register
-    __m128i key_16B = _mm_set1_epi8((char)key_hash);
+    // // SIMD comparison
+    // // a. set every byte to key_hash in a 16B register
+    // __m128i key_16B = _mm_set1_epi8((char)key_hash);
 
-    // b. load meta into another 16B register
-    __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
+    // // b. load meta into another 16B register
+    // __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
 
-    // c. compare them
-    __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
+    // // c. compare them
+    // __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
 
-    // d. generate a mask
-    unsigned int mask = (unsigned int)
-        _mm_movemask_epi8(cmp_res); // 1: same; 0: diff
+    // // d. generate a mask
+    // unsigned int mask = (unsigned int)
+    //     _mm_movemask_epi8(cmp_res); // 1: same; 0: diff
 
-    // remove the lower 2 bits then AND bitmap
-    mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
+    // // remove the lower 2 bits then AND bitmap
+    // mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
 
-    // search every matching candidate
-    ret_pos = -1;
-    while (mask)
-    {
-        jj = bitScan(mask) - 1; // next candidate
-        if (lp->k(jj) == key)
-        { // found
-            ret_pos = jj;
-            break;
-        }
-        mask &= ~(0x1 << jj); // remove this bit
-    } // end while
+    // // search every matching candidate
+    // ret_pos = -1;
+    // while (mask)
+    // {
+    //     jj = bitScan(mask) - 1; // next candidate
+    //     if (lp->k(jj) == key)
+    //     { // found
+    //         ret_pos = jj;
+    //         break;
+    //     }
+    //     mask &= ~(0x1 << jj); // remove this bit
+    // } // end while
     lp->lock = 1;
     
     _xend();
