@@ -140,7 +140,8 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
 bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t{UPDATE};
-  return lbt->update(PBkeyToLB(key), PBvalToLB(value));
+  return true;
+  // return lbt->update(PBkeyToLB(key), PBvalToLB(value));
   // if (pos >= 0)
   // {
   //   ((bleaf*)p)->ent[pos].ch = value;

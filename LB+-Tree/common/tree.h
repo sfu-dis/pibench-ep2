@@ -227,12 +227,12 @@ public:
    * @param key   the index key
    * @param ptr   the record pointer
    */
-   virtual bool update(key_type key, void *ptr)
-   {
-      fprintf(stderr, "Not implemented!\n");
-      exit(1);
-      return false;
-   }
+   // virtual bool update(key_type key, void *ptr)
+   // {
+   //    fprintf(stderr, "Not implemented!\n");
+   //    exit(1);
+   //    return false;
+   // }
 
    /**
    * print the tree structure
