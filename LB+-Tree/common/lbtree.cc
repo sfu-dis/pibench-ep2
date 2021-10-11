@@ -595,73 +595,53 @@ Again1:
 }
 
 
-void* lbtree::find_and_lock(key_type key, int *pos)
+void* lbtree::update(key_type key, void *ptr)
 {
     bnode *p;
     bleaf *lp;
-    int i, t, m, b;
+    int i, t, m, b, jj;
 
     unsigned char key_hash = hashcode1B(key);
     int ret_pos;
-
-Again1:
+    volatile long long sum;
+Again:
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
-        goto Again1;
-
+    {
+        // random backoff
+        sum= 0;
+        for (i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again;
+    }
     // 2. search nonleaf nodes
     p = tree_meta->tree_root;
-
     for (i = tree_meta->root_level; i > 0; i--)
     {
-
         // prefetch the entire node
         NODE_PREF(p);
-
         // if the lock bit is set, abort
         if (p->lock())
         {
             _xabort(1);
-            goto Again1;
+            goto Again;
         }
-
-        // binary search to narrow down to at most 8 entries
         b = 1;
         t = p->num();
-        while (b + 7 <= t)
-        {
-            m = (b + t) >> 1;
-            if (key > p->k(m))
-                b = m + 1;
-            else if (key < p->k(m))
-                t = m - 1;
-            else
-            {
-                p = p->ch(m);
-                goto inner_done;
-            }
-        }
-
         // sequential search (which is slightly faster now)
         for (; b <= t; b++)
             if (key < p->k(b))
                 break;
         p = p->ch(b - 1);
-
-    inner_done:;
     }
-
     // 3. search leaf node
     lp = (bleaf *)p;
-
     // prefetch the entire node
     LEAF_PREF(lp);
-
     // if the lock bit is set, abort
     if (lp->lock)
     {
         _xabort(2);
-        goto Again1;
+        goto Again;
     }
 
     // SIMD comparison
@@ -685,24 +665,19 @@ Again1:
     ret_pos = -1;
     while (mask)
     {
-        int jj = bitScan(mask) - 1; // next candidate
-
+        jj = bitScan(mask) - 1; // next candidate
         if (lp->k(jj) == key)
         { // found
             ret_pos = jj;
             break;
         }
-
         mask &= ~(0x1 << jj); // remove this bit
-        /*  UBSan: implicit conversion from int -65 to unsigned int
-            changed the value to 4294967231 (32-bit, unsigned)      */
     } // end while
     lp->lock = 1;
-    // 4. RTM commit
+    
     _xend();
-
-    *pos = ret_pos;
-    return (void *)lp;
+    lp->lock = 0;
+    return ret_pos >= 0;
 }
 
 /* ------------------------------------- *
