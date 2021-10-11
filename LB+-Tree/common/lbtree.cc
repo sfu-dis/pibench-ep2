@@ -624,13 +624,13 @@ Again:
         //     _xabort(1);
         //     goto Again;
         // }
-        // b = 1;
-        // t = p->num();
-        // // sequential search (which is slightly faster now)
-        // for (; b <= t; b++)
-        //     if (key < p->k(b))
-        //         break;
-        // p = p->ch(b - 1);
+        
+        t = p->num();
+        // sequential search (which is slightly faster now)
+        for (b = 1; b <= t; b++)
+            if (key < p->ent[b].key)
+                break;
+        p = p->ent[b-1].ch;
     }
     // lp = (bleaf *)p;
     // LEAF_PREF(lp);
