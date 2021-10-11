@@ -617,14 +617,13 @@ Again:
     p = tree_meta->tree_root;
     for (i = tree_meta->root_level; i > 0; i--)
     {
-        // prefetch the entire node
         NODE_PREF(p);
         // if the lock bit is set, abort
-        if (p->lock())
-        {
-            _xabort(1);
-            goto Again;
-        }
+        // if (p->lock())
+        // {
+        //     _xabort(1);
+        //     goto Again;
+        // }
         b = 1;
         t = p->num();
         // sequential search (which is slightly faster now)
