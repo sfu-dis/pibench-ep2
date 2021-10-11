@@ -619,11 +619,11 @@ Again:
     {
         NODE_PREF(p);
         // if the lock bit is set, abort
-        // if (*((int*)(p)) != 0)
-        // {
-        //     _xabort(1);
-        //     goto Again;
-        // }
+        if (*((int*)&(p->ent[0].k)))
+        {
+            _xabort(1);
+            goto Again;
+        }
         
         t = p->num();
         // sequential search (which is slightly faster now)
@@ -632,13 +632,13 @@ Again:
                 break;
         p = p->ent[b-1].ch;
     }
-    lp = (bleaf *)p;
-    LEAF_PREF(lp);
-    if (lp->lock)
-    {
-        _xabort(2);
-        goto Again;
-    }
+    // lp = (bleaf *)p;
+    // LEAF_PREF(lp);
+    // if (lp->lock)
+    // {
+    //     _xabort(2);
+    //     goto Again;
+    // }
 
     // // SIMD comparison
     // __m128i key_16B = _mm_set1_epi8((char)key_hash);
