@@ -618,12 +618,12 @@ Again:
     for (i = tree_meta->root_level; i > 0; i--)
     {
         // NODE_PREF(p);
-        // // if the lock bit is set, abort
-        // if (p->lock())
-        // {
-        //     _xabort(1);
-        //     goto Again;
-        // }
+        // if the lock bit is set, abort
+        if (p->lock())
+        {
+            _xabort(1);
+            goto Again;
+        }
         
         t = p->num();
         // sequential search (which is slightly faster now)
