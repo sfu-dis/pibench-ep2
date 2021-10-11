@@ -628,7 +628,7 @@ Again:
         t = p->num();
         // sequential search (which is slightly faster now)
         for (b = 1; b <= t; b++)
-            if (key < p->ent[b].key)
+            if (key < p->ent[b].k)
                 break;
         p = p->ent[b-1].ch;
     }
