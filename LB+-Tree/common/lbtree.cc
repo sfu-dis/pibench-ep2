@@ -617,7 +617,7 @@ Again:
     p = tree_meta->tree_root;
     for (i = tree_meta->root_level; i > 0; i--)
     {
-        NODE_PREF(p);
+        // NODE_PREF(p);
         // if the lock bit is set, abort
         // if (p->lock())
         // {
@@ -627,10 +627,10 @@ Again:
         
         t = p->num();
         // sequential search (which is slightly faster now)
-        for (b = 1; b <= t; b++)
-            if (key < p->ent[b].k)
-                break;
-        p = p->ent[b-1].ch;
+        // for (b = 1; b <= t; b++)
+        //     if (key < p->ent[b].k)
+        //         break;
+        p = p->ent[0].ch;
     }
     // lp = (bleaf *)p;
     // LEAF_PREF(lp);
