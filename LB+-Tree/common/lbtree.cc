@@ -627,9 +627,9 @@ Again:
         
         t = p->num();
         // sequential search (which is slightly faster now)
-        // for (b = 1; b <= t; b++)
-        //     if (key < p->ent[b].k)
-        //         break;
+        for (b = 1; b <= t; b++)
+            if (p->ent[b].k >= key)
+                break;
         p = p->ent[0].ch;
     }
     // lp = (bleaf *)p;
