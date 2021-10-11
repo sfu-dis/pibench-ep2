@@ -617,7 +617,7 @@ Again:
     p = tree_meta->tree_root;
     for (i = tree_meta->root_level; i > 0; i--)
     {
-        // NODE_PREF(p);
+        NODE_PREF(p);
         // if the lock bit is set, abort
         if (*((int*)(p)) != 0)
         {
