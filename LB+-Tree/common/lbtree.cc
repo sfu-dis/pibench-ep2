@@ -669,16 +669,16 @@ Again1: // find target leaf and lock it
     mask = (unsigned int)_mm_movemask_epi8(cmp_res); // 1: same; 0: diff
     mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
     pos = -1;
-    while (mask)
-    {
-        int jj = bitScan(mask) - 1; // next candidate
-        if (lp->k(jj) == key)
-        { // found
-            pos = jj;
-            break;
-        }
-        mask &= ~(0x1 << jj); // remove this bit
-    } // end while
+    // while (mask)
+    // {
+    //     int jj = bitScan(mask) - 1; // next candidate
+    //     if (lp->k(jj) == key)
+    //     { // found
+    //         pos = jj;
+    //         break;
+    //     }
+    //     mask &= ~(0x1 << jj); // remove this bit
+    // } // end while
     if (pos >= 0)
     {
         lp->ent[pos].ch = ptr;
