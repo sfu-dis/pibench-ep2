@@ -662,13 +662,13 @@ Again1: // find target leaf and lock it
     // 4. RTM commit
     _xend();
 
-    unsigned char key_hash = hashcode1B(key);
-    __m128i key_16B = _mm_set1_epi8((char)key_hash);
-    __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
-    __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
-    mask = (unsigned int)_mm_movemask_epi8(cmp_res); // 1: same; 0: diff
-    mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
-    pos = -1;
+    // unsigned char key_hash = hashcode1B(key);
+    // __m128i key_16B = _mm_set1_epi8((char)key_hash);
+    // __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
+    // __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
+    // mask = (unsigned int)_mm_movemask_epi8(cmp_res); // 1: same; 0: diff
+    // mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
+    // pos = -1;
     // while (mask)
     // {
     //     int jj = bitScan(mask) - 1; // next candidate
@@ -687,7 +687,7 @@ Again1: // find target leaf and lock it
     //     sfence();
     // #endif
     // }
-    // lp->lock = 0;
+    lp->lock = 0;
     return pos >= 0;
 //     bnode *p;
 //     bleaf *lp;
