@@ -599,7 +599,7 @@ bool lbtree::update(key_type key, void *ptr)
 {
     bnode *p;
     bleaf *lp, *np = nullptr;
-    int i, t, m, b, jj, pos;
+    int i, t, m, b, jj;
     unsigned int mask;
     // volatile long long sum;
 
