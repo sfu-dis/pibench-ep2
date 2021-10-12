@@ -144,7 +144,10 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
   // Try to find the record first.
   bleaf *p;
   int pos = -1;
-  p = (bleaf *)lbt->lookup(PBkeyToLB(key), &pos);
+  auto k = PBkeyToLB(key);
+  IdxEntry ent;
+Retry:
+  p = (bleaf *)lbt->lookup(k, &pos);
   if (!p || pos < 0)
   {
 #ifdef DEBUG_MSG
@@ -173,12 +176,15 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
   //   p->lock = 1;
   //   _xend();
   // }
-  void *recptr = lbt->get_recptr(p, pos);
-  memcpy(&recptr, value, ITEM_SIZE);
-#ifdef NVMPOOL_REAL
-  clwb(p);
-  sfence();
-#endif
+  ent = p->ent[pos];
+  if (p->lock || ent.k != k || !std::atomic_compare_exchange_strong(&(lp->ent[pos].ch), &ent.ch, value))
+    goto Retry;
+  // void *recptr = lbt->get_recptr(p, pos);
+  // memcpy(&recptr, value, ITEM_SIZE);
+// #ifdef NVMPOOL_REAL
+//   clwb(p);
+//   sfence();
+// #endif
   // p->lock = 0;
   return true;
 }
