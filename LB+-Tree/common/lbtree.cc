@@ -599,7 +599,7 @@ bool lbtree::update(key_type key, void *ptr)
 {
     bnode *p;
     bleaf *lp, *np = nullptr;
-    int i, t, m, b, jj;
+    int i, t, m, b, jj, pos;
     unsigned int mask;
     // volatile long long sum;
 
@@ -661,7 +661,27 @@ Again1: // find target leaf and lock it
     lp->lock = 1;
     // 4. RTM commit
     _xend();
-    return true;
+    pos = -1;
+    while (mask)
+    {
+        int jj = bitScan(mask) - 1; // next candidate
+        if (lp->k(jj) == key)
+        { // found
+            pos = jj;
+            break;
+        }
+        mask &= ~(0x1 << jj); // remove this bit
+    } // end while
+    if (pos >= 0)
+    {
+        lp->ent[pos].ch = ptr;
+    #ifdef NVMPOOL_REAL
+        clwb(lp);
+        sfence();
+    #endif
+    }
+    lp->lock = 0;
+    return pos >= 0;
 //     bnode *p;
 //     bleaf *lp;
 //     int i, t, m, b, jj;
