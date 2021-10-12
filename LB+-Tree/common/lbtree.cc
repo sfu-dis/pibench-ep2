@@ -687,7 +687,7 @@ Again1: // find target leaf and lock it
     //     sfence();
     // #endif
     // }
-    lp->lock = 0;
+    // lp->lock = 0;
     return true;
 //     bnode *p;
 //     bleaf *lp;
