@@ -177,7 +177,7 @@ Retry:
   //   _xend();
   // }
   ent = p->ent[pos];
-  if (p->lock || ent.k != k || !std::atomic_compare_exchange_strong(&(lp->ent[pos].ch), &ent.ch, value))
+  if (p->lock || ent.k != k || !__sync_bool_compare_and_swap((uint64_t*)&(p->ent[pos].ch), *(uint64_t*)&(ent.ch), *(uint64_t*)value))
     goto Retry;
   // void *recptr = lbt->get_recptr(p, pos);
   // memcpy(&recptr, value, ITEM_SIZE);
