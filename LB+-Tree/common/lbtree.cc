@@ -598,40 +598,105 @@ Again1:
 bool lbtree::update(key_type key, void *ptr)
 {
     bnode *p;
-    bleaf *lp;
+    bleaf *lp, *np = nullptr;
     int i, t, m, b, jj;
+    unsigned int mask;
+    // volatile long long sum;
 
-    unsigned char key_hash = hashcode1B(key);
-    int ret_pos;
-    volatile long long sum;
-Again:
+Again1: // find target leaf and lock it
     // 1. RTM begin
     if (_xbegin() != _XBEGIN_STARTED)
     {
-        // random backoff
-        sum= 0;
-        for (i=(rdtsc() % 1024); i>0; i--) sum += i;
-        goto Again;
+        // Commented backoff because it will cause infinite abort in mempool mode
+        // sum= 0;
+        // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
+        goto Again1;
     }
     // 2. search nonleaf nodes
     p = tree_meta->tree_root;
     for (i = tree_meta->root_level; i > 0; i--)
     {
+        // prefetch the entire node
         NODE_PREF(p);
         // if the lock bit is set, abort
         if (p->lock())
         {
             _xabort(1);
-            goto Again;
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+            goto Again1;
         }
-        
+        // binary search to narrow down to at most 8 entries
+        b = 1;
         t = p->num();
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (key > p->k(m))
+                b = m + 1;
+            else if (key < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
         // sequential search (which is slightly faster now)
-        for (b = 1; b <= t; b++)
-            if (p->ent[b].k >= key) // key < p->ent[b].k
+        for (; b <= t; b++)
+            if (key < p->k(b))
                 break;
-        p = p->ent[b-1].ch;
+        p = p->ch(b - 1);
+    inner_done:;
     }
+    lp = (bleaf *)p;
+    // prefetch the entire node
+    LEAF_PREF(lp);
+    // if the lock bit is set, abort
+    if (lp->lock)
+    {
+        _xabort(2);
+        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+        goto Again1;
+    }
+    lp->lock = 1;
+    // 4. RTM commit
+    _xend();
+    return true;
+//     bnode *p;
+//     bleaf *lp;
+//     int i, t, m, b, jj;
+
+//     unsigned char key_hash = hashcode1B(key);
+//     int ret_pos;
+//     volatile long long sum;
+// Again:
+//     // 1. RTM begin
+//     if (_xbegin() != _XBEGIN_STARTED)
+//     {
+//         // random backoff
+//         sum= 0;
+//         for (i=(rdtsc() % 1024); i>0; i--) sum += i;
+//         goto Again;
+//     }
+//     // 2. search nonleaf nodes
+//     p = tree_meta->tree_root;
+//     for (i = tree_meta->root_level; i > 0; i--)
+//     {
+//         NODE_PREF(p);
+//         // if the lock bit is set, abort
+//         if (p->lock())
+//         {
+//             _xabort(1);
+//             goto Again;
+//         }
+        
+//         t = p->num();
+//         // sequential search (which is slightly faster now)
+//         for (b = 1; b <= t; b++)
+//             if (p->ent[b].k >= key) // key < p->ent[b].k
+//                 break;
+//         p = p->ent[b-1].ch;
+//     }
     // lp = (bleaf *)p;
     // LEAF_PREF(lp);
     // if (lp->lock)
@@ -661,9 +726,9 @@ Again:
     // } // end while
     // lp->lock = 1;
     
-    _xend();
-    // lp->lock = 0;
-    return true;
+    // _xend();
+    // // lp->lock = 0;
+    // return true;
 }
 
 /* ------------------------------------- *
