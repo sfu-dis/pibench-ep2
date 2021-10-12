@@ -679,15 +679,15 @@ Again1: // find target leaf and lock it
     //     }
     //     mask &= ~(0x1 << jj); // remove this bit
     // } // end while
-    if (pos >= 0)
-    {
-        lp->ent[pos].ch = ptr;
-    #ifdef NVMPOOL_REAL
-        clwb(lp);
-        sfence();
-    #endif
-    }
-    lp->lock = 0;
+    // if (pos >= 0)
+    // {
+    //     lp->ent[pos].ch = ptr;
+    // #ifdef NVMPOOL_REAL
+    //     clwb(lp);
+    //     sfence();
+    // #endif
+    // }
+    // lp->lock = 0;
     return pos >= 0;
 //     bnode *p;
 //     bleaf *lp;
