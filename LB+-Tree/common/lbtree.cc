@@ -688,7 +688,7 @@ Again1: // find target leaf and lock it
     // #endif
     // }
     lp->lock = 0;
-    return pos >= 0;
+    return true;
 //     bnode *p;
 //     bleaf *lp;
 //     int i, t, m, b, jj;
