@@ -180,15 +180,18 @@ public:
    void *alloc(unsigned long long size)
    {
    #ifdef POOL
-      if (mempool_cur + size <= mempool_end)
+      if (mempool_cur)
       {
-         char *p;
-         p = mempool_cur;
-         mempool_cur += size;
-         return (void *)p;
+         if (mempool_cur + size <= mempool_end)
+         {
+            char *p;
+            p = mempool_cur;
+            mempool_cur += size;
+            return (void *)p;
+         }
+         fprintf(stderr, "%s alloc - run out of memory!\n", mempool_name);
+         abort();
       }
-      fprintf(stderr, "%s alloc - run out of memory!\n", mempool_name);
-      abort();
    #elif defined(PMEM)
       if (pop)
       {

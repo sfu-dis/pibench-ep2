@@ -38,37 +38,37 @@ void threadMemPools::init(int num_workers, long long size, long long align)
     for (int i = 0; i < tm_num_workers; i++) {
         tm_pools[i] = mempool(NULL);
     }
-#ifdef POOL
-    long long load_pool_size = (size / 2LL / align) * align;
-    long long size_per_pool = (load_pool_size / (long long) tm_num_workers / align) * align;
-    printf("DRAM pool size for load (first) thread: %lld \n", load_pool_size + size_per_pool);
-    printf("DRAM pool size for each other worker thread: %lld \n", size_per_pool);
-    tm_size = size_per_pool * (long long) tm_num_workers + load_pool_size;
-    printf("Total DRAM pool size: %lld \n", tm_size);
-    tm_buf = (char *)memalign(align, tm_size);
-    if (!tm_buf || !tm_pools)
-    {
-        perror("malloc");
-        exit(1);
-    }
+// #ifdef POOL
+//     long long load_pool_size = (size / 2LL / align) * align;
+//     long long size_per_pool = (load_pool_size / (long long) tm_num_workers / align) * align;
+//     printf("DRAM pool size for load (first) thread: %lld \n", load_pool_size + size_per_pool);
+//     printf("DRAM pool size for each other worker thread: %lld \n", size_per_pool);
+//     tm_size = size_per_pool * (long long) tm_num_workers + load_pool_size;
+//     printf("Total DRAM pool size: %lld \n", tm_size);
+//     tm_buf = (char *)memalign(align, tm_size);
+//     if (!tm_buf || !tm_pools)
+//     {
+//         perror("malloc");
+//         exit(1);
+//     }
 
-    // 2. initialize memory pools
-    char name[80];
-    for (int i = 0; i < tm_num_workers; i++)
-    {
-        sprintf(name, "DRAM pool %d", i);
-        if (i)
-            tm_pools[i].init(tm_buf + load_pool_size + i * size_per_pool, size_per_pool, align, strdup(name));
-        else
-            tm_pools[0].init(tm_buf, load_pool_size + size_per_pool, align, strdup(name));
-    }
+//     // 2. initialize memory pools
+//     char name[80];
+//     for (int i = 0; i < tm_num_workers; i++)
+//     {
+//         sprintf(name, "DRAM pool %d", i);
+//         if (i)
+//             tm_pools[i].init(tm_buf + load_pool_size + i * size_per_pool, size_per_pool, align, strdup(name));
+//         else
+//             tm_pools[0].init(tm_buf, load_pool_size + size_per_pool, align, strdup(name));
+//     }
 
-    // 3. touch every page to make sure that they are allocated
-    for (long long i = 0; i < tm_size; i += 4096)
-    {
-        tm_buf[i] = 1;
-    }
-#endif
+//     // 3. touch every page to make sure that they are allocated
+//     for (long long i = 0; i < tm_size; i += 4096)
+//     {
+//         tm_buf[i] = 1;
+//     }
+// #endif
 }
 
 void threadMemPools::print(void)
