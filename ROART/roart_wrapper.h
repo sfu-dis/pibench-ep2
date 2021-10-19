@@ -3,6 +3,7 @@
 #include "Tree.h"
 #include "threadinfo.h"
 #include <sys/types.h>
+#include <algorithm>
 
 // #define DEBUG_MSG
 
@@ -129,8 +130,8 @@ bool roart_wrapper::remove(const char *key, size_t key_sz)
 int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&values_out)
 {
   thread_local ThreadHelper t;
-  constexpr size_t TWO_MB = 1ULL << 21;
-  static thread_local char results[TWO_MB];
+  constexpr size_t ONE_MB = 1ULL << 20;
+  static thread_local char results[ONE_MB];
   size_t scanned = 0;
   values_out = results;
   uint64_t max = (uint64_t)-1;
@@ -143,6 +144,10 @@ int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
   end_k.init((char*)&max, key_sz, (char*)&max, key_sz);
 #endif
   roart.lookupRange(&k, &end_k, nullptr, (PART_ns::Leaf**)&results, scan_sz, scanned);
+  auto arr = (PART_ns::Leaf**)&results;
+  std::sort(arr, arr + scanned, [] (const PART_ns::Leaf* l1, const PART_ns::Leaf* l2) {
+            return *(uint64_t*)(l1->kv) < *(uint64_t*)(l2->kv);
+    });
 #ifdef DEBUG_MSG
   if (scanned != 100)
     printf("%d records scanned.\n", scanned);

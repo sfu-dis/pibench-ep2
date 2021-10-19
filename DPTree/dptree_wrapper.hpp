@@ -30,6 +30,10 @@ private:
     dptree::concur_dptree<uint64_t, uint64_t> dptree;
 };
 
+struct KV {
+    uint64_t k;
+    uint64_t v;
+};
 
 dptree_wrapper::dptree_wrapper()
 {
