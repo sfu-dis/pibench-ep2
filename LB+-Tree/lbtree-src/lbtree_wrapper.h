@@ -176,15 +176,15 @@ Retry:
   //   p->lock = 1;
   //   _xend();
   // }
-  ent = p->ent[pos];
-  if (p->lock || ent.k != k || !__sync_bool_compare_and_swap((uint64_t*)&(p->ent[pos].ch), *(uint64_t*)&(ent.ch), *(uint64_t*)value))
-    goto Retry;
-  // void *recptr = lbt->get_recptr(p, pos);
-  // memcpy(&recptr, value, ITEM_SIZE);
-// #ifdef NVMPOOL_REAL
-//   clwb(p);
-//   sfence();
-// #endif
+  // ent = p->ent[pos];
+  // if (p->lock || ent.k != k || !__sync_bool_compare_and_swap((uint64_t*)&(p->ent[pos].ch), *(uint64_t*)&(ent.ch), *(uint64_t*)value))
+  //   goto Retry;
+  void *recptr = lbt->get_recptr(p, pos);
+  memcpy(&recptr, value, ITEM_SIZE);
+#ifdef NVMPOOL_REAL
+  clwb(p);
+  sfence();
+#endif
   // p->lock = 0;
   return true;
 }
