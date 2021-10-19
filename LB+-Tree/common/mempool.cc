@@ -148,11 +148,11 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
 
         tn_nvm_file = nvm_file;
         
-        long long load_pool_size = (size / (long long)2 / 4096LL) * 4096LL; 
-        long long size_per_pool = (load_pool_size / (long long) tm_num_workers / 4096LL) * 4096LL;
-        printf("NVM pool size for load (first) thread: %lld \n", load_pool_size + size_per_pool);
-        printf("NVM pool size for each other worker thread: %lld \n", size_per_pool);
-        tm_size = size_per_pool * (long long) tm_num_workers + load_pool_size;
+        //long long load_pool_size = (size / (long long)2 / 4096LL) * 4096LL; 
+        long long size_per_pool = (size / (long long) tm_num_workers / 4096LL) * 4096LL;
+        // printf("NVM pool size for load (first) thread: %lld \n", load_pool_size + size_per_pool);
+        // printf("NVM pool size for each other worker thread: %lld \n", size_per_pool);
+        tm_size = size_per_pool * (long long) tm_num_workers;
         printf("Total NVM pool size: %lld \n", tm_size);
         #ifdef NVMPOOL_REAL
             printf("Using actual NVM\n");
@@ -191,10 +191,7 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         for (int i = 0; i < tm_num_workers; i++)
         {
             sprintf(name, "NVM pool %d", i);
-            if (i)
-                tm_pools[i].init(tm_buf + load_pool_size + i * size_per_pool, size_per_pool, 4096LL, strdup(name));
-            else
-                tm_pools[0].init(tm_buf, load_pool_size + size_per_pool, 4096LL, strdup(name));
+            tm_pools[i].init(tm_buf + i * size_per_pool, size_per_pool, 4096LL, strdup(name));
         }
 
         // 3. touch every page to make sure that they are allocated
