@@ -71,5 +71,5 @@ int utree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
   if (scanned != 100)
     printf("%d records scanned\n", scanned);
 #endif
-  return 
+  return scanned;
 }
