@@ -1,7 +1,7 @@
-# index-wrappers
+# Index wrappers
 Pibench wrapper for indexes
 
-# Python Scripts
+# Python scripts
 ```
 cp -r wrappers /youPathTo_PiBench_Build_Src 
 cp benchmark.py /youPathTo_PiBench_Build_Src
