@@ -1,6 +1,13 @@
 # index-wrappers
 Pibench wrapper for indexes
 
+Python Scripts
+```
+cp -r wrappers /youPathTo_PiBench_Build_Src 
+cp benchmark.py /youPathTo_PiBench_Build_Src
+python3 benchmark.py
+```
+
 # Installation
 1. [DPTree](DPTree/README.md)
 2. [FPTree](FP-Tree/README.md)
