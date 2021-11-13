@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[5]:
+# In[26]:
 
 
 import os
@@ -59,13 +59,19 @@ def default_binary_path(mode, tree):
     else:
         return "unknow tree"
     
+def define_dptree_cpubind(threads):
+    cpubind = list(range(0, threads * 2, 2))
+    cpubind = list(map(str, cpubind))
+    str_cpubind = ','.join(cpubind)
+    return str_cpubind
+    
 OPs = ["-r 1", "-r 0 -i 1", "-r 0 -u 1", "-r 0 -s 1"]
-TREE = "hot" # name of index choose from [masstree, hot, fptree, lbtree, dptree, roart, roart_dcmm, utree]
+TREE = "dptree" # name of index choose from [masstree, hot, fptree, lbtree, dptree, roart, roart_dcmm, utree]
 MODE = "dram" # dram or pmem tree DRAM: [fptree, lbtree, roart, masstree, hot] PMEM: [fptree, lbtree, roart, roart_dcmm, dptree, utree]
 OUTPUT_DIR = "./results" # generate output directory 
 DISTRIBUTION = "uniform" # choose from [uniform, skew]
 THREAD = [40, 30, 20, 10, 5, 1]
-TRIAL = 3
+TRIAL = 1
 N = 100000000
 P = 100000000
 POOL_NAME = default_pool_name(MODE, TREE) # name of pool file to delete (assume on pmem0), set to "" if running dram index
@@ -73,7 +79,7 @@ BINARY_PATH = default_binary_path(MODE, TREE)
 OUTPUT_DIR = OUTPUT_DIR + "_" + MODE + '_' + DISTRIBUTION + '/'
 
 
-# In[6]:
+# In[27]:
 
 
 # running script
@@ -91,15 +97,21 @@ for op in OPs:
 
     command_binary_path = "echo Index binary path: {binary_path}".format(binary_path = BINARY_PATH)
     os.system(command_binary_path)
-
-    NUMA_COMMAND = "numactl --cpunodebind=0 --membind=0"
+        
     LD_PRELOAD = "LD_PRELOAD=/usr/lib64/libjemalloc.so"
+    
     if DISTRIBUTION == "skew":
         SKEW = "--distribution SELFSIMILAR --skew 0.2"
     else:
         SKEW = ""
 
     for T in THREAD:
+        
+        if TREE == "dptree":
+            NUMA_COMMAND = "numactl --physcpubind={cpubind} --membind=0".format(cpubind = define_dptree_cpubind(T))
+        else:
+            NUMA_COMMAND = "numactl --cpunodebind=0 --membind=0"
+            
         command = "hog-machine.sh {numa_command} sudo {ld_preload} ./PiBench {binary_path}             -n {n} -p {p} {op} {skew} --mode time --seconds 10 -t {t} >> {file}".format(numa_command=NUMA_COMMAND,                 ld_preload=LD_PRELOAD, binary_path=BINARY_PATH, n=N, p=P, op=op, skew=SKEW, t=T, file=output_file)
 
         for i in range(TRIAL):
@@ -111,18 +123,6 @@ for op in OPs:
             if POOL_NAME != "":
                 os.system("eval sudo rm {pool_name}".format(pool_name=POOL_NAME))
             os.system("sleep 3")
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:
