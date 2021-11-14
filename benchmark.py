@@ -67,7 +67,7 @@ def define_dptree_cpubind(threads):
     
 OPs = ["-r 1", "-r 0 -i 1", "-r 0 -u 1", "-r 0 -s 1"]
 TREE = "dptree" # name of index choose from [masstree, hot, fptree, lbtree, dptree, roart, roart_dcmm, utree]
-MODE = "dram" # dram or pmem tree DRAM: [fptree, lbtree, roart, masstree, hot] PMEM: [fptree, lbtree, roart, roart_dcmm, dptree, utree]
+MODE = "pmem" # dram or pmem tree DRAM: [fptree, lbtree, roart, masstree, hot] PMEM: [fptree, lbtree, roart, roart_dcmm, dptree, utree]
 OUTPUT_DIR = "./results" # generate output directory 
 DISTRIBUTION = "uniform" # choose from [uniform, skew]
 THREAD = [40, 30, 20, 10, 5, 1]
