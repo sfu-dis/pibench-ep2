@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[26]:
+# In[30]:
 
 
 import os
@@ -71,7 +71,7 @@ MODE = "dram" # dram or pmem tree DRAM: [fptree, lbtree, roart, masstree, hot] P
 OUTPUT_DIR = "./results" # generate output directory 
 DISTRIBUTION = "uniform" # choose from [uniform, skew]
 THREAD = [40, 30, 20, 10, 5, 1]
-TRIAL = 1
+TRIAL = 3
 N = 100000000
 P = 100000000
 POOL_NAME = default_pool_name(MODE, TREE) # name of pool file to delete (assume on pmem0), set to "" if running dram index
@@ -79,7 +79,7 @@ BINARY_PATH = default_binary_path(MODE, TREE)
 OUTPUT_DIR = OUTPUT_DIR + "_" + MODE + '_' + DISTRIBUTION + '/'
 
 
-# In[27]:
+# In[33]:
 
 
 # running script
@@ -117,11 +117,10 @@ for op in OPs:
         for i in range(TRIAL):
             print(command)
             os.system("echo {command}".format(command=command))
-            os.system("echo -e \n{command} >> {file}".format(command=command, file=output_file))
             os.system("eval {command}".format(command=command))
             os.system("sleep 1")
             if POOL_NAME != "":
-                os.system("eval sudo rm {pool_name}".format(pool_name=POOL_NAME))
+                os.system("sudo rm {pool_name}".format(pool_name=POOL_NAME))
             os.system("sleep 3")
 
 
