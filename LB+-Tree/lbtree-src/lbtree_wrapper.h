@@ -95,10 +95,6 @@ lbtree_wrapper::~lbtree_wrapper()
 #ifdef NVMFLUSH_STAT
   NVMFLUSH_STAT_print();
 #endif
-#ifdef MEMORY_FOOTPRINT
-    printf("DRAM Footprint: %llu\n\n", dram_footprint);
-    printf("PMEM Footprint: %llu\n\n", pmem_footprint);
-#endif
 }
 
 inline key_type PBkeyToLB(const char *key, size_t size = 8)
