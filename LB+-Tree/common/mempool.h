@@ -52,6 +52,10 @@
 #define PMEM // comment this out to use DRAM as NVM (DRAM version LB+-Tree)
 //#define POOL // comment this out to use malloc and PMDK if #define PMEM
 
+// #define MEMORY_FOOTPRINT
+std::atomic<uint64_t> dram_footprint(0);
+std::atomic<uint64_t> pmem_footprint(0);
+
 #define FREE_ON_DELETE // comment this out to reuse freed leaves
 
 struct dummy { // dummy class for using PMDK
@@ -182,6 +186,9 @@ public:
    #ifdef POOL
       if (mempool_cur)
       {
+         #ifdef MEMORY_FOOTPRINT
+            pmem_footprint += size;
+         #endif
          if (mempool_cur + size <= mempool_end)
          {
             char *p;
@@ -195,6 +202,9 @@ public:
    #elif defined(PMEM)
       if (pop)
       {
+         #ifdef MEMORY_FOOTPRINT
+            pmem_footprint += size;
+         #endif
          thread_local pobj_action act;
          auto x = POBJ_XRESERVE_NEW(pop, dummy, &act, POBJ_CLASS_ID(class_id));
          D_RW(x)->arr[0] = NULL;
@@ -204,6 +214,9 @@ public:
          return pmemobj_direct(x.oid);
       }
    #endif
+      #ifdef MEMORY_FOOTPRINT
+         dram_footprint += size;
+      #endif
       return new (std::align_val_t(256)) char[size];
    }
 

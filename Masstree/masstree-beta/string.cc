@@ -512,6 +512,9 @@ inline String::memo_type* String::create_memo(int capacity, int dirty) {
     assert(capacity > 0 && capacity >= dirty);
     memo_type *memo =
         reinterpret_cast<memo_type *>(new char[capacity + MEMO_SPACE]);
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += (capacity + MEMO_SPACE);
+    #endif
     if (memo)
         memo->initialize(capacity, dirty);
     return memo;

@@ -41,6 +41,10 @@ dptree_wrapper::dptree_wrapper()
 
 dptree_wrapper::~dptree_wrapper()
 {
+#ifdef MEMORY_FOOTPRINT
+    printf("DRAM Footprint: %llu\n\n", dram_footprint);
+    printf("PMEM Footprint: %llu\n\n", pmem_footprint);
+#endif
 }
 
 bool dptree_wrapper::find(const char* key, size_t key_sz, char* value_out)

@@ -42,6 +42,10 @@
 #include <thread>
 #include <boost/lockfree/queue.hpp>
 
+// #define MEMORY_FOOTPRINT
+std::atomic<uint64_t> dram_footprint(0);
+std::atomic<uint64_t> pmem_footprint(0);
+
 #ifdef TEST_MODE
     #define MAX_INNER_SIZE 3
     #define MAX_LEAF_SIZE 4

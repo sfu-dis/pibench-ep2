@@ -179,7 +179,9 @@ inline LeafNode* FPtree::maxLeaf(BaseNode* node)
 
         POBJ_ALLOC(pop, &array, struct Log, sizeof(struct Log) * sizeLogArray,
                     NULL, NULL);
-
+        #ifdef MEMORY_FOOTPRINT
+            pmem_footprint += (sizeof(struct Log) * sizeLogArray);
+        #endif
         if (TOID_IS_NULL(array)) { fprintf(stderr, "POBJ_ALLOC\n"); return OID_NULL; }
 
         for (uint64_t i = 0; i < sizeLogArray; i++) 
@@ -190,6 +192,9 @@ inline LeafNode* FPtree::maxLeaf(BaseNode* node)
             {
                 fprintf(stderr, "pmemobj_alloc\n");
             }
+            #ifdef MEMORY_FOOTPRINT
+                pmem_footprint += sizeof(struct Log);
+            #endif
         }	
         return array.oid;
     }
@@ -448,6 +453,9 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
         if (!root->isInnerNode) // splitting when tree has only root 
         {
             cur = new InnerNode();
+        #ifdef MEMORY_FOOTPRINT
+            dram_footprint += sizeof(InnerNode);
+        #endif
             cur->init(splitKey, reachedLeafNode, newLeafNode);
             root = cur;
         }
@@ -476,6 +484,9 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
                 else 
                 {
                     newInnerNode = new InnerNode();
+                    #ifdef MEMORY_FOOTPRINT
+                        dram_footprint += sizeof(InnerNode);
+                    #endif
                     parent->nKey = mid;
                     if (insert_pos != mid)
                     {
@@ -500,6 +511,9 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
                     if (parent == root)
                     {
                         cur = new InnerNode(splitKey, parent, newInnerNode);
+                        #ifdef MEMORY_FOOTPRINT
+                            dram_footprint += sizeof(InnerNode);
+                        #endif
                         root = cur;
                         break;
                     }
@@ -530,6 +544,9 @@ void FPtree::updateParents(uint64_t splitKey, InnerNode* parent, BaseNode* child
         else 
         {
             InnerNode* newInnerNode = new InnerNode();
+            #ifdef MEMORY_FOOTPRINT
+                dram_footprint += sizeof(InnerNode);
+            #endif
             insert_pos = std::lower_bound(parent->keys, parent->keys + MAX_INNER_SIZE, splitKey) - parent->keys;
 
             if (insert_pos < mid) {  // insert into parent node
@@ -562,6 +579,9 @@ void FPtree::updateParents(uint64_t splitKey, InnerNode* parent, BaseNode* child
             if (parent == root)
             {
                 root = new InnerNode(splitKey, parent, newInnerNode);
+                #ifdef MEMORY_FOOTPRINT
+                    dram_footprint += sizeof(InnerNode);
+                #endif
                 return;
             }
             parent = stack_innerNodes.pop();
@@ -615,11 +635,17 @@ bool FPtree::insert(struct KV kv)
                 TOID(struct List) ListHead = POBJ_ROOT(pop, struct List);
                 TOID(struct LeafNode) *dst = &D_RW(ListHead)->head;
                 POBJ_ALLOC(pop, dst, struct LeafNode, args.size, constructLeafNode, &args);
+                #ifdef MEMORY_FOOTPRINT
+                    pmem_footprint += sizeof(struct LeafNode);
+                #endif
                 D_RW(ListHead)->head = *dst; 
                 pmemobj_persist(pop, &D_RO(ListHead)->head, sizeof(D_RO(ListHead)->head));
                 root = (struct BaseNode *) pmemobj_direct((*dst).oid);
             #else
                 root = new LeafNode();
+                #ifdef MEMORY_FOOTPRINT
+                    dram_footprint += sizeof(LeafNode);
+                #endif
                 reinterpret_cast<LeafNode*>(root)->lock = 1;
                 reinterpret_cast<LeafNode*> (root)->addKV(kv);
                 reinterpret_cast<LeafNode*>(root)->lock = 0;
@@ -687,7 +713,9 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
         log->PLeaf = *dst;
 
         POBJ_ALLOC(pop, dst, struct LeafNode, args.size, constructLeafNode, &args);
-
+        #ifdef MEMORY_FOOTPRINT
+            pmem_footprint += sizeof(LeafNode);
+        #endif
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {
             if (D_RO(*dst)->kv_pairs[i].key < splitKey)
@@ -715,7 +743,9 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
         splitLogQueue.push(log);
     #else
         LeafNode* newLeafNode = new LeafNode(*leaf);
-
+        #ifdef MEMORY_FOOTPRINT
+            dram_footprint += sizeof(LeafNode);
+        #endif
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {
             if (newLeafNode->kv_pairs[i].key < splitKey)
@@ -1224,6 +1254,9 @@ uint64_t FPtree::rangeScan(uint64_t key, uint64_t scan_size, char* result)
         min_keys.erase(min_keys.begin());
 
         InnerNode* new_root = new InnerNode();
+        #ifdef MEMORY_FOOTPRINT
+            dram_footprint += sizeof(InnerNode);
+        #endif
         uint64_t idx = 0;
         uint64_t root_size = total_leaves <= MAX_INNER_SIZE ? 
                              total_leaves : MAX_INNER_SIZE + 1;

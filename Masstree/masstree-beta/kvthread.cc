@@ -54,6 +54,9 @@ threadinfo *threadinfo::make(int purpose, int index) {
     static int threads_initialized;
 
     threadinfo* ti = new(malloc(8192)) threadinfo(purpose, index);
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += 8192;
+    #endif
     ti->next_ = allthreads;
     allthreads = ti;
 
@@ -204,6 +207,9 @@ void threadinfo::refill_pool(int nl) {
 
     if (!use_pool()) {
         pool_[nl - 1] = malloc(nl * CACHE_LINE_SIZE);
+        #ifdef MEMORY_FOOTPRINT
+            dram_footprint += (nl * CACHE_LINE_SIZE);
+        #endif
         if (pool_[nl - 1])
             *reinterpret_cast<void**>(pool_[nl - 1]) = 0;
         return;

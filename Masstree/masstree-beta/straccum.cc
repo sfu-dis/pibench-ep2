@@ -92,6 +92,9 @@ char* StringAccum::grow(int ncap) {
         ncap = r_.cap + (1 << 19);
 
     char* n = new char[ncap + memo_space];
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += (ncap + memo_space);
+    #endif
     if (!n) {
         assign_out_of_memory();
         errno = ENOMEM;

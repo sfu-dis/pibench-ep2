@@ -45,6 +45,7 @@
 #include <avx512fintrin.h>
 #endif
 
+
 extern int nvm_dram_alloc(void **ptr, size_t align, size_t size);
 extern void nvm_dram_free(void *ptr, size_t size);
 extern void clflush_1mfence(volatile void *p);

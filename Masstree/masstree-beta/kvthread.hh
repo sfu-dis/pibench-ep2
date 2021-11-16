@@ -204,6 +204,9 @@ class threadinfo {
     // memory allocation
     void* allocate(size_t sz, memtag tag) {
         void* p = malloc(sz + memdebug_size);
+        #ifdef MEMORY_FOOTPRINT
+            dram_footprint += (sz + memdebug_size);
+        #endif
         p = memdebug::make(p, sz, tag);
         if (p)
             mark(threadcounter(tc_alloc + (tag > memtag_value)), sz);

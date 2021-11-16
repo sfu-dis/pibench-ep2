@@ -69,6 +69,9 @@ masstree_wrapper::masstree_wrapper()
 
 masstree_wrapper::~masstree_wrapper()
 {
+#ifdef MEMORY_FOOTPRINT
+    printf("DRAM Footprint: %llu\n\n", dram_footprint);
+#endif
 }
 
 bool masstree_wrapper::find(const char *key, size_t key_sz, char *value_out)

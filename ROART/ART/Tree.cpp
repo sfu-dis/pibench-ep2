@@ -41,10 +41,24 @@ void *allocate_size(size_t size) {
 
 #ifdef DRAM_MODE
     void *addr = new (std::align_val_t(64)) char[size];
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += size;
+        if (dram_map.find(size) == dram_map.end())
+            dram_map[size] = 1;
+        else
+            dram_map[size] ++;
+    #endif
 #else
     PMEMoid ptr;
     pmemobj_zalloc(pmem_pool, &ptr, size, TOID_TYPE_NUM(char));
     void *addr = (void *)pmemobj_direct(ptr);
+    #ifdef MEMORY_FOOTPRINT
+        pmem_footprint += size;
+        if (pmem_map.find(size) == pmem_map.end())
+            pmem_map[size] = 1;
+        else
+            pmem_map[size] ++;
+    #endif
 #endif
 
 #ifdef COUNT_ALLOC

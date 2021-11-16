@@ -19,6 +19,9 @@
 #include "str.hh"
 #include "ksearch.hh"
 
+// #define MEMORY_FOOTPRINT
+std::atomic<uint64_t> dram_footprint(0);
+
 namespace Masstree {
 using lcdf::Str;
 using lcdf::String;

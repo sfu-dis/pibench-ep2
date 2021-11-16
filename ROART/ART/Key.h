@@ -5,6 +5,7 @@
 #include <cstring>
 #include <memory>
 #include <stdint.h>
+#include <unordered_map>
 
 static const char * pool_path = "./pool.data";
 static const long long pool_size = 64LL * 1024 * 1024 * 1024; // default 64GB
@@ -16,6 +17,12 @@ static const long long pool_size = 64LL * 1024 * 1024 * 1024; // default 64GB
 #define ZENTRY  // Stores key bytes in inner node pointers
 #define LEAF_ARRAY  // subtree with <= 64 entries will be compact into array of pointers
 // #define SORT_LEAVES
+
+// #define MEMORY_FOOTPRINT
+std::atomic<uint64_t> dram_footprint(0);
+std::atomic<uint64_t> pmem_footprint(0);
+std::unordered_map<size_t, int> dram_map;
+std::unordered_map<size_t, int> pmem_map;
 
 //#define INSTANT_RESTART
 //#define RECLAIM_MEMORY  // recovery
