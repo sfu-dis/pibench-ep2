@@ -258,12 +258,16 @@ FPtree::FPtree()
 
 FPtree::~FPtree() 
 {
-    #ifdef PMEM
-        pmemobj_close(pop);
-    #else
-        if (root != nullptr)
-            delete root;
-    #endif  
+#ifdef MEMORY_FOOTPRINT
+    std::cout << "DRAM Footprint: " << dram_footprint << std::endl;
+    std::cout << "PMEM Footprint: " << pmem_footprint << std::endl;
+#endif
+#ifdef PMEM
+    pmemobj_close(pop);
+#else
+    if (root != nullptr)
+        delete root;
+#endif  
 }
 
 

@@ -27,19 +27,12 @@ private:
     FPtree tree_;
 };
 
-extern static std::atomic<uint64_t> dram_footprint;
-extern static std::atomic<uint64_t> pmem_footprint;
-
 fptree_wrapper::fptree_wrapper()
 {
 }
 
 fptree_wrapper::~fptree_wrapper()
 {
-#ifdef MEMORY_FOOTPRINT
-    std::cout << "DRAM Footprint: " << dram_footprint << std::endl;
-    std::cout << "PMEM Footprint: " << pmem_footprint << std::endl;
-#endif
 }
 
 bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
