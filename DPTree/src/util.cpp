@@ -114,6 +114,9 @@ void clear_cache()
     // Remove cache
     int size = 256 * 1024 * 1024;
     char *garbage = new char[size];
+    #ifdef MEMORY_FOOTPRINT
+        other_mp += size;
+    #endif
     for (int i = 0; i < size; ++i)
         garbage[i] = i;
     for (int i = 100; i < size; ++i)

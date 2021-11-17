@@ -9,6 +9,9 @@
 namespace ART_OLC {
 
     Tree::Tree(LoadKeyFunction loadKey) : root(new N256( nullptr, 0)), loadKey(loadKey) {
+        #ifdef MEMORY_FOOTPRINT
+            baseTree_mp += sizeof(N256);
+        #endif
     }
 
     Tree::~Tree() {
@@ -387,7 +390,9 @@ namespace ART_OLC {
                     }
                     // 1) Create new node which will be parent of node, Set common prefix, level to this node
                     auto newNode = new N4(node->getPrefix(), nextLevel - level);
-
+                    #ifdef MEMORY_FOOTPRINT
+                        baseTree_mp += sizeof(N4);
+                    #endif
                     // 2)  add node and (tid, *k) as children
                     newNode->insert(k[nextLevel], N::setLeaf(tid));
                     newNode->insert(nonMatchingKey, node);
@@ -446,6 +451,9 @@ namespace ART_OLC {
                 }
 
                 auto n4 = new N4(&k[level], prefixLength);
+                #ifdef MEMORY_FOOTPRINT
+                    baseTree_mp += sizeof(N4);
+                #endif
                 n4->insert(k[level + prefixLength], N::setLeaf(tid));
                 n4->insert(key[level + prefixLength], nextNode);
                 N::change(node, k[level - 1], n4);

@@ -114,6 +114,9 @@ namespace ART_OLC {
         }
 
         auto nBig = new biggerN(n->getPrefix(), n->getPrefixLength());
+        #ifdef MEMORY_FOOTPRINT
+            baseTree_mp += sizeof(biggerN);
+        #endif
         n->copyTo(nBig);
         nBig->insert(key, val);
 
@@ -226,6 +229,9 @@ namespace ART_OLC {
         }
 
         auto nSmall = new smallerN(n->getPrefix(), n->getPrefixLength());
+        #ifdef MEMORY_FOOTPRINT
+            baseTree_mp += sizeof(smallerN);
+        #endif
 
         n->copyTo(nSmall);
         nSmall->remove(key);

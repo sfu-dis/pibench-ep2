@@ -8,6 +8,7 @@
 #include <string.h>
 #include <immintrin.h>
 #include <unistd.h>
+#include <atomic>
 
 extern std::atomic<uint64_t> pmem_footprint;
 extern std::atomic<uint64_t> other_mp;

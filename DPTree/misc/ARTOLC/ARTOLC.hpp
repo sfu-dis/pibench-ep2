@@ -2,6 +2,8 @@
 #include "Tree.h"
 #include "index_key.h"
 
+extern std::atomic<uint64_t> baseTree_mp;
+
 template <typename KeyType>
 class ArtOLCIndex
 {
@@ -57,6 +59,9 @@ class ArtOLCIndex
 
     ArtOLCIndex(uint64_t kt)
     {
+        #ifdef MEMORY_FOOTPRINT
+            baseTree_mp += sizeof(ART_OLC::Tree);
+        #endif
         if (sizeof(KeyType) == 8)
         {
             idx = new ART_OLC::Tree([](TID tid, Key &key) {

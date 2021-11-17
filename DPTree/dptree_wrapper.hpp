@@ -9,8 +9,15 @@
 #include <mutex>
 #include <shared_mutex>
 #include <libpmemobj.h>
+#include <atomic>
 
 // #define DEBUG_MSG
+
+#define MEMORY_FOOTPRINT
+std::atomic<uint64_t> bufferTree_mp(0);
+std::atomic<uint64_t> baseTree_mp(0);
+std::atomic<uint64_t> other_mp(0);
+std::atomic<uint64_t> pmem_footprint(0);
 
 extern int parallel_merge_worker_num;
 
@@ -42,8 +49,10 @@ dptree_wrapper::dptree_wrapper()
 dptree_wrapper::~dptree_wrapper()
 {
 #ifdef MEMORY_FOOTPRINT
-    printf("DRAM Footprint: %llu\n\n", dram_footprint);
-    printf("PMEM Footprint: %llu\n\n", pmem_footprint);
+    printf("Buffer Tree Footprint: %llu\n\n", bufferTree_mp.load());
+    printf("Base Tree Footprint: %llu\n\n", baseTree_mp.load());
+    printf("Other DRAM Footprint: %llu\n\n", other_mp.load());
+    printf("PMEM Footprint: %llu\n\n", pmem_footprint.load());
 #endif
 }
 

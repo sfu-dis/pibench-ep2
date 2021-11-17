@@ -10,6 +10,7 @@
 #include <vector>
 #include <fstream>
 #include <functional>
+#include <atomic>
 
 extern std::atomic<uint64_t> bufferTree_mp;
 extern std::atomic<uint64_t> baseTree_mp;

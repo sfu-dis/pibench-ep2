@@ -6,6 +6,8 @@
 #define ART_OPTIMISTICLOCK_COUPLING_N_H
 #include "N.h"
 
+extern std::atomic<uint64_t> baseTree_mp;
+
 using namespace ART;
 
 namespace ART_OLC {
