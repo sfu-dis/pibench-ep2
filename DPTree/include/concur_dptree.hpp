@@ -2110,7 +2110,7 @@ class durable_concur_buffer_btree
     {
         btree = new btreeolc::BTree<key_type, value_type>();
         #ifdef MEMORY_FOOTPRINT
-            bufferTree_mp += sizeof(btreeolc::BTree);
+            bufferTree_mp += sizeof(btreeolc::BTree<key_type, value_type>);
         #endif
         cap = expected_size = std::max(expected_size, (size_t)1000);
         bloom = new concur_bloom_type(cap, bloom_err_rate);

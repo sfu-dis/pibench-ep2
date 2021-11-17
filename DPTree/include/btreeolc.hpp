@@ -322,7 +322,7 @@ struct BTree
     BTree() { 
         root = new BTreeLeaf<Key, Value>(); 
         #ifdef MEMORY_FOOTPRINT
-            bufferTree_mp += sizeof(BTreeLeaf);
+            bufferTree_mp += sizeof(BTreeLeaf<Key, Value>);
         #endif
     }
 
@@ -330,7 +330,7 @@ struct BTree
     {
         auto inner = new BTreeInner<Key>();
         #ifdef MEMORY_FOOTPRINT
-            bufferTree_mp += sizeof(BTreeInner);
+            bufferTree_mp += sizeof(BTreeInner<Key>);
         #endif
         inner->count = 1;
         inner->keys[0] = k;
