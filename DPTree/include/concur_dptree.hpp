@@ -45,6 +45,9 @@
 #include <avx512fintrin.h>
 #endif
 
+extern std::atomic<uint64_t> bufferTree_mp;
+extern std::atomic<uint64_t> baseTree_mp;
+extern std::atomic<uint64_t> other_mp;
 
 extern int nvm_dram_alloc(void **ptr, size_t align, size_t size);
 extern void nvm_dram_free(void *ptr, size_t size);
@@ -180,6 +183,9 @@ class lockfree_taskqueue
     lockfree_taskqueue(int cap) : consumer_off(0), producer_off(0), max_task_count(std::numeric_limits<int>::max() / 2)
     {
         tasks = new T[cap];
+        #ifdef MEMORY_FOOTPRINT
+            other_mp += sizeof(T);
+        #endif
     }
 
     ~lockfree_taskqueue()
@@ -1214,6 +1220,9 @@ public:
         if (pool == nullptr)
         {
             pool = new ThreadPool(nworkers);
+            #ifdef MEMORY_FOOTPRINT
+                other_mp += sizeof(ThreadPool);
+            #endif
         }
         auto sanity_check_func = [this](leaf_node *h) {
             int max_key_node_idx = -1;
@@ -1638,6 +1647,9 @@ public:
                         __builtin_bswap64(l->max_key(nv));
             };
             art_trees[nv] = new ART_IDX::art_tree(loadKey, loadKey);
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(ART_IDX::art_tree);
+            #endif
             // ART_IDX::art_tree::bulkLoadCreate(loadKey, loadKey, kvs, 0, kvs.size()
             // - 1, 0, KeyExtract, KeyLen);
             auto cur = head[nv];
@@ -2097,12 +2109,21 @@ class durable_concur_buffer_btree
     durable_concur_buffer_btree(size_t expected_size, caching_log_page_allocator<> *allocator) : approx_size(0)
     {
         btree = new btreeolc::BTree<key_type, value_type>();
+        #ifdef MEMORY_FOOTPRINT
+            bufferTree_mp += sizeof(btreeolc::BTree);
+        #endif
         cap = expected_size = std::max(expected_size, (size_t)1000);
         bloom = new concur_bloom_type(cap, bloom_err_rate);
+        #ifdef MEMORY_FOOTPRINT
+            other_mp += sizeof(concur_bloom_type);
+        #endif
         logs.resize(stripes);
         for (int i = 0; i < stripes; ++i)
         {
             logs[i] = new log_type(allocator, approx_size);
+            #ifdef MEMORY_FOOTPRINT
+                other_mp += sizeof(log_type);
+            #endif
         }
     }
 
@@ -2218,10 +2239,16 @@ public:
     {
         cap = expected_size = std::max(expected_size, (size_t)1000);
         bloom = new concur_bloom_type(expected_size, bloom_err_rate);
+        #ifdef MEMORY_FOOTPRINT
+            other_mp += sizeof(concur_bloom_type);
+        #endif
         logs.reserve(stripes);
         for (int i = 0; i < stripes; ++i)
         {
             logs[i] = new log_type(allocator, approx_size);
+            #ifdef MEMORY_FOOTPRINT
+                other_mp += sizeof(log_type);
+            #endif
         }
     }
 
@@ -2350,9 +2377,15 @@ class concur_dptree
 		}
     #endif
         front_buffer_tree = new buffer_btree_type(1024, &allocator);
+        #ifdef MEMORY_FOOTPRINT
+            bufferTree_mp += sizeof(buffer_btree_type);
+        #endif
         middle_buffer_tree = nullptr;
         rear_base_tree = new base_tree_type(base_tree_inner_rebuild_time,
                                             base_tree_parallel_merge_work_time);
+        #ifdef MEMORY_FOOTPRINT
+            baseTree_mp += sizeof(base_tree_type);
+        #endif
     }
     size_t size() { return front_buffer_tree->real_size() + rear_base_tree->size(); }
     size_t get_buffer_tree_size() { return front_buffer_tree->real_size(); }
@@ -2862,6 +2895,9 @@ class concur_dptree
                 auto old_front_buffer_tree = front_buffer_tree;
                 auto new_front_buffer_tree =
                         new buffer_btree_type(expected_new_buffer_tree_size, &allocator);
+                #ifdef MEMORY_FOOTPRINT
+                    bufferTree_mp += sizeof(buffer_btree_type);
+                #endif
                 // make the full front tree as the middle tree for read-only workloads
                 assert(middle_buffer_tree == nullptr);
                 __atomic_store_n(&middle_buffer_tree, old_front_buffer_tree, __ATOMIC_SEQ_CST);

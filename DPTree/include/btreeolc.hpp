@@ -15,6 +15,10 @@
 #include <utility>
 #include <functional>
 
+extern std::atomic<uint64_t> bufferTree_mp;
+extern std::atomic<uint64_t> baseTree_mp;
+extern std::atomic<uint64_t> other_mp;
+
 namespace btreeolc
 {
 
@@ -216,6 +220,9 @@ struct BTreeLeaf : public BTreeLeafBase
     BTreeLeaf *split(Key &sep)
     {
         BTreeLeaf *newLeaf = new BTreeLeaf();
+        #ifdef MEMORY_FOOTPRINT
+            bufferTree_mp += sizeof(BTreeLeaf);
+        #endif
         newLeaf->count = count - (count / 2);
         count = count - newLeaf->count;
         newLeaf->next = next;
@@ -275,6 +282,9 @@ struct BTreeInner : public BTreeInnerBase
     BTreeInner *split(Key &sep)
     {
         BTreeInner *newInner = new BTreeInner();
+        #ifdef MEMORY_FOOTPRINT
+            bufferTree_mp += sizeof(BTreeInner);
+        #endif
         newInner->count = count - (count / 2);
         count = count - newInner->count - 1;
         sep = keys[count];
@@ -309,11 +319,19 @@ struct BTree
 {
     std::atomic<NodeBase *> root;
 
-    BTree() { root = new BTreeLeaf<Key, Value>(); }
+    BTree() { 
+        root = new BTreeLeaf<Key, Value>(); 
+        #ifdef MEMORY_FOOTPRINT
+            bufferTree_mp += sizeof(BTreeLeaf);
+        #endif
+    }
 
     void makeRoot(Key k, NodeBase *leftChild, NodeBase *rightChild)
     {
         auto inner = new BTreeInner<Key>();
+        #ifdef MEMORY_FOOTPRINT
+            bufferTree_mp += sizeof(BTreeInner);
+        #endif
         inner->count = 1;
         inner->keys[0] = k;
         inner->children[0] = leftChild;

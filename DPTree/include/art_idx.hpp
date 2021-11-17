@@ -11,6 +11,10 @@
 #include <fstream>
 #include <functional>
 
+extern std::atomic<uint64_t> bufferTree_mp;
+extern std::atomic<uint64_t> baseTree_mp;
+extern std::atomic<uint64_t> other_mp;
+
 namespace ART_IDX
 {
 // Constants for the node types
@@ -530,6 +534,9 @@ struct art_tree
                 return;
             }
             Node4 *newNode = new Node4();
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node4);
+            #endif
             newNode->prefixLength = newPrefixLength;
             memcpy(newNode->prefix, key + depth, min(newPrefixLength, maxPrefixLength));
             *nodeRef = newNode;
@@ -547,6 +554,9 @@ struct art_tree
             {
                 // Prefix differs, create new node
                 Node4 *newNode = new Node4();
+                #ifdef MEMORY_FOOTPRINT
+                    baseTree_mp += sizeof(Node4);
+                #endif
                 *nodeRef = newNode;
                 newNode->prefixLength = mismatchPos;
                 memcpy(newNode->prefix, node->prefix, min(mismatchPos, maxPrefixLength));
@@ -620,6 +630,9 @@ struct art_tree
                 newPrefixLength++;
 
             Node4 *newNode = new Node4();
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node4);
+            #endif
             newNode->prefixLength = newPrefixLength;
             memcpy(newNode->prefix, key + depth, min(newPrefixLength, maxPrefixLength));
             *nodeRef = newNode;
@@ -637,6 +650,9 @@ struct art_tree
             {
                 // Prefix differs, create new node
                 Node4 *newNode = new Node4();
+                #ifdef MEMORY_FOOTPRINT
+                    baseTree_mp += sizeof(Node4);
+                #endif
                 *nodeRef = newNode;
                 newNode->prefixLength = mismatchPos;
                 memcpy(newNode->prefix, node->prefix, min(mismatchPos, maxPrefixLength));
@@ -707,6 +723,9 @@ struct art_tree
         {
             // Grow to Node16
             Node16 *newNode = new Node16();
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node16);
+            #endif
             *nodeRef = newNode;
             newNode->count = 4;
             copyPrefix(node, newNode);
@@ -738,6 +757,9 @@ struct art_tree
         {
             // Grow to Node48
             Node48 *newNode = new Node48();
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node48);
+            #endif
             *nodeRef = newNode;
             memcpy(newNode->child, node->child, node->count * sizeof(uintptr_t));
             for (unsigned i = 0; i < node->count; i++)
@@ -767,6 +789,9 @@ struct art_tree
         {
             // Grow to Node256
             Node256 *newNode = new Node256();
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node256);
+            #endif
             for (unsigned i = 0; i < 256; i++)
                 if (node->childIndex[i] != 48)
                     newNode->child[i] = node->child[node->childIndex[i]];
@@ -847,6 +872,9 @@ struct art_tree
               class KeyByteExtractFunc>
     static art_tree* bulkLoadCreate(std::function<void(uintptr_t, uint8_t[])> loadKey, std::function<void(uintptr_t, uint8_t[])> loadLowerBoundKey, std::vector<std::pair<Key, uintptr_t>> &kvs, int lo, int hi, int depth, KeyByteExtractFunc ExtractKeyByte, KeyLenFunc KeyLen) {
         auto tree = new art_tree(loadKey, loadLowerBoundKey);
+        #ifdef MEMORY_FOOTPRINT
+            baseTree_mp += sizeof(art_tree);
+        #endif
         tree->root = bulkLoad(kvs, lo, hi, depth, ExtractKeyByte, KeyLen);
         return tree;
     }
@@ -922,18 +950,30 @@ struct art_tree
         if (childCnt <= 4)
         {
             n = new Node4;
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node4);
+            #endif
         }
         else if (childCnt <= 16)
         {
             n = new Node16;
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node16);
+            #endif
         }
         else if (childCnt <= 48)
         {
             n = new Node48;
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node48);
+            #endif
         }
         else
         {
             n = new Node256;
+            #ifdef MEMORY_FOOTPRINT
+                baseTree_mp += sizeof(Node256);
+            #endif
         }
         n->prefixLength = nmeta.prefixLength;
         if (n->prefixLength)

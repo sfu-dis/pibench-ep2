@@ -9,9 +9,8 @@
 #include <immintrin.h>
 #include <unistd.h>
 
-// #define MEMORY_FOOTPRINT
-std::atomic<uint64_t> dram_footprint(0);
-std::atomic<uint64_t> pmem_footprint(0);
+extern std::atomic<uint64_t> pmem_footprint;
+extern std::atomic<uint64_t> other_mp;
 
 struct leaf_node;
 
