@@ -107,8 +107,8 @@ void threadMemPools::print_usage(void)
 threadNVMPools::~threadNVMPools()
 {
 #ifdef MEMORY_FOOTPRINT
-    printf("DRAM Footprint: %llu\n", dram_footprint);
-    printf("PMEM Footprint: %llu\n", pmem_footprint);
+    printf("DRAM Footprint: %llu\n", dram_footprint.load());
+    printf("PMEM Footprint: %llu\n", pmem_footprint.load());
 #endif
     if (tm_buf)
     {
