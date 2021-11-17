@@ -13,7 +13,6 @@
 
 // #define DEBUG_MSG
 
-#define MEMORY_FOOTPRINT
 std::atomic<uint64_t> bufferTree_mp(0);
 std::atomic<uint64_t> baseTree_mp(0);
 std::atomic<uint64_t> other_mp(0);
