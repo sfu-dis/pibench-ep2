@@ -177,6 +177,14 @@ Tree::Tree() {
 }
 
 Tree::~Tree() {
+#ifdef MEMORY_FOOTPRINT
+    printf("DRAM Footprint: %llu\n", dram_footprint.load());
+    for (auto itr = dram_map.begin(); itr != dram_map.end(); itr++)
+        printf("DRAM Block size: %llu    Count: %llu \n", itr->first, itr->second);
+    printf("\n\nPMEM Footprint: %llu\n", pmem_footprint.load());
+    for (auto itr = pmem_map.begin(); itr != pmem_map.end(); itr++)
+        printf("PMEM Block size: %llu    Count: %llu \n", itr->first, itr->second);
+#endif
     // TODO: reclaim the memory of PM
     //    N::deleteChildren(root);
     //    N::deleteNode(root);

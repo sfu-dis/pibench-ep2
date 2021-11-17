@@ -7,6 +7,11 @@
 #include <list>
 #include <mutex>
 
+std::atomic<uint64_t> dram_footprint(0);
+std::atomic<uint64_t> pmem_footprint(0);
+std::unordered_map<size_t, int> dram_map;
+std::unordered_map<size_t, int> pmem_map;
+
 namespace NVMMgr_ns {
 
 // global block allocator

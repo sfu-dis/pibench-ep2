@@ -12,6 +12,11 @@
 #include "tbb/concurrent_queue.h"
 #include <list>
 
+extern std::atomic<uint64_t> dram_footprint;
+extern std::atomic<uint64_t> pmem_footprint;
+extern std::unordered_map<size_t, int> dram_map;
+extern std::unordered_map<size_t, int> pmem_map;
+
 namespace NVMMgr_ns {
 /*
  * Persistent leaf management

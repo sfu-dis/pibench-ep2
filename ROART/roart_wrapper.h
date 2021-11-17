@@ -43,14 +43,6 @@ roart_wrapper::roart_wrapper()
 
 roart_wrapper::~roart_wrapper()
 {
-#ifdef MEMORY_FOOTPRINT
-    printf("DRAM Footprint: %llu\n", dram_footprint);
-    for (auto itr = dram_map.begin(); itr != dram_map.end(); itr++)
-        printf("DRAM Block size: %llu    Count: %llu \n", itr->first, itr->second);
-    printf("\n\nPMEM Footprint: %llu\n", pmem_footprint);
-    for (auto itr = pmem_map.begin(); itr != pmem_map.end(); itr++)
-        printf("PMEM Block size: %llu    Count: %llu \n", itr->first, itr->second);
-#endif
 }
 
 bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
