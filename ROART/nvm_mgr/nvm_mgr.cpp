@@ -276,6 +276,9 @@ bool init_nvm_mgr() {
         return false;
     }
     nvm_mgr = new NVMMgr();
+#ifdef MEMORY_FOOTPRINT
+    dram_footprint += sizeof(NVMMgr);
+#endif
     return true;
 }
 

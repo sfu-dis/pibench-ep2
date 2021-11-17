@@ -190,8 +190,13 @@ thread_info::thread_info() {
     //    leaf_free_list = new PMFreeList(pmblock);
 
     free_list = new buddy_allocator(pmblock);
-
+#ifdef MEMORY_FOOTPRINT
+    dram_footprint += sizeof(buddy_allocator);
+#endif
     md = new GCMetaData();
+#ifdef MEMORY_FOOTPRINT
+    dram_footprint += sizeof(GCMetaData);
+#endif
     _lock = 0;
     id = tid++;
 }
@@ -210,6 +215,9 @@ thread_info::~thread_info() {
 void thread_info::AddGarbageNode(void *node_p) {
     GarbageNode *garbage_node_p =
         new GarbageNode(Epoch_Mgr::GetGlobalEpoch(), node_p);
+#ifdef MEMORY_FOOTPRINT
+    dram_footprint += sizeof(GarbageNode);
+#endif
     assert(garbage_node_p != nullptr);
 
     // Link this new node to the end of the linked list
@@ -324,11 +332,11 @@ void *alloc_new_node_from_size(size_t size) {
 #endif
     void *addr = ti->free_list->alloc_node(size);
 #ifdef MEMORY_FOOTPRINT
-    pmem_footprint += node_size;
-    if (pmem_map.find(node_size) == pmem_map.end())
-        pmem_map[node_size] = 1;
+    pmem_footprint += size;
+    if (pmem_map.find(size) == pmem_map.end())
+        pmem_map[size] = 1;
     else
-        pmem_map[node_size] ++;
+        pmem_map[size] ++;
 #endif
 #ifdef COUNT_ALLOC
     dcmm_time->end();
@@ -372,13 +380,18 @@ void register_threadinfo() {
 #endif
     if (pmblock == nullptr) {
         pmblock = new PMBlockAllocator(get_nvm_mgr());
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += sizeof(PMBlockAllocator);
+    #endif
         std::cout << "[THREAD]\tfirst new pmblock\n";
         //        std::cout<<"PPPPP meta data addr "<<
         //        get_nvm_mgr()->meta_data<<"\n";
     }
     if (epoch_mgr == nullptr) {
         epoch_mgr = new Epoch_Mgr();
-
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += sizeof(Epoch_Mgr);
+    #endif
         // need to call function to create a new thread to increase epoch
         epoch_mgr->StartThread();
         std::cout << "[THREAD]\tfirst new epoch_mgr and add global epoch\n";

@@ -642,6 +642,9 @@ restart:
 
     if (toContinue != nullptr) {
         Key *newkey = new Key();
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += sizeof(Key);
+    #endif
 #ifdef KEY_INLINE
         newkey->Init((char *)toContinue->GetKey(), toContinue->key_len,
                      toContinue->GetValue(), toContinue->val_len);
@@ -859,6 +862,9 @@ restart:
 
     if (toContinue != nullptr) {
         Key *newkey = new Key();
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += sizeof(Key);
+    #endif
 #ifdef KEY_INLINE
         newkey->Init((char *)toContinue->GetKey(), toContinue->key_len,
                      toContinue->GetValue(), toContinue->val_len);

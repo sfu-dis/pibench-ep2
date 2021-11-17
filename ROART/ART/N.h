@@ -99,6 +99,9 @@ class N : public BaseNode {
     N(NTypes type, uint32_t level, const uint8_t *prefix, uint32_t prefixLength)
         : BaseNode(type), level(level) {
         type_version_lock_obsolete = new std::atomic<uint64_t>;
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += sizeof(std::atomic<uint64_t>);
+    #endif
         type_version_lock_obsolete->store(0b100);
         recovery_latch.store(0, std::memory_order_seq_cst);
         setType(type);
@@ -108,6 +111,9 @@ class N : public BaseNode {
     N(NTypes type, uint32_t level, const Prefix &prefi)
         : BaseNode(type), prefix(prefi), level(level) {
         type_version_lock_obsolete = new std::atomic<uint64_t>;
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += sizeof(std::atomic<uint64_t>);
+    #endif
         type_version_lock_obsolete->store(0b100);
         recovery_latch.store(0, std::memory_order_seq_cst);
         setType(type);

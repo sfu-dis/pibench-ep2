@@ -126,6 +126,9 @@ void N::check_generation() {
             //            printf("start to recovery of this node %lld\n",
             //            (uint64_t)this);
             type_version_lock_obsolete = new std::atomic<uint64_t>;
+        #ifdef MEMORY_FOOTPRINT
+            dram_footprint += sizeof(std::atomic<uint64_t>);
+        #endif
             type_version_lock_obsolete->store(convertTypeToVersion(type));
             type_version_lock_obsolete->fetch_add(0b100);
 
@@ -927,6 +930,9 @@ void N::rebuild_node(N *node, std::vector<std::pair<uint64_t, size_t>> &rs,
     if ((uint64_t)node >= start_addr && (uint64_t)node < end_addr) {
         node->setCount(xcount, xcompactCount);
         node->type_version_lock_obsolete = new std::atomic<uint64_t>;
+    #ifdef MEMORY_FOOTPRINT
+        dram_footprint += sizeof(std::atomic<uint64_t>);
+    #endif
         node->type_version_lock_obsolete->store(convertTypeToVersion(type));
         node->type_version_lock_obsolete->fetch_add(0b100);
         // node->old_pointer.store(0);
