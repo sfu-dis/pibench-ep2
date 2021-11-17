@@ -24,6 +24,7 @@
 #include <thread>
 #include <atomic>
 #include <vector>
+#include <iostream>
 
 #include <immintrin.h>
 /* ---------------------------------------------------------------------- */

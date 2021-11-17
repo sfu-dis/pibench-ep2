@@ -42,6 +42,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdint.h>
+#include <atomic>
 
 /* -------------------------------------------------------------- */
 /* NVMPOOL_REAL: use pmdk to map NVM
@@ -53,8 +54,8 @@
 //#define POOL // comment this out to use malloc and PMDK if #define PMEM
 
 // #define MEMORY_FOOTPRINT
-static std::atomic<uint64_t> dram_footprint(0);
-static std::atomic<uint64_t> pmem_footprint(0);
+extern std::atomic<uint64_t> dram_footprint;
+extern std::atomic<uint64_t> pmem_footprint;
 
 #define FREE_ON_DELETE // comment this out to reuse freed leaves
 

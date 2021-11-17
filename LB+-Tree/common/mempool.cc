@@ -20,6 +20,9 @@
 
 #include "mempool.h"
 
+std::atomic<uint64_t> dram_footprint(0);
+std::atomic<uint64_t> pmem_footprint(0);
+
 thread_local int worker_id = -1; /* in Thread Local Storage */
 
 uint64_t class_id = 0;
@@ -103,6 +106,10 @@ void threadMemPools::print_usage(void)
 /* -------------------------------------------------------------- */
 threadNVMPools::~threadNVMPools()
 {
+#ifdef MEMORY_FOOTPRINT
+    printf("DRAM Footprint: %llu\n", dram_footprint);
+    printf("PMEM Footprint: %llu\n", pmem_footprint);
+#endif
     if (tm_buf)
     {
 #ifdef NVMPOOL_REAL

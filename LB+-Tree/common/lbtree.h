@@ -259,10 +259,6 @@ public:
 
     ~lbtree()
     {
-    #ifdef MEMORY_FOOTPRINT
-        std::cout << "DRAM Footprint: " << dram_footprint << std::endl;
-        std::cout << "PMEM Footprint: " << pmem_footprint << std::endl;
-    #endif
         delete tree_meta;
     }
 
