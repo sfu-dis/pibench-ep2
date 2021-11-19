@@ -70,7 +70,7 @@ masstree_wrapper::masstree_wrapper()
 masstree_wrapper::~masstree_wrapper()
 {
 #ifdef MEMORY_FOOTPRINT
-    printf("DRAM Footprint: %llu\n\n", dram_footprint);
+    printf("DRAM Footprint: %llu\n\n", dram_footprint.load());
 #endif
 }
 

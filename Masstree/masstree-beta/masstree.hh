@@ -18,6 +18,7 @@
 #include "compiler.hh"
 #include "str.hh"
 #include "ksearch.hh"
+#include <atomic>
 
 // #define MEMORY_FOOTPRINT
 std::atomic<uint64_t> dram_footprint(0);
