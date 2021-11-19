@@ -6,6 +6,8 @@ set(CMAKE_BUILD_TYPE Release)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/third-party/bilke-cmake-modules/")
 
+#add_definitions(-DMEMORY_FOOTPRINT)
+
 execute_process(COMMAND cat /proc/cpuinfo COMMAND grep avx2 OUTPUT_VARIABLE HAVE_AVX2)
 execute_process(COMMAND cat /proc/cpuinfo COMMAND grep bmi2 OUTPUT_VARIABLE HAVE_BMI2)
 execute_process(COMMAND cat /proc/cpuinfo COMMAND grep avx512 OUTPUT_VARIABLE HAVE_AVX512)

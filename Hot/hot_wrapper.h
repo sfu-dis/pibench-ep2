@@ -3,8 +3,12 @@
 #include <hot/rowex/HOTRowex.hpp>
 #include <idx/contenthelpers/OptionalValue.hpp>
 #include "tree_api.hpp"
+#include <atomic>
 
 // #define DEBUG_MSG
+
+std::atomic<uint64_t> dram_fp(0);
+
 
 struct KV {
   uint64_t key;
@@ -59,6 +63,7 @@ hot_wrapper::hot_wrapper()
 
 hot_wrapper::~hot_wrapper()
 {
+  printf("DRAM Footprint: %llu\n", dram_fp.load());
 }
 
 bool hot_wrapper::find(const char *key, size_t key_sz, char *value_out)
@@ -83,6 +88,9 @@ bool hot_wrapper::insert(const char *key, size_t key_sz, const char *value, size
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   // records.emplace_back(k, v);
   KV* record = new KV(k, v);
+#ifdef MEMORY_FOOTPRINT
+  dram_fp += sizeof(KV);
+#endif
   bool ret = hot.insert(record);
 #ifdef DEBUG_MSG
   if (!ret)
@@ -98,6 +106,9 @@ bool hot_wrapper::update(const char *key, size_t key_sz, const char *value, size
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   // records.emplace_back(k, v);
   KV* record = new KV(k, v);
+#ifdef MEMORY_FOOTPRINT
+  dram_fp += sizeof(KV);
+#endif
   idx::contenthelpers::OptionalValue<KV*> ret = hot.upsert(record);
 #ifdef DEBUG_MSG
   if (!ret.mIsValid)
