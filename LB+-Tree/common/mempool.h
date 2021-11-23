@@ -52,6 +52,8 @@
 #define PMEM // comment this out to use DRAM as NVM (DRAM version LB+-Tree)
 //#define POOL // comment this out to use malloc and PMDK if #define PMEM
 
+#define ENTRY_MOVING
+
 #define FREE_ON_DELETE // comment this out to reuse freed leaves
 
 struct dummy { // dummy class for using PMDK

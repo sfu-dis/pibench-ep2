@@ -833,6 +833,7 @@ void lbtree::insert(key_type key, void *ptr)
             // 1.4 line 1--3
             else
             {
+            #ifdef ENTRY_MOVING
                 int last_slot = last_slot_in_line[slot];
                 int from = 0;
                 for (int to = slot + 1; to <= last_slot; to++)
@@ -848,6 +849,7 @@ void lbtree::insert(key_type key, void *ptr)
                         from++;
                     }
                 }
+            #endif
 
                 // 1.4.2 flush the line containing slot
                 #ifdef NVMPOOL_REAL
@@ -975,6 +977,7 @@ void lbtree::insert(key_type key, void *ptr)
             // line 1--3
             else
             {
+            #ifdef ENTRY_MOVING
                 int last_slot = last_slot_in_line[slot];
                 int from = 0;
                 for (int to = slot + 1; to <= last_slot; to++)
@@ -990,6 +993,7 @@ void lbtree::insert(key_type key, void *ptr)
                         from++;
                     }
                 }
+            #endif
 
                 // flush the line containing slot
                 #ifdef NVMPOOL_REAL
