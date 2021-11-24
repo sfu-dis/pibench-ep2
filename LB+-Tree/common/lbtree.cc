@@ -503,10 +503,10 @@ Again1:
 
     for (i = tree_meta->root_level; i > 0; i--)
     {
-
+    #ifdef PREFETCH
         // prefetch the entire node
         NODE_PREF(p);
-
+    #endif
         // if the lock bit is set, abort
         if (p->lock())
         {
@@ -543,9 +543,10 @@ Again1:
     // 3. search leaf node
     lp = (bleaf *)p;
 
+#ifdef PREFETCH
     // prefetch the entire node
     LEAF_PREF(lp);
-
+#endif
     // if the lock bit is set, abort
     if (lp->lock)
     {
@@ -672,9 +673,10 @@ void lbtree::insert(key_type key, void *ptr)
 
         for (i = tree_meta->root_level; i > 0; i--)
         {
-
+        #ifdef PREFETCH
             // prefetch the entire node
             NODE_PREF(p);
+        #endif
 
             // if the lock bit is set, abort
             if (p->lock())
@@ -717,9 +719,10 @@ void lbtree::insert(key_type key, void *ptr)
         // 3. search leaf node
         lp = (bleaf *)p;
 
+    #ifdef PREFETCH
         // prefetch the entire node
         LEAF_PREF(lp);
-
+    #endif
         // if the lock bit is set, abort
         if (lp->lock)
         {
@@ -1183,9 +1186,10 @@ void lbtree::del(key_type key)
 
         for (i = tree_meta->root_level; i > 0; i--)
         {
-
+        #ifdef PREFETCH
             // prefetch the entire node
             NODE_PREF(p);
+        #endif
 
             // if the lock bit is set, abort
             if (p->lock())
@@ -1227,8 +1231,10 @@ void lbtree::del(key_type key)
         // 3. search leaf node
         lp = (bleaf *)p;
 
+    #ifdef PREFETCH
         // prefetch the entire node
         LEAF_PREF(lp);
+    #endif
 
         // if the lock bit is set, abort
         if (lp->lock)
@@ -1594,8 +1600,10 @@ Again1: // find target leaf and lock it
     p = tree_meta->tree_root;
     for (i = tree_meta->root_level; i > 0; i--)
     {
+    #ifdef PREFETCH
         // prefetch the entire node
         NODE_PREF(p);
+    #endif
         // if the lock bit is set, abort
         if (p->lock())
         {
@@ -1627,8 +1635,10 @@ Again1: // find target leaf and lock it
     inner_done:;
     }
     lp = (bleaf *)p;
+#ifdef PREFETCH
     // prefetch the entire node
     LEAF_PREF(lp);
+#endif
     // if the lock bit is set, abort
     if (lp->lock)
     {
