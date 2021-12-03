@@ -54,6 +54,7 @@
 
 #define ENTRY_MOVING
 #define PREFETCH
+#define SIMD
 
 #define FREE_ON_DELETE // comment this out to reuse freed leaves
 

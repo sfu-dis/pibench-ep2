@@ -492,6 +492,10 @@ void *lbtree::lookup(key_type key, int *pos)
 
     unsigned char key_hash = hashcode1B(key);
     int ret_pos;
+#ifndef SIMD
+    uint16_t bmp;
+    uint16_t i;
+#endif
 
 Again1:
     // 1. RTM begin
@@ -554,6 +558,7 @@ Again1:
         goto Again1;
     }
 
+#ifdef SIMD
     // SIMD comparison
     // a. set every byte to key_hash in a 16B register
     __m128i key_16B = _mm_set1_epi8((char)key_hash);
@@ -587,6 +592,24 @@ Again1:
         /*  UBSan: implicit conversion from int -65 to unsigned int
             changed the value to 4294967231 (32-bit, unsigned)      */
     } // end while
+#else
+    uint16_t bmp = lp->bitmap;
+    uint16_t i = 0;
+    ret_pos = -1;
+    while (bmp) 
+    {
+        if (bmp & 1 && lp->fgpt[i] == key_hash && lp->ent[i] == key)
+        {
+            ret_pos = i;
+            break;
+        }
+        else
+        {
+            bmp >= 1;
+            i++;
+        }
+    }
+#endif
 
     // 4. RTM commit
     _xend();
