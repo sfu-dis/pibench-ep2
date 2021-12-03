@@ -494,7 +494,7 @@ void *lbtree::lookup(key_type key, int *pos)
     int ret_pos;
 #ifndef SIMD
     uint16_t bmp;
-    uint16_t i;
+    uint16_t idx;
 #endif
 
 Again1:
@@ -593,20 +593,19 @@ Again1:
             changed the value to 4294967231 (32-bit, unsigned)      */
     } // end while
 #else
-    uint16_t bmp = lp->bitmap;
-    uint16_t i = 0;
+    bmp = lp->bitmap;
     ret_pos = -1;
     while (bmp) 
     {
-        if (bmp & 1 && lp->fgpt[i] == key_hash && lp->ent[i] == key)
+        if (bmp & 1 && lp->fgpt[idx] == key_hash && lp->ent[idx].k == key)
         {
-            ret_pos = i;
+            ret_pos = idx;
             break;
         }
         else
         {
             bmp >= 1;
-            i++;
+            idx++;
         }
     }
 #endif
