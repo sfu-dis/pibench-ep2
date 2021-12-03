@@ -56,6 +56,10 @@
 #define PREFETCH
 #define SIMD
 
+#ifndef SIMD
+static uint16_t offset = (uint16_t)65535 >> 2;
+#endif
+
 #define FREE_ON_DELETE // comment this out to reuse freed leaves
 
 struct dummy { // dummy class for using PMDK
