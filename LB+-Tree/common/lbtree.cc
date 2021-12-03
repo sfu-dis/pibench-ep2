@@ -595,9 +595,10 @@ Again1:
 #else
     bmp = lp->bitmap;
     ret_pos = -1;
+    idx = 0;
     while (bmp) 
     {
-        if (bmp & 1 && lp->fgpt[idx] == key_hash && lp->ent[idx].k == key)
+        if (bmp & 1 && lp->fgpt[idx] == key_hash && lp->k(idx) == key)
         {
             ret_pos = idx;
             break;
