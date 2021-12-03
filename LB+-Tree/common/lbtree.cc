@@ -669,6 +669,9 @@ void lbtree::insert(key_type key, void *ptr)
 
     unsigned char key_hash = hashcode1B(key);
     volatile long long sum;
+#ifndef SIMD
+    uint16_t bmp;
+#endif
 
     /* Part 1. get the positions to insert the key */
     {
@@ -749,7 +752,7 @@ void lbtree::insert(key_type key, void *ptr)
         }
 
         parray[0] = lp;
-
+#ifdef SIMD
         // SIMD comparison
         // a. set every byte to key_hash in a 16B register
         __m128i key_16B = _mm_set1_epi8((char)key_hash);
@@ -782,7 +785,19 @@ void lbtree::insert(key_type key, void *ptr)
             /*  UBSan: implicit conversion from int -33 to unsigned int 
                 changed the value to 4294967263 (32-bit, unsigned)      */
         } // end while
-
+#else
+    bmp = lp->bitmap & offset;
+    while (bmp) 
+    {
+        i = bitScan(bmp) - 1;
+        if (lp->fgpt[i] == key_hash && lp->k(i) == key)
+        {
+            _xend();
+            return;
+        }
+        bmp &= ~(0x1 << i);
+    }
+#endif
         // 4. set lock bits before exiting the RTM transaction
         lp->lock = 1;
 
