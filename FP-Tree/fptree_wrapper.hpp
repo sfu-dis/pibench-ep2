@@ -27,6 +27,7 @@ private:
     FPtree tree_;
 };
 
+thread_local char k[128];
 
 fptree_wrapper::fptree_wrapper()
 {
@@ -38,7 +39,13 @@ fptree_wrapper::~fptree_wrapper()
 
 bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 {
-    uint64_t value = tree_.find(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)));
+#ifdef VAR_KEY
+	memcpy(k, key, key_sz);
+	k[key_sz] = '\0';
+#else
+	uint64_t k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
+#endif
+    uint64_t value = tree_.find((uint64_t)k);
     if (value == 0)
     {
 	#ifdef DEBUG_MSG
