@@ -483,7 +483,7 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
             #ifdef VAR_KEY
                 idx = std::lower_bound(cur->keys, cur->keys + cur->nKey, kv.key, 
                     [](uint64_t a, uint64_t b) { return strcmp((char*)a, (char*)b) < 0; }) - cur->keys;
-                if (idx < this->nKey && strcmp((char*)cur->keys[idx], (char*)kv.key) == 0)
+                if (idx < cur->nKey && strcmp((char*)cur->keys[idx], (char*)kv.key) == 0)
                     idx++;
             #else
                 idx = std::lower_bound(cur->keys, cur->keys + cur->nKey, kv.key) - cur->keys;
@@ -778,7 +778,7 @@ uint64_t FPtree::findSplitKey(LeafNode* leaf)
     // TODO: find median in one pass instead of sorting
 #ifdef VAR_KEY
     std::sort(std::begin(tempArr), std::end(tempArr), [] (const KV& kv1, const KV& kv2){
-            return strcmp((char*)kv1.key < (char*)kv2.key) < 0;
+            return strcmp((char*)kv1.key, (char*)kv2.key) < 0;
         });
 #else
     std::sort(std::begin(tempArr), std::end(tempArr), [] (const KV& kv1, const KV& kv2){

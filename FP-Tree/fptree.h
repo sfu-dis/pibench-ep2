@@ -78,6 +78,10 @@ enum Result { Insert, Update, Split, Abort, Delete, Remove, NotFound };
     POBJ_LAYOUT_TOID(Array, struct Log);
     POBJ_LAYOUT_END(Array);
 
+    POBJ_LAYOUT_BEGIN(Char);
+    POBJ_LAYOUT_TOID(Char, char);
+    POBJ_LAYOUT_END(Char);
+
     inline PMEMobjpool *pop;
 #endif
 
