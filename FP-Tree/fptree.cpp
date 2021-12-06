@@ -99,11 +99,20 @@ void InnerNode::addKey(uint64_t index, uint64_t key, BaseNode* child, bool add_c
 
 inline uint64_t InnerNode::findChildIndex(uint64_t key)
 {
+#ifdef VAR_KEY 
+    auto lower = std::lower_bound(this->keys, this->keys + this->nKey, key, 
+        [](uint64_t a, uint64_t b) { return strcmp((char*)a, (char*)b) < 0; });
+    uint64_t idx = lower - this->keys;
+    if (idx < this->nKey && strcmp((char*)*lower, (char*)key) == 0)
+        idx++;
+#else
     auto lower = std::lower_bound(this->keys, this->keys + this->nKey, key);
     uint64_t idx = lower - this->keys;
     if (idx < this->nKey && *lower == key)
         idx++;
+#endif
     return idx;
+
 }
 
 inline void LeafNode::addKV(struct KV kv)
@@ -121,10 +130,15 @@ inline uint64_t LeafNode::findKVIndex(uint64_t key)
     for (uint64_t i = 0; i < MAX_LEAF_SIZE; i++) 
     {
         if (this->bitmap.test(i) == 1 &&
-            this->fingerprints[i] == key_hash &&
-            this->kv_pairs[i].key == key)
+            this->fingerprints[i] == key_hash)
         {
-            return i;
+        #ifdef VAR_KEY
+            if (strcmp((char*)(this->kv_pairs[i].key), (char*)key) == 0)
+                return i;
+        #else
+            if (this->kv_pairs[i].key == key)
+                return i;
+        #endif
         }
     }
     return MAX_LEAF_SIZE;
@@ -264,7 +278,11 @@ FPtree::~FPtree()
 
 inline static uint8_t getOneByteHash(uint64_t key)
 {
+#ifdef VAR_KEY
+    uint8_t oneByteHashKey = std::_Hash_bytes((char*)key, key_size_, 1) & 0xff;
+#else
     uint8_t oneByteHashKey = std::_Hash_bytes(&key, sizeof(key), 1) & 0xff;
+#endif
     return oneByteHashKey;
 }
 
@@ -400,8 +418,13 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
     if (decision == Result::Split)
     {
         splitKey = splitLeaf(reachedLeafNode);       // split and link two leaves
+    #ifdef VAR_KEY
+        if (strcmp((char*)kv.key, (char*)splitKey) >= 0)                      // select one leaf to insert
+            insertNode = reachedLeafNode->p_next;
+    #else
         if (kv.key >= splitKey)                      // select one leaf to insert
             insertNode = reachedLeafNode->p_next;
+    #endif
     }
 
     #ifdef PMEM
@@ -457,9 +480,16 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
             while(cur->isInnerNode)
             {
                 inners[i] = cur;
+            #ifdef VAR_KEY
+                idx = std::lower_bound(cur->keys, cur->keys + cur->nKey, kv.key, 
+                    [](uint64_t a, uint64_t b) { return strcmp((char*)a, (char*)b) < 0; }) - cur->keys;
+                if (idx < this->nKey && strcmp((char*)cur->keys[idx], (char*)kv.key) == 0)
+                    idx++;
+            #else
                 idx = std::lower_bound(cur->keys, cur->keys + cur->nKey, kv.key) - cur->keys;
                 if (idx < cur->nKey && cur->keys[idx] == kv.key) // TODO: this should always be false
                     idx ++;
+            #endif
                 ppos[i++] = idx;
                 cur = reinterpret_cast<InnerNode*> (cur->p_children[idx]);
             }
@@ -690,8 +720,13 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
 
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {
+        #ifdef VAR_KEY
+            if (strcmp((char*)D_RO(*dst)->kv_pairs[i].key, (char*)splitKey) < 0)
+                D_RW(*dst)->bitmap.reset(i);
+        #else
             if (D_RO(*dst)->kv_pairs[i].key < splitKey)
                 D_RW(*dst)->bitmap.reset(i);
+        #endif
         }
         // Persist(NewLeaf.Bitmap)
         pmemobj_persist(pop, &D_RO(*dst)->bitmap, sizeof(D_RO(*dst)->bitmap));
@@ -718,8 +753,13 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
 
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {
+        #ifdef VAR_KEY
+            if (strcmp((char*)newLeafNode->kv_pairs[i].key, (char*)splitKey) < 0)
+                newLeafNode->bitmap.reset(i);
+        #else
             if (newLeafNode->kv_pairs[i].key < splitKey)
                 newLeafNode->bitmap.reset(i);
+        #endif
         }
 
         leaf->bitmap = newLeafNode->bitmap;
@@ -736,10 +776,15 @@ uint64_t FPtree::findSplitKey(LeafNode* leaf)
     KV tempArr[MAX_LEAF_SIZE];
     memcpy(tempArr, leaf->kv_pairs, sizeof(leaf->kv_pairs));
     // TODO: find median in one pass instead of sorting
+#ifdef VAR_KEY
+    std::sort(std::begin(tempArr), std::end(tempArr), [] (const KV& kv1, const KV& kv2){
+            return strcmp((char*)kv1.key < (char*)kv2.key) < 0;
+        });
+#else
     std::sort(std::begin(tempArr), std::end(tempArr), [] (const KV& kv1, const KV& kv2){
             return kv1.key < kv2.key;
         });
-
+#endif
     uint64_t mid = floor(MAX_LEAF_SIZE / 2);
     uint64_t splitKey = tempArr[mid].key;
 

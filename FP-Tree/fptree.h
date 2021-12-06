@@ -42,6 +42,8 @@
 #include <thread>
 #include <boost/lockfree/queue.hpp>
 
+extern size_t key_size_;
+
 #ifdef TEST_MODE
     #define MAX_INNER_SIZE 3
     #define MAX_LEAF_SIZE 4
