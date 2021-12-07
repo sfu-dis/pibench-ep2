@@ -65,13 +65,16 @@ bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, s
 	#ifdef PMEM
         //TOID(struct char)* dst;
         PMEMoid dst;
-        pmemobj_zalloc(pop, &dst, key_size_, TOID_TYPE_NUM(char));
-        memcpy(pmemobj_direct(dst), key, key_size_);
+        pmemobj_zalloc(pop, &dst, key_size_+1, TOID_TYPE_NUM(char));
+        char* new_k = pmemobj_direct(dst);
+        memcpy(new_k, key, key_size_);
+        new_k[key_size_] = '\0';
         //pmemobj_persist(pop, dst, key_size_);
-        KV kv = KV((uint64_t)pmemobj_direct(dst), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
+        KV kv = KV((uint64_t)new_k, *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
     #else
-		char* new_k = new char[key_size_];
+		char* new_k = new char[key_size_+1];
 		memcpy(new_k, key, key_size_);
+		new_k[key_size_] = '\0';
 		KV kv = KV((uint64_t)new_k, *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
 	#endif
 #else
