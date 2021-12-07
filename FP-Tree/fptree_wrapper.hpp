@@ -44,8 +44,7 @@ bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 	k[key_size_] = '\0';
 	uint64_t value = tree_.find((uint64_t)k);
 #else
-	uint64_t k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
-	uint64_t value = tree_.find((uint64_t)k);
+	uint64_t value = tree_.find(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)));
 #endif
     
     if (value == 0)
@@ -71,9 +70,9 @@ bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, s
         //pmemobj_persist(pop, dst, key_size_);
         KV kv = KV((uint64_t)pmemobj_direct(dst), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
     #else
-		char* k = new char[key_size_];
-		memcpy(k, key, key_size_);
-		KV kv = KV((uint64_t)k, *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
+		char* new_k = new char[key_size_];
+		memcpy(new_k, key, key_size_);
+		KV kv = KV((uint64_t)new_k, *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
 	#endif
 #else
     KV kv = KV(*reinterpret_cast<uint64_t*>(const_cast<char*>(key)), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
