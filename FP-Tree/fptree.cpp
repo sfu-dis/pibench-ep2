@@ -101,9 +101,9 @@ inline uint64_t InnerNode::findChildIndex(uint64_t key)
 {
 #ifdef VAR_KEY 
     auto lower = std::lower_bound(this->keys, this->keys + this->nKey, key, 
-        [](uint64_t a, uint64_t b) { return strcmp((char*)a, (char*)b) < 0; });
+        [](uint64_t a, uint64_t b) { return vkcmp((char*)a, (char*)b) < 0; });
     uint64_t idx = lower - this->keys;
-    if (idx < this->nKey && strcmp((char*)*lower, (char*)key) == 0)
+    if (idx < this->nKey && vkcmp((char*)*lower, (char*)key) == 0)
         idx++;
 #else
     auto lower = std::lower_bound(this->keys, this->keys + this->nKey, key);
@@ -126,14 +126,14 @@ inline void LeafNode::addKV(struct KV kv)
 
 inline uint64_t LeafNode::findKVIndex(uint64_t key)
 {
-    size_t key_hash = getOneByteHash(key);
+    uint8_t key_hash = getOneByteHash(key);
     for (uint64_t i = 0; i < MAX_LEAF_SIZE; i++) 
     {
         if (this->bitmap.test(i) == 1 &&
             this->fingerprints[i] == key_hash)
         {
         #ifdef VAR_KEY
-            if (strcmp((char*)(this->kv_pairs[i].key), (char*)key) == 0)
+            if (vkcmp((char*)(this->kv_pairs[i].key), (char*)key) == 0)
                 return i;
         #else
             if (this->kv_pairs[i].key == key)
@@ -419,12 +419,28 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
     {
         splitKey = splitLeaf(reachedLeafNode);       // split and link two leaves
     #ifdef VAR_KEY
-        if (strcmp((char*)kv.key, (char*)splitKey) >= 0)                      // select one leaf to insert
+        if (vkcmp((char*)kv.key, (char*)splitKey) >= 0)                      // select one leaf to insert
             insertNode = reachedLeafNode->p_next;
     #else
         if (kv.key >= splitKey)                      // select one leaf to insert
             insertNode = reachedLeafNode->p_next;
     #endif
+        // for (int i = 0; i < MAX_LEAF_SIZE; i++)
+        // {
+        //     if (reachedLeafNode->bitmap.test(i) == 1 &&
+        //         reachedLeafNode->fingerprints[i] != getOneByteHash(reachedLeafNode->kv_pairs[i].key))
+        //     {
+        //         printf("fingerprint messed up in original leaf after split!\n");
+        //     }
+        // }
+        // for (int i = 0; i < MAX_LEAF_SIZE; i++)
+        // {
+        //     if (reachedLeafNode->p_next->bitmap.test(i) == 1 &&
+        //         reachedLeafNode->p_next->fingerprints[i] != getOneByteHash(reachedLeafNode->p_next->kv_pairs[i].key))
+        //     {
+        //         printf("fingerprint messed up in original leaf after split!\n");
+        //     }
+        // }
     }
 
     #ifdef PMEM
@@ -482,8 +498,8 @@ void FPtree::splitLeafAndUpdateInnerParents(LeafNode* reachedLeafNode, Result de
                 inners[i] = cur;
             #ifdef VAR_KEY
                 idx = std::lower_bound(cur->keys, cur->keys + cur->nKey, kv.key, 
-                    [](uint64_t a, uint64_t b) { return strcmp((char*)a, (char*)b) < 0; }) - cur->keys;
-                if (idx < cur->nKey && strcmp((char*)cur->keys[idx], (char*)kv.key) == 0)
+                    [](uint64_t a, uint64_t b) { return vkcmp((char*)a, (char*)b) < 0; }) - cur->keys;
+                if (idx < cur->nKey && vkcmp((char*)cur->keys[idx], (char*)kv.key) == 0)
                     idx++;
             #else
                 idx = std::lower_bound(cur->keys, cur->keys + cur->nKey, kv.key) - cur->keys;
@@ -721,7 +737,7 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {
         #ifdef VAR_KEY
-            if (strcmp((char*)D_RO(*dst)->kv_pairs[i].key, (char*)splitKey) < 0)
+            if (vkcmp((char*)D_RO(*dst)->kv_pairs[i].key, (char*)splitKey) < 0)
                 D_RW(*dst)->bitmap.reset(i);
         #else
             if (D_RO(*dst)->kv_pairs[i].key < splitKey)
@@ -754,7 +770,7 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {
         #ifdef VAR_KEY
-            if (strcmp((char*)newLeafNode->kv_pairs[i].key, (char*)splitKey) < 0)
+            if (vkcmp((char*)newLeafNode->kv_pairs[i].key, (char*)splitKey) < 0)
                 newLeafNode->bitmap.reset(i);
         #else
             if (newLeafNode->kv_pairs[i].key < splitKey)
@@ -778,7 +794,7 @@ uint64_t FPtree::findSplitKey(LeafNode* leaf)
     // TODO: find median in one pass instead of sorting
 #ifdef VAR_KEY
     std::sort(std::begin(tempArr), std::end(tempArr), [] (const KV& kv1, const KV& kv2){
-            return strcmp((char*)kv1.key, (char*)kv2.key) < 0;
+            return vkcmp((char*)kv1.key, (char*)kv2.key) < 0;
         });
 #else
     std::sort(std::begin(tempArr), std::end(tempArr), [] (const KV& kv1, const KV& kv2){
@@ -1309,7 +1325,16 @@ uint64_t rdtsc(){
     return ((uint64_t)hi << 32) | lo;
 }
 
-
+int vkcmp(char* a, char* b) {
+    for (int i = 0; i < key_size_; i++)
+    {
+        if (a[i] < b[i])
+            return 1;
+        else if (a[i] > b[i])
+            return -1;
+    }
+    return 0;
+}
 
 #if BUILD_INSPECTOR == 0
     int main(int argc, char *argv[]) 
@@ -1319,7 +1344,7 @@ uint64_t rdtsc(){
 
         #ifdef PMEM
             const char* command = argv[1];
-            if (command != NULL && strcmp(command, "show") == 0)
+            if (command != NULL && vkcmp(command, "show") == 0)
             {  
                 showList();
                 return 0;
