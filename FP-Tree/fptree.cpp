@@ -15,6 +15,31 @@
     }
 #endif
 
+/*
+    Use case
+    uint64_t tick = rdtsc();
+    Put program between 
+    std::cout << rdtsc() - tick << std::endl;
+*/
+uint64_t rdtsc(){
+    unsigned int lo,hi;
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+    return ((uint64_t)hi << 32) | lo;
+}
+
+#ifdef VAR_KEY
+int vkcmp(char* a, char* b) {
+    for (int i = 0; i < key_size_; i++)
+    {
+        if (a[i] < b[i])
+            return 1;
+        else if (a[i] > b[i])
+            return -1;
+    }
+    return 0;
+}
+#endif
+
 BaseNode::BaseNode() 
 {
     this->isInnerNode = false;
@@ -1312,29 +1337,6 @@ uint64_t FPtree::rangeScan(uint64_t key, uint64_t scan_size, char* result)
     }
 #endif
 
-
-/*
-    Use case
-    uint64_t tick = rdtsc();
-    Put program between 
-    std::cout << rdtsc() - tick << std::endl;
-*/
-uint64_t rdtsc(){
-    unsigned int lo,hi;
-    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
-    return ((uint64_t)hi << 32) | lo;
-}
-
-int vkcmp(char* a, char* b) {
-    for (int i = 0; i < key_size_; i++)
-    {
-        if (a[i] < b[i])
-            return 1;
-        else if (a[i] > b[i])
-            return -1;
-    }
-    return 0;
-}
 
 #if BUILD_INSPECTOR == 0
     int main(int argc, char *argv[]) 
