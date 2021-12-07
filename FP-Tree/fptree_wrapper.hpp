@@ -40,12 +40,14 @@ fptree_wrapper::~fptree_wrapper()
 bool fptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 {
 #ifdef VAR_KEY
-	memcpy(k, key, key_sz);
-	k[key_sz] = '\0';
+	memcpy(k, key, key_size_);
+	k[key_size_] = '\0';
+	uint64_t value = tree_.find((uint64_t)k);
 #else
 	uint64_t k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
+	uint64_t value = tree_.find((uint64_t)k);
 #endif
-    uint64_t value = tree_.find((uint64_t)k);
+    
     if (value == 0)
     {
 	#ifdef DEBUG_MSG
@@ -64,13 +66,13 @@ bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, s
 	#ifdef PMEM
         //TOID(struct char)* dst;
         PMEMoid dst;
-        pmemobj_zalloc(pop, &dst, key_sz, TOID_TYPE_NUM(char));
-        memcpy(pmemobj_direct(dst), key, key_sz);
-        //pmemobj_persist(pop, dst, key_sz);
+        pmemobj_zalloc(pop, &dst, key_size_, TOID_TYPE_NUM(char));
+        memcpy(pmemobj_direct(dst), key, key_size_);
+        //pmemobj_persist(pop, dst, key_size_);
         KV kv = KV((uint64_t)pmemobj_direct(dst), *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
     #else
-		char* k = new char[key_sz];
-		memcpy(k, key, key_sz);
+		char* k = new char[key_size_];
+		memcpy(k, key, key_size_);
 		KV kv = KV((uint64_t)k, *reinterpret_cast<uint64_t*>(const_cast<char*>(value)));
 	#endif
 #else
