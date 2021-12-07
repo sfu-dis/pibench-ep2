@@ -42,6 +42,8 @@
 #include <thread>
 #include <boost/lockfree/queue.hpp>
 
+extern size_t key_size_;
+
 #ifdef TEST_MODE
     #define MAX_INNER_SIZE 3
     #define MAX_LEAF_SIZE 4
@@ -75,6 +77,10 @@ enum Result { Insert, Update, Split, Abort, Delete, Remove, NotFound };
     POBJ_LAYOUT_BEGIN(Array);
     POBJ_LAYOUT_TOID(Array, struct Log);
     POBJ_LAYOUT_END(Array);
+
+    POBJ_LAYOUT_BEGIN(Char);
+    POBJ_LAYOUT_TOID(Char, char);
+    POBJ_LAYOUT_END(Char);
 
     inline PMEMobjpool *pop;
 #endif
