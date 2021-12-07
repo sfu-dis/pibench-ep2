@@ -66,7 +66,7 @@ bool fptree_wrapper::insert(const char* key, size_t key_sz, const char* value, s
         //TOID(struct char)* dst;
         PMEMoid dst;
         pmemobj_zalloc(pop, &dst, key_size_, TOID_TYPE_NUM(char));
-        char* new_k = pmemobj_direct(dst);
+        char* new_k = (char*)pmemobj_direct(dst);
         memcpy(new_k, key, key_size_);
         // new_k[key_size_] = '\0';
         //pmemobj_persist(pop, dst, key_size_);

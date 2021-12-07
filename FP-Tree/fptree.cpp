@@ -1346,7 +1346,7 @@ uint64_t FPtree::rangeScan(uint64_t key, uint64_t scan_size, char* result)
 
         #ifdef PMEM
             const char* command = argv[1];
-            if (command != NULL && vkcmp(command, "show") == 0)
+            if (command != NULL && strcmp(command, "show") == 0)
             {  
                 showList();
                 return 0;
