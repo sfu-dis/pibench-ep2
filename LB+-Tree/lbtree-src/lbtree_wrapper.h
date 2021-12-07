@@ -57,6 +57,10 @@ static const constexpr auto UPDATE = "update";
 static const constexpr auto REMOVE = "remove";
 static const constexpr auto SCAN = "scan";
 
+#ifdef VAR_KEY
+  thread_local char k[128];
+#endif
+
 lbtree_wrapper::lbtree_wrapper(void *nvm_addr, bool recover)
 {
 #ifdef NVMFLUSH_STAT
@@ -112,9 +116,12 @@ bool lbtree_wrapper::find(const char *key, size_t key_sz, char *value_out)
   thread_local ThreadHelper t{FIND};
   void *p;
   int pos = -1;
-  auto k = PBkeyToLB(key);
-  p = lbt->lookup(k, &pos);
-
+#ifdef VAR_KEY
+  memcpy(k, key, key_size_);
+  p = lbt->lookup((key_type)k, &pos);
+#else
+  p = lbt->lookup(PBkeyToLB(key), &pos);
+#endif
   if (pos >= 0)
   {
     void *recptr = lbt->get_recptr(p, pos);
@@ -132,7 +139,21 @@ bool lbtree_wrapper::find(const char *key, size_t key_sz, char *value_out)
 bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t{INSERT};
+#ifdef VAR_KEY // key size > 8
+  #ifdef PMEM
+    PMEMoid dst;
+    pmemobj_zalloc(pop, &dst, key_size_, TOID_TYPE_NUM(char));
+    char* new_k = (char*)pmemobj_direct(dst);
+    memcpy(new_k, key, key_size_);
+    key_type k = (key_type) new_k;
+  #else
+    char* new_k = new char[key_size_];
+    memcpy(new_k, key, key_size_);
+    key_type k = (key_type) new_k;
+  #endif
+#else
   auto k = PBkeyToLB(key);
+#endif
   lbt->insert(k, PBvalToLB(value));
   return true;
 }
