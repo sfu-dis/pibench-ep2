@@ -62,9 +62,9 @@ static const constexpr auto SCAN = "scan";
   extern PMEMobjpool * pop_;
 
   #ifndef PMEM
-    thread_local char key_arr[800000000];
+    thread_local char* key_arr = new char[813600000]; // 100M key + 1.7M for 10 seconds
     thread_local char* cur_addr = key_arr;
-    thread_local char* end_addr = key_arr + 800000000;
+    thread_local char* end_addr = key_arr + 813600000;
   #endif
 #endif
 
@@ -161,8 +161,8 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
       exit(1);
     }
     memcpy(cur_addr, key, key_size_);
+    key_type k = (key_type) cur_addr;
     cur_addr += key_size_;
-    key_type k = (key_type) new_k;
   #endif
 #else
   auto k = PBkeyToLB(key);
