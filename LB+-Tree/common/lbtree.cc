@@ -148,7 +148,11 @@ int lbtree::bulkloadSubtree(
         {
 
             // get key from input
+        #ifdef VAR_KEY
+            key_type mykey = (key_type)(new uint64_t);
+        #else
             key_type mykey = (key_type)(input->get_key(key_id));
+        #endif
             key_id++;
 
             // entry
