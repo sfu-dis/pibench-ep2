@@ -60,6 +60,12 @@ static const constexpr auto SCAN = "scan";
 #ifdef VAR_KEY
   thread_local char k[128];
   extern PMEMobjpool * pop_;
+
+  #ifndef PMEM
+    thread_local char key_arr[800000000];
+    thread_local char* cur_addr = key_arr;
+    thread_local char* end_addr = key_arr + 800000000;
+  #endif
 #endif
 
 lbtree_wrapper::lbtree_wrapper(void *nvm_addr, bool recover)
@@ -148,8 +154,14 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
     memcpy(new_k, key, key_size_);
     key_type k = (key_type) new_k;
   #else
-    char* new_k = new char[key_size_];
-    memcpy(new_k, key, key_size_);
+    // char* new_k = new char[key_size_];
+    if (cur_addr >= end_addr)
+    {
+      printf("insufficient Memory for keys!\n");
+      exit(1);
+    }
+    memcpy(cur_addr, key, key_size_);
+    cur_addr += key_size_;
     key_type k = (key_type) new_k;
   #endif
 #else
