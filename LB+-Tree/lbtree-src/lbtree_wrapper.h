@@ -142,7 +142,7 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
 #ifdef VAR_KEY // key size > 8
   #ifdef PMEM
     PMEMoid dst;
-    pmemobj_zalloc(pop, &dst, key_size_, TOID_TYPE_NUM(char));
+    pmemobj_zalloc(pop_, &dst, key_size_, TOID_TYPE_NUM(char));
     char* new_k = (char*)pmemobj_direct(dst);
     memcpy(new_k, key, key_size_);
     key_type k = (key_type) new_k;

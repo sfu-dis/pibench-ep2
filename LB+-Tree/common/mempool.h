@@ -54,6 +54,10 @@
 
 // #define VAR_KEY
 
+#if defined(PMEM) && defined(VAR_KEY)
+   PMEMobjpool * pop_;
+#endif
+
 #define ENTRY_MOVING
 #define PREFETCH
 
@@ -72,6 +76,12 @@ extern uint64_t class_id;
       POBJ_LAYOUT_BEGIN(LBtree);
       POBJ_LAYOUT_TOID(LBtree, dummy);
       POBJ_LAYOUT_END(LBtree);
+
+      #ifdef VAR_KEY
+         POBJ_LAYOUT_BEGIN(Char);
+         POBJ_LAYOUT_TOID(Char, char);
+         POBJ_LAYOUT_END(Char);
+      #endif
    #endif
 #endif
 
