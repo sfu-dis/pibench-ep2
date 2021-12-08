@@ -54,10 +54,6 @@
 
 // #define VAR_KEY
 
-#if defined(PMEM) && defined(VAR_KEY)
-   PMEMobjpool * pop_;
-#endif
-
 #define ENTRY_MOVING
 #define PREFETCH
 

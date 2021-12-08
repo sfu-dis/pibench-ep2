@@ -24,6 +24,10 @@ thread_local int worker_id = -1; /* in Thread Local Storage */
 
 uint64_t class_id = 0;
 
+#if defined(PMEM) && defined(VAR_KEY)
+   PMEMobjpool * pop_;
+#endif
+
 threadMemPools the_thread_mempools;
 threadNVMPools the_thread_nvmpools;
 

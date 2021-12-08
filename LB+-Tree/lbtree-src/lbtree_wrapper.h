@@ -59,6 +59,7 @@ static const constexpr auto SCAN = "scan";
 
 #ifdef VAR_KEY
   thread_local char k[128];
+  extern PMEMobjpool * pop_;
 #endif
 
 lbtree_wrapper::lbtree_wrapper(void *nvm_addr, bool recover)
