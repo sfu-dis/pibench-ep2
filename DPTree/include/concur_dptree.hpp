@@ -563,7 +563,7 @@ public:
                 key_type upsert_key = upsert_kvs_sit->first;
                 int free_idx;
             #ifdef VAR_KEY
-                int r = vkcmp((char*)cv_key, (char*)upsert_key)
+                int r = vkcmp((char*)cv_key, (char*)upsert_key);
                 if (r == 0)
             #else
                 if (cv_key == upsert_key)
@@ -805,7 +805,7 @@ public:
                 key_type upsert_key = upsert_kvs_sit->first;
                 assert(i < l_key_count);
             #ifdef VAR_KEY
-                int r = vkcmp((char*)cv_key, (char*)upsert_key)
+                int r = vkcmp((char*)cv_key, (char*)upsert_key);
                 if (r == 0)
             #else
                 if (cv_key == upsert_key)
