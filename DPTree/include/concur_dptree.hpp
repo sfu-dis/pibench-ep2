@@ -24,6 +24,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include <bits/hash_bytes.h>
 
 #include "stx/btree_map.h"
 #include "btreeolc.hpp"
@@ -53,6 +54,8 @@ extern void clflush(volatile void *p);
 extern void mfence();
 extern double secs_now(void);
 extern void cpu_pause();
+extern size_t key_size_;
+
 namespace dptree
 {
 
@@ -525,7 +528,9 @@ public:
             const typename std::vector<kv_pair>::iterator &upsert_kvs_eit, bool cv,
             int &split_merges)
         {
+        #ifndef VAR_KEY
             std::hash<key_type> hasher;
+        #endif
             ++split_merges;
             bool nv = !cv;
             std::vector<leaf_node *> leafs = {new_leaf_node()};
@@ -557,27 +562,51 @@ public:
                 key_type cv_key = l->key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
                 int free_idx;
+            #ifdef VAR_KEY
+                int r = vkcmp((char*)cv_key, (char*)upsert_key)
+                if (r == 0)
+            #else
                 if (cv_key == upsert_key)
+            #endif
                 {
+                #ifdef VAR_KEY
+                    free_idx =
+                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     last_leaf->pairs[free_idx] = *upsert_kvs_sit;
                     last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                     ++i;
                     ++upsert_kvs_sit;
                     mask.set(cv_key_idx);
                 }
+            #ifdef VAR_KEY
+                if (r < 0)
+            #else
                 else if (cv_key < upsert_key)
+            #endif
                 {
+                #ifdef VAR_KEY
+                    free_idx =
+                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)cv_key, key_size_, 1));
+                #else
                     free_idx = node_alloc_bitmap->alloc_first_unset_bit(hasher(cv_key));
+                #endif
                     last_leaf->pairs[free_idx] = l->pairs[cv_key_idx];
                     last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                     ++i;
                 }
                 else
                 {
+                #ifdef VAR_KEY
+                    free_idx =
+                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     last_leaf->pairs[free_idx] = *upsert_kvs_sit;
                     last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                     ++upsert_kvs_sit;
@@ -589,8 +618,13 @@ public:
             {
                 ensure_last_leaf_capacity();
                 int cv_key_idx = l->meta[cv].key_idx(i);
+            #ifdef VAR_KEY
+                int free_idx =
+                    node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
+            #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(l->pairs[cv_key_idx].first));
+            #endif
                 last_leaf->pairs[free_idx] = l->pairs[cv_key_idx];
                 last_leaf->mark_dirty_cacheline((char*)&last_leaf->pairs[free_idx]);
                 last_leaf->meta[nv].append(free_idx);
@@ -600,8 +634,13 @@ public:
             while (upsert_kvs_sit != upsert_kvs_eit)
             {
                 ensure_last_leaf_capacity();
+            #ifdef VAR_KEY
+                int free_idx =
+                    node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
+            #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(upsert_kvs_sit->first));
+            #endif
                 last_leaf->pairs[free_idx] = *upsert_kvs_sit;
                 last_leaf->mark_dirty_cacheline((char*)&last_leaf->pairs[free_idx]);
                 last_leaf->meta[nv].append(free_idx);
@@ -629,7 +668,9 @@ public:
             int l_key_count = l->key_count(cv);
             int l_free_cells = l->free_cells(cv);
             int i = 0;
+        #ifndef VAR_KEY
             auto hasher = std::hash<key_type>();
+        #endif
 
             bitmap *node_alloc_bitmap = &leafs.back()->meta[nv].get_bitmap();
             bitmap mask; // records bit positions that should be unmarked due to key
@@ -674,10 +715,20 @@ public:
                 key_type cv_key = l->key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
                 int free_idx;
+            #ifdef VAR_KEY
+                int r = vkcmp((char*)cv_key, (char*)upsert_key);
+                if (r == 0)
+            #else
                 if (cv_key == upsert_key)
+            #endif
                 {
+                #ifdef VAR_KEY
+                    free_idx =
+                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     last_leaf->pairs[free_idx] = *upsert_kvs_sit;
                     last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                     ++i;
@@ -685,9 +736,17 @@ public:
                     mask.set(
                         cv_key_idx); // cv_key_idx is updated and moved to previous nodes
                 }
+            #ifdef VAR_KEY
+                else if (r < 0)
+            #else
                 else if (cv_key < upsert_key)
+            #endif
                 {
+                #ifdef VAR_KEY
+                    free_idx = node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)cv_key, key_size_, 1));
+                #else
                     free_idx = node_alloc_bitmap->alloc_first_unset_bit(hasher(cv_key));
+                #endif
                     last_leaf->pairs[free_idx] = l->pairs[cv_key_idx];
                     last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                     ++i;
@@ -695,8 +754,13 @@ public:
                 }
                 else
                 {
+                #ifdef VAR_KEY
+                    free_idx =
+                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     last_leaf->pairs[free_idx] = *upsert_kvs_sit;
                     last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                     ++upsert_kvs_sit;
@@ -709,8 +773,13 @@ public:
             {
                 ensure_last_leaf_capacity();
                 int cv_key_idx = l->meta[cv].key_idx(i);
+            #ifdef VAR_KEY
+                int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                    std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
+            #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(l->pairs[cv_key_idx].first));
+            #endif
                 last_leaf->pairs[free_idx] = l->pairs[cv_key_idx];
                 last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                 last_leaf->meta[nv].append(free_idx);
@@ -735,10 +804,20 @@ public:
                 key_type cv_key = l->key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
                 assert(i < l_key_count);
+            #ifdef VAR_KEY
+                int r = vkcmp((char*)cv_key, (char*)upsert_key)
+                if (r == 0)
+            #else
                 if (cv_key == upsert_key)
+            #endif
                 {
+                #ifdef VAR_KEY
+                    int free_idx =
+                        l_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     int free_idx =
                         l_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     l->pairs[free_idx] = *upsert_kvs_sit;
                     l->mark_dirty_cacheline((char *) &l->pairs[free_idx]);
                     ++i;
@@ -747,15 +826,24 @@ public:
                                           // same node
                     l_new_meta.append(free_idx);
                 }
+            #ifdef VAR_KEY
+                else if (r < 0)
+            #else
                 else if (cv_key < upsert_key)
+            #endif
                 {
                     ++i;
                     l_new_meta.append(cv_key_idx);
                 }
                 else
                 {
+                #ifdef VAR_KEY
+                    int free_idx =
+                        l_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     int free_idx =
                         l_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     l->pairs[free_idx] = *upsert_kvs_sit;
                     l->mark_dirty_cacheline((char *) &l->pairs[free_idx]);
                     ++upsert_kvs_sit;
@@ -840,15 +928,29 @@ public:
                 int cv_key_idx = this->meta[cv].key_idx(i);
                 key_type cv_key = key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
+            #ifdef VAR_KEY
+                int r = vkcmp((char*)cv_key, (char*)upsert_key);
+                if (r < 0)
+            #else
                 if (cv_key < upsert_key)
+            #endif
                 {
                     ++i;
                     this->meta[nv].append(cv_key_idx);
                 }
+            #ifdef VAR_KEY
+                else if (r > 0)
+            #else
                 else if (cv_key > upsert_key)
+            #endif
                 {
+                #ifdef VAR_KEY
+                    int free_idx =
+                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     int free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     this->pairs[free_idx] = *upsert_kvs_sit;
                     this->mark_dirty_cacheline((char *) &this->pairs[free_idx]);
                     // insert: place new kv onto a new cell and append the idx to the
@@ -861,8 +963,13 @@ public:
                 { // cv_key == upsert_key
                     // upsert: place updated value onto a new cell and modify the order
                     // array
+                #ifdef VAR_KEY
+                    int free_idx =
+                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                #else
                     int free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
+                #endif
                     this->pairs[free_idx] = *upsert_kvs_sit;
                     this->mark_dirty_cacheline((char *) &this->pairs[free_idx]);
                     this->meta[nv].append(free_idx);
@@ -881,8 +988,13 @@ public:
 
             while (upsert_kvs_sit != upsert_kvs_eit)
             {
+            #ifdef VAR_KEY
+                int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                    std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
+            #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(upsert_kvs_sit->first));
+            #endif
                 this->pairs[free_idx] = *upsert_kvs_sit;
                 this->mark_dirty_cacheline((char *) &pairs[free_idx]);
                 this->meta[nv].append(free_idx);
@@ -932,7 +1044,9 @@ public:
         {
             const int keys_per_node = std::ceil(total_keys / 2.0);
             std::vector<leaf_node *> merged_leafs = {new_leaf_node()};
+        #ifndef VAR_KEY
             std::hash<key_type> hasher;
+        #endif
             bitmap *node_alloc_bitmap = &merged_leafs.back()->meta[nv].get_bitmap();
             leaf_node *last_leaf = merged_leafs.back();
             auto ensure_last_leaf_capacity = [&last_leaf, &merged_leafs, nv,
@@ -957,8 +1071,13 @@ public:
                 for (int j = 0; j < l_key_count; ++j)
                 {
                     ensure_last_leaf_capacity();
+                #ifdef VAR_KEY
+                    int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                        std::_Hash_bytes((char*)l->ith_key(j, nv), key_size_, 1));
+                #else
                     int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                         hasher(l->ith_key(j, nv)));
+                #endif
                     last_leaf->pairs[free_idx] = l->ith_kv(j, nv);
                     last_leaf->mark_dirty_cacheline((char *) &last_leaf->pairs[free_idx]);
                     last_leaf->meta[nv].append(free_idx);
@@ -986,7 +1105,9 @@ public:
                                  leaf_node *&last_leaf,
                                  leaf_node *end_leaf = nullptr)
         {
+        #ifndef VAR_KEY
             std::hash<key_type> hasher;
+        #endif
             int l1_key_count = l1->key_count(nv);
             leaf_node *l2 = l1->next_sibling(nv);
             if (l1_key_count >= merge_node_threshold || l2 == end_leaf)
@@ -1005,8 +1126,12 @@ public:
                 assert(l2_tmp_meta.key_count() == l1_key_count + l2->key_count(nv));
                 for (int i = 0; i < l1_key_count; ++i)
                 {
+                #ifdef VAR_KEY
+                    int free_idx = l2_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)l1->ith_key(i, nv), key_size_, 1));
+                #else
                     int free_idx = l2_alloc_bitmap->alloc_first_unset_bit(
                         hasher(l1->ith_key(i, nv)));
+                #endif
                     l2->pairs[free_idx] = l1->ith_kv(i, nv);
                     l2->mark_dirty_cacheline((char *) &l2->pairs[free_idx]);
                     l2_tmp_meta.set_key_idx(i, free_idx);
@@ -1139,15 +1264,23 @@ public:
     leaf_node *lower_bound_leaf(const key_type &key)
     {
         bool v = gv;
-        uint8_t lookup_key[sizeof(key_type)];
-        // TODO: record reader epoch
-        *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(key);
         bool pref = true;
         auto tree = art_trees[v];
         if (tree == nullptr)
             return nullptr;
+    #ifdef VAR_KEY
+        uint8_t lookup_key[key_size_];
+        memcpy(lookup_key, (char*)key, key_size_);
+        auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
+                                     key_size_, pref);
+    #else
+        uint8_t lookup_key[sizeof(key_type)];
+        // TODO: record reader epoch
+        *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(key);
         auto leaf = tree->lowerBound(lookup_key, sizeof(key_type), 0,
                                      sizeof(key_type), pref);
+    #endif
+        
         if (leaf == nullptr)
             return nullptr;
         auto cur = reinterpret_cast<leaf_node *>(ART_IDX::getLeafValue(leaf));
@@ -1225,14 +1358,23 @@ public:
                 auto mkey = h->max_key(gv);
                 // printf("%p max_key %llu idx %d key count %d\n", h, mkey, node_idx,
                 // h->key_count(gv));
+            #ifdef VAR_KEY
+                if (vkcmp((char*)prev_mkey, (char*)mkey) > 0)
+            #else
                 if (prev_mkey > mkey)
+            #endif
                 {
                     printf("!!! prev_mkey %lu, mkey %lu, mkey_cv %d\n", prev_mkey,
                            mkey, h->key_count(!gv));
                     assert(false);
                 }
-                sane &= prev_mkey <= mkey;
+                // sane &= true;// prev_mkey <= mkey;
+                
+            #ifdef VAR_KEY
+                if (vkcmp((char*)mkey, (char*)max_key) > 0)
+            #else
                 if (mkey > max_key)
+            #endif
                 {
                     max_key = mkey;
                     max_key_node_idx = node_idx;
@@ -1315,7 +1457,11 @@ public:
                 {
                     key_type cur_high_key = cur->max_key(cv);
                     std::vector<kv_pair> upsert_kvs;
+                #ifdef VAR_KEY
+                    while (sit != eit && vkcmp((char*)sit.key(), (char*)cur_high_key) <= 0)
+                #else
                     while (sit != eit && sit.key() <= cur_high_key)
+                #endif
                     {
                         bool is_upsert = is_upsert_op(sit.value());
                         if (is_upsert)
@@ -1496,7 +1642,11 @@ public:
             else
             {
                 auto max_key = last_key;
+            #ifdef VAR_KEY
+                while (sit != end_it && vkcmp((char*)sit.key(), (char*)lb_leaf->max_key(cv)) <= 0)
+            #else
                 while (sit != end_it && sit.key() <= lb_leaf->max_key(cv))
+            #endif
                 {
                     max_key = sit.key();
                     ++sit;
@@ -1633,8 +1783,12 @@ public:
             auto st = secs_now();
             auto loadKey = [this, nv](uintptr_t tid, uint8_t key[]) {
                 leaf_node *l = reinterpret_cast<leaf_node *>(tid);
+            #ifdef VAR_KEY
+                reinterpret_cast<uint64_t *>(key)[0] = l->max_key(nv);
+            #else
                 reinterpret_cast<uint64_t *>(key)[0] =
                         __builtin_bswap64(l->max_key(nv));
+            #endif
             };
             art_trees[nv] = new ART_IDX::art_tree(loadKey, loadKey);
             // ART_IDX::art_tree::bulkLoadCreate(loadKey, loadKey, kvs, 0, kvs.size()
@@ -1645,9 +1799,14 @@ public:
             {
                 for (auto p : merge_worker_stats[i].maxkey_node_pairs)
                 {
-                    uint64_t key = __builtin_bswap64(p.first);
                     uintptr_t value = (uintptr_t)p.second;
+                #ifdef VAR_KEY
+                    uint64_t key = p.first;
+                    art_trees[nv]->insert((uint8_t *)key, value, key_size_);
+                #else
+                    uint64_t key = __builtin_bswap64(p.first);
                     art_trees[nv]->insert((uint8_t *)&key, value, sizeof(key_type));
+                #endif
                     ++kvs_count;
                 }
             }
@@ -1814,30 +1973,51 @@ public:
         if (tree == nullptr) {
             return false;
         }
+        bool pref = true;
+    #ifdef VAR_KEY
+        uint8_t lookup_key[key_size_];
+        memcpy(lookup_key, (char*)key, key_size_);
+        auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
+                                     key_size_, pref);
+    #else
         uint8_t lookup_key[sizeof(key_type)];
         *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(key);
-        bool pref = true;
         auto leaf = tree->lowerBound(lookup_key, sizeof(key_type), 0,
                                      sizeof(key_type), pref);
+    #endif
+        
         if (leaf == nullptr)
             return false;
         auto cur = reinterpret_cast<leaf_node *>(ART_IDX::getLeafValue(leaf));
-        uint8_t search_key_fp = std::hash<key_type>()(key);
+    #ifdef VAR_KEY
+        size_t h = std::_Hash_bytes((char*)key, key_size_, 1);
+    #else
+        size_t h = hasher(key);
+    #endif
+        uint8_t search_key_fp = h & 0xff;
+
+    #ifdef VAR_KEY
+        while (cur && vkcmp((char*)key, (char*)cur->max_key(v)) > 0)
+    #else
         while (cur && key > cur->max_key(v))
+    #endif
         {
             cur = cur->next_sibling(v);
         }
         if (cur == nullptr)
             return false;
 
-        size_t h = hasher(key);
         auto *bmap = &cur->meta[v].get_bitmap();
         int p = h % key_capacity;
         int limit = probe_limit;
         while (limit)
         {
             //++probes;
+        #ifdef VAR_KEY
+            if (vkcmp((char*)cur->pairs[p].first, (char*)key) == 0 && bmap->test(p))
+        #else
             if (cur->pairs[p].first == key && bmap->test(p))
+        #endif
             {
                 value = cur->pairs[p].second;
                 return true;
@@ -1851,7 +2031,11 @@ public:
         do
         {
             //++probes;
+        #ifdef VAR_KEY
+            if (vkcmp((char*)cur->pairs[p].first, (char*)key) == 0 && bmap->test(p))
+        #else
             if (cur->pairs[p].first == key && bmap->test(p))
+        #endif
             {
                 value = cur->pairs[p].second;
                 return true;
@@ -2143,7 +2327,11 @@ class durable_concur_buffer_btree
         }
         auto btree_leaf_insert_func = [&key, &value, this]() {
             *local_record = log_record<key_type, value_type>(op_type::upsertion, key, value);
+        #ifdef VAR_KEY
+            int id = std::_Hash_bytes((char*)key, key_size_, 1) % stripes;
+        #else
             int id = std::hash<key_type>()(key) % stripes;
+        #endif
             logs[id]->append_and_flush(local_record);
             bloom->insert(key);
         };

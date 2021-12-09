@@ -25,6 +25,19 @@ private:
 };
 extern tree *the_treep;
 extern thread_local int worker_id;
+
+#ifdef VAR_KEY
+  thread_local char k[128];
+  extern PMEMobjpool * pop_;
+
+  #ifndef PMEM
+    thread_local char* key_arr = new char[813600000]; // 100M key + 1.7M for 10 seconds
+    thread_local char* cur_addr = key_arr;
+    thread_local char* end_addr = key_arr + 813600000;
+    thread_local bool init = false;
+  #endif
+#endif
+
 /**
  * LB+Tree divides memory space so each thread has its own range.
  * Threads cannot share this because there is no concurrency control.
@@ -43,6 +56,11 @@ struct ThreadHelper
     else
       id_ = worker_id;
     worker_id = id_;
+    if (!init)
+    {
+      memset(key_arr, 0, 813600000);
+      init = true;
+    }
     // printf("constructor worker_id: %d (%s)\n", id_, str);
   }
   ~ThreadHelper()
@@ -56,17 +74,6 @@ static const constexpr auto INSERT = "insert";
 static const constexpr auto UPDATE = "update";
 static const constexpr auto REMOVE = "remove";
 static const constexpr auto SCAN = "scan";
-
-#ifdef VAR_KEY
-  thread_local char k[128];
-  extern PMEMobjpool * pop_;
-
-  #ifndef PMEM
-    thread_local char* key_arr = new char[813600000]; // 100M key + 1.7M for 10 seconds
-    thread_local char* cur_addr = key_arr;
-    thread_local char* end_addr = key_arr + 813600000;
-  #endif
-#endif
 
 lbtree_wrapper::lbtree_wrapper(void *nvm_addr, bool recover)
 {

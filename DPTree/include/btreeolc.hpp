@@ -15,6 +15,20 @@
 #include <utility>
 #include <functional>
 
+extern size_t key_size_;
+#ifdef VAR_KEY
+int vkcmp(char* a, char* b) {
+    for (int i = 0; i < key_size_; i++)
+    {
+        if (a[i] < b[i])
+            return 1;
+        else if (a[i] > b[i])
+            return -1;
+    }
+    return 0;
+}
+#endif
+
 namespace btreeolc
 {
 
@@ -139,7 +153,11 @@ struct BTreeLeaf : public BTreeLeafBase
     {
         unsigned lower = 0;
         unsigned upper = count;
+    #ifdef VAR_KEY
+        while (lower < upper && vkcmp((char*)data[lower].first, (char*)k) < 0)
+    #else
         while (lower < upper && data[lower].first < k)
+    #endif
             ++lower;
         // do
         // {
@@ -193,7 +211,11 @@ struct BTreeLeaf : public BTreeLeafBase
         if (count)
         {
             unsigned pos = lowerBound(k);
+        #ifdef VAR_KEY
+            if ((pos < count) && vkcmp((char*)data[pos].first, (char*)k) == 0)
+        #else
             if ((pos < count) && (data[pos].first == k))
+        #endif
             {
                 // Upsert
                 data[pos].second = p;
@@ -267,7 +289,11 @@ struct BTreeInner : public BTreeInnerBase
     {
         unsigned lower = 0;
         unsigned upper = count;
+    #ifdef VAR_KEY
+        while (lower < upper && vkcmp((char*)keys[lower], (char*)k) < 0)
+    #else
         while (lower < upper && keys[lower] < k)
+    #endif
             ++lower;
         return lower;
     }
@@ -404,8 +430,12 @@ struct BTree
                 if (parent) {
                     parent->downgradeToReadLock(versionParent);
                 }
-
-                if (k > sep) {
+            #ifdef VAR_KEY
+                if (vkcmp((char*)k, (char*)sep) > 0)
+            #else
+                if (k > sep) 
+            #endif
+                {
                     inner->writeUnlock();
                     inner = newInner;
                     versionNode = newInner->readLockOrRestart(needRestart);
@@ -463,7 +493,12 @@ struct BTree
             // Split
             Key sep;
             BTreeLeaf<Key, Value> *newLeaf = leaf->split(sep);
-            if (k > sep) {
+        #ifdef VAR_KEY
+            if (vkcmp((char*)k, (char*)sep) > 0)
+        #else
+            if (k > sep) 
+        #endif
+            {
                 newLeaf->insert(k, v);
             } else {
                 leaf->insert(k, v);

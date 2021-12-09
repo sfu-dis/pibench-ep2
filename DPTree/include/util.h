@@ -18,6 +18,13 @@ struct leaf_node;
     POBJ_LAYOUT_BEGIN(DPTree);
     POBJ_LAYOUT_TOID(DPTree, leaf_node);
     POBJ_LAYOUT_END(DPTree);
+
+    #ifdef VAR_KEY
+        POBJ_LAYOUT_BEGIN(Char);
+        POBJ_LAYOUT_TOID(Char, char);
+        POBJ_LAYOUT_END(Char);
+    #endif
+
     inline PMEMobjpool *pop;
     const uint64_t POOL_SIZE = 60ULL * 1024ULL * 1024ULL * 1024ULL; // 60 GB
 
