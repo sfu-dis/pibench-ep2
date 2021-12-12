@@ -885,7 +885,9 @@ public:
             meta[nv] = meta[cv];
             int free_cells = meta[cv].free_cells();
             int in_range_count = upsert_kvs_eit - upsert_kvs_sit;
+        #ifndef VAR_KEY
             std::hash<key_type> hasher;
+        #endif
             assert(key_capacity - free_cells == meta[cv].get_bitmap().popcount());
             if (in_range_count > free_cells)
             { // not enough free cells to upserts
@@ -1284,7 +1286,11 @@ public:
         if (leaf == nullptr)
             return nullptr;
         auto cur = reinterpret_cast<leaf_node *>(ART_IDX::getLeafValue(leaf));
+    #ifdef VAR_KEY
+        while (cur && vkcmp((char*)key, (char*)cur->max_key(v)) > 0)
+    #else
         while (cur && key > cur->max_key(v))
+    #endif
         {
             cur = cur->next_sibling(v);
         }
@@ -1527,6 +1533,8 @@ public:
 
                 if (has_del)
                 {
+                    printf("Deletion not implemented!\n");
+                    exit(1);
                     auto h = task.start_leaf;
                     auto cur = h;
                     auto sit = task.kv_sit;
@@ -1965,7 +1973,9 @@ public:
 
     bool lookup(const key_type &key, value_type &value)
     {
+    #ifndef VAR_KEY
         std::hash<key_type> hasher;
+    #endif
         reader_epoch.register_to_manager(&reader_manager);
         epoch_guard g(reader_epoch);
         bool v = gv;

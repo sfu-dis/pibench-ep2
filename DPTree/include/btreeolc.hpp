@@ -727,7 +727,11 @@ struct BTree
         BTreeLeaf<Key, Value> *leaf = static_cast<BTreeLeaf<Key, Value> *>(node);
         unsigned pos = leaf->lowerBound(k);
         bool success = false;
+    #ifdef VAR_KEY
+        if ((pos < leaf->count) && vkcmp((char*)leaf->data[pos].first, (char*)k) == 0)
+    #else
         if ((pos < leaf->count) && (leaf->data[pos].first == k))
+    #endif
         {
             success = true;
             result = leaf->data[pos].second;
