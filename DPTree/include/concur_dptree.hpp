@@ -2024,7 +2024,7 @@ public:
         {
             //++probes;
         #ifdef VAR_KEY
-            if (vkcmp((char*)cur->pairs[p].first, (char*)key) == 0 && bmap->test(p))
+            if (bmap->test(p) && vkcmp((char*)cur->pairs[p].first, (char*)key) == 0)
         #else
             if (cur->pairs[p].first == key && bmap->test(p))
         #endif
@@ -2042,7 +2042,7 @@ public:
         {
             //++probes;
         #ifdef VAR_KEY
-            if (vkcmp((char*)cur->pairs[p].first, (char*)key) == 0 && bmap->test(p))
+            if (bmap->test(p) && vkcmp((char*)cur->pairs[p].first, (char*)key) == 0)
         #else
             if (cur->pairs[p].first == key && bmap->test(p))
         #endif
