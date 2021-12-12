@@ -145,12 +145,12 @@ double measure(std::function<unsigned()> f, const string &bench_name, unsigned i
     sfence_count = 0;
     char tcmalloc_stats_buf[1024];
     print_mem = 0;
-    if (print_mem) {
-        MallocExtension::instance()->GetStats(tcmalloc_stats_buf,
-                                              sizeof(tcmalloc_stats_buf));
-    }
-    if (print_mem)
-        printf("%s\n", tcmalloc_stats_buf);
+    // if (print_mem) {
+    //     MallocExtension::instance()->GetStats(tcmalloc_stats_buf,
+    //                                           sizeof(tcmalloc_stats_buf));
+    // }
+    // if (print_mem)
+    //     printf("%s\n", tcmalloc_stats_buf);
 
     double start = secs_now();
     unsigned c = 0;
@@ -158,12 +158,12 @@ double measure(std::function<unsigned()> f, const string &bench_name, unsigned i
         c += f() + 1;
     }
     double end = secs_now();
-    if (print_mem) {
-        MallocExtension::instance()->GetStats(tcmalloc_stats_buf,
-                                              sizeof(tcmalloc_stats_buf));
-    }
-    if (print_mem)
-        printf("%s\n", tcmalloc_stats_buf);
+    // if (print_mem) {
+    //     MallocExtension::instance()->GetStats(tcmalloc_stats_buf,
+    //                                           sizeof(tcmalloc_stats_buf));
+    // }
+    // if (print_mem)
+    //     printf("%s\n", tcmalloc_stats_buf);
     double avg = (end - start) * 1000000000L / c;
     printf("Benchmark %s, Elapsed %f secs, %f ns/op, %f mops, %u ops in total, %lld flushes, %f flushes/op, %f sfences/op\n",
            bench_name.c_str(), (end - start), avg,
