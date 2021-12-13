@@ -1306,8 +1306,8 @@ public:
     #ifdef VAR_KEY
         assert(key != 0 && "key is 0!!!\n");
         uint8_t lookup_key[key_size_];
-        *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(*(uint64_t*)key);
-        // memcpy(lookup_key, (char*)key, key_size_);
+        // *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(*(uint64_t*)key);
+        memcpy(lookup_key, (char*)key, key_size_);
         auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
                                      key_size_, pref);
     #else
@@ -1842,7 +1842,8 @@ public:
                 leaf_node *l = reinterpret_cast<leaf_node *>(tid);
             #ifdef VAR_KEY
                 assert(l->max_key(nv) != 0 && "l->max_key(nv) is 0!\n");
-                reinterpret_cast<uint64_t *>(key)[0] = __builtin_bswap64(*(uint64_t*)l->max_key(nv));
+                // reinterpret_cast<uint64_t *>(key)[0] = __builtin_bswap64(*(uint64_t*)l->max_key(nv));
+                reinterpret_cast<uint64_t *>(key)[0] = *(uint64_t*)l->max_key(nv);
             #else
                 reinterpret_cast<uint64_t *>(key)[0] =
                         __builtin_bswap64(l->max_key(nv));
@@ -1860,9 +1861,9 @@ public:
                     uintptr_t value = (uintptr_t)p.second;
                 #ifdef VAR_KEY
                     assert(p.first != 0);
-                    uint64_t key = __builtin_bswap64(*(uint64_t*)p.first);
+                    uint64_t key = p.first; //__builtin_bswap64(*(uint64_t*)p.first);
                     // assert(key != 0 && "key is 0!\n");
-                    art_trees[nv]->insert((uint8_t *)&key, value, key_size_);
+                    art_trees[nv]->insert((uint8_t *)key, value, key_size_);
                 #else
                     uint64_t key = __builtin_bswap64(p.first);
                     art_trees[nv]->insert((uint8_t *)&key, value, sizeof(key_type));
@@ -2037,8 +2038,8 @@ public:
     #ifdef VAR_KEY
         uint8_t lookup_key[key_size_];
         assert(key != 0);
-        *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(*(uint64_t*)key);
-        // memcpy(lookup_key, (char*)key, key_size_);
+        // *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(*(uint64_t*)key);
+        memcpy(lookup_key, (char*)key, key_size_);
         auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
                                      key_size_, pref);
     #else
