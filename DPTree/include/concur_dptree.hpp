@@ -1355,9 +1355,15 @@ public:
         }
         auto sanity_check_func = [this](leaf_node *h) {
             int max_key_node_idx = -1;
-            uint64_t max_key = 0;
-            int node_idx = 0;
+        #ifdef VAR_KEY
+            uint64_t max_key = (uint64_t) new char[key_size_];
+            memset((char*)max_key, 0, key_size_);
             auto prev_mkey = max_key;
+        #else
+            uint64_t max_key = 0;
+            auto prev_mkey = max_key;
+        #endif
+            int node_idx = 0;
             bool sane = true;
             while (h)
             {
