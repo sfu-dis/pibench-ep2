@@ -1306,7 +1306,8 @@ public:
     #ifdef VAR_KEY
         assert(key != 0 && "key is 0!!!\n");
         uint8_t lookup_key[key_size_];
-        memcpy(lookup_key, (char*)key, key_size_);
+        *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(*(uint64_t*)key);
+        // memcpy(lookup_key, (char*)key, key_size_);
         auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
                                      key_size_, pref);
     #else
@@ -1508,7 +1509,7 @@ public:
                     key_type cur_high_key = cur->max_key(cv);
                     std::vector<kv_pair> upsert_kvs;
                 #ifdef VAR_KEY
-                    assert(sit == eit || (cur_high_key != 0 && sit.key() != 0))
+                    assert(sit == eit || (cur_high_key != 0 && sit.key() != 0));
                     while (sit != eit && vkcmp((char*)sit.key(), (char*)cur_high_key) <= 0)
                 #else
                     while (sit != eit && sit.key() <= cur_high_key)
@@ -1521,7 +1522,7 @@ public:
                         }
                         has_del |= !is_upsert;
                         ++sit;
-                        assert(sit == eit || (cur_high_key != 0 && sit.key() != 0))
+                        assert(sit == eit || (cur_high_key != 0 && sit.key() != 0));
                     }
                     auto ustart = upsert_kvs.begin();
                     auto uend = upsert_kvs.end();
@@ -1841,7 +1842,7 @@ public:
                 leaf_node *l = reinterpret_cast<leaf_node *>(tid);
             #ifdef VAR_KEY
                 assert(l->max_key(nv) != 0 && "l->max_key(nv) is 0!\n");
-                reinterpret_cast<uint64_t *>(key)[0] = l->max_key(nv);
+                reinterpret_cast<uint64_t *>(key)[0] = __builtin_bswap64(*(uint64_t*)l->max_key(nv));
             #else
                 reinterpret_cast<uint64_t *>(key)[0] =
                         __builtin_bswap64(l->max_key(nv));
@@ -1858,7 +1859,7 @@ public:
                 {
                     uintptr_t value = (uintptr_t)p.second;
                 #ifdef VAR_KEY
-                    uint64_t key = p.first;
+                    uint64_t key = __builtin_bswap64(*(uint64_t*)p.first);
                     assert(key != 0 && "key is 0!\n");
                     art_trees[nv]->insert((uint8_t *)key, value, key_size_);
                 #else
@@ -2034,7 +2035,8 @@ public:
         bool pref = true;
     #ifdef VAR_KEY
         uint8_t lookup_key[key_size_];
-        memcpy(lookup_key, (char*)key, key_size_);
+        *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(*(uint64_t*)key);
+        // memcpy(lookup_key, (char*)key, key_size_);
         auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
                                      key_size_, pref);
     #else
