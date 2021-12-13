@@ -528,9 +528,7 @@ public:
             const typename std::vector<kv_pair>::iterator &upsert_kvs_eit, bool cv,
             int &split_merges)
         {
-        #ifndef VAR_KEY
             std::hash<key_type> hasher;
-        #endif
             ++split_merges;
             bool nv = !cv;
             std::vector<leaf_node *> leafs = {new_leaf_node()};
@@ -680,9 +678,7 @@ public:
             int l_key_count = l->key_count(cv);
             int l_free_cells = l->free_cells(cv);
             int i = 0;
-        #ifndef VAR_KEY
             auto hasher = std::hash<key_type>();
-        #endif
 
             bitmap *node_alloc_bitmap = &leafs.back()->meta[nv].get_bitmap();
             bitmap mask; // records bit positions that should be unmarked due to key
@@ -915,9 +911,7 @@ public:
             meta[nv] = meta[cv];
             int free_cells = meta[cv].free_cells();
             int in_range_count = upsert_kvs_eit - upsert_kvs_sit;
-        #ifndef VAR_KEY
             std::hash<key_type> hasher;
-        #endif
             assert(key_capacity - free_cells == meta[cv].get_bitmap().popcount());
             if (in_range_count > free_cells)
             { // not enough free cells to upserts
@@ -1084,9 +1078,7 @@ public:
         {
             const int keys_per_node = std::ceil(total_keys / 2.0);
             std::vector<leaf_node *> merged_leafs = {new_leaf_node()};
-        #ifndef VAR_KEY
             std::hash<key_type> hasher;
-        #endif
             bitmap *node_alloc_bitmap = &merged_leafs.back()->meta[nv].get_bitmap();
             leaf_node *last_leaf = merged_leafs.back();
             auto ensure_last_leaf_capacity = [&last_leaf, &merged_leafs, nv,
@@ -1148,9 +1140,7 @@ public:
                                  leaf_node *&last_leaf,
                                  leaf_node *end_leaf = nullptr)
         {
-        #ifndef VAR_KEY
             std::hash<key_type> hasher;
-        #endif
             int l1_key_count = l1->key_count(nv);
             leaf_node *l2 = l1->next_sibling(nv);
             if (l1_key_count >= merge_node_threshold || l2 == end_leaf)
