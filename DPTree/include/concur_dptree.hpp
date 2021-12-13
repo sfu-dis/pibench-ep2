@@ -1321,13 +1321,14 @@ public:
             return nullptr;
         auto cur = reinterpret_cast<leaf_node *>(ART_IDX::getLeafValue(leaf));
     #ifdef VAR_KEY
-        assert(key != 0 && cur->max_key(v) != 0);
+        assert(!cur || cur->max_key(v) != 0);
         while (cur && vkcmp((char*)key, (char*)cur->max_key(v)) > 0)
     #else
         while (cur && key > cur->max_key(v))
     #endif
         {
             cur = cur->next_sibling(v);
+            assert(!cur || cur->max_key(v) != 0);
         }
         return cur;
     }
@@ -1507,7 +1508,7 @@ public:
                     key_type cur_high_key = cur->max_key(cv);
                     std::vector<kv_pair> upsert_kvs;
                 #ifdef VAR_KEY
-                    assert(cur_high_key != 0 && sit.key() != 0);
+                    assert(sit == eit || (cur_high_key != 0 && sit.key() != 0))
                     while (sit != eit && vkcmp((char*)sit.key(), (char*)cur_high_key) <= 0)
                 #else
                     while (sit != eit && sit.key() <= cur_high_key)
@@ -1520,6 +1521,7 @@ public:
                         }
                         has_del |= !is_upsert;
                         ++sit;
+                        assert(sit == eit || (cur_high_key != 0 && sit.key() != 0))
                     }
                     auto ustart = upsert_kvs.begin();
                     auto uend = upsert_kvs.end();
@@ -1695,7 +1697,7 @@ public:
             {
                 auto max_key = last_key;
             #ifdef VAR_KEY
-                assert(sit.key() != 0 && lb_leaf->max_key(cv) != 0);
+                assert(sit == end_it || (sit.key() != 0 && lb_leaf->max_key(cv) != 0));
                 while (sit != end_it && vkcmp((char*)sit.key(), (char*)lb_leaf->max_key(cv)) <= 0)
             #else
                 while (sit != end_it && sit.key() <= lb_leaf->max_key(cv))
@@ -1704,6 +1706,7 @@ public:
                     max_key = sit.key();
                     ++sit;
                     ++merge_in_kv_count;
+                    assert(sit == end_it || (sit.key() != 0 && lb_leaf->max_key(cv) != 0));
                 }
                 merge_task task;
                 task.start_leaf = start_leaf;
@@ -2052,13 +2055,15 @@ public:
         uint8_t search_key_fp = h & 0xff;
 
     #ifdef VAR_KEY
-        assert(key != 0 && cur->max_key(v) != 0);
+        assert(key != 0);
+        assert(!cur || cur->max_key(v) != 0);
         while (cur && vkcmp((char*)key, (char*)cur->max_key(v)) > 0)
     #else
         while (cur && key > cur->max_key(v))
     #endif
         {
             cur = cur->next_sibling(v);
+            assert(!cur || cur->max_key(v) != 0);
         }
         if (cur == nullptr)
             return false;
@@ -2071,7 +2076,6 @@ public:
             //++probes;
         #ifdef VAR_KEY
             assert(!bmap->test(p) || cur->pairs[p].first != 0);
-            assert(key != 0);
             if (bmap->test(p) && vkcmp((char*)cur->pairs[p].first, (char*)key) == 0)
         #else
             if (cur->pairs[p].first == key && bmap->test(p))
