@@ -571,8 +571,10 @@ public:
             #endif
                 {
                 #ifdef VAR_KEY
+                    // free_idx =
+                    //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     free_idx =
-                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -590,8 +592,9 @@ public:
             #endif
                 {
                 #ifdef VAR_KEY
-                    free_idx =
-                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)cv_key, key_size_, 1));
+                    // free_idx =
+                    //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)cv_key, key_size_, 1));
+                    free_idx = node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)cv_key));
                 #else
                     free_idx = node_alloc_bitmap->alloc_first_unset_bit(hasher(cv_key));
                 #endif
@@ -602,8 +605,10 @@ public:
                 else
                 {
                 #ifdef VAR_KEY
+                    // free_idx =
+                    //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     free_idx =
-                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -621,8 +626,10 @@ public:
                 int cv_key_idx = l->meta[cv].key_idx(i);
             #ifdef VAR_KEY
                 assert(l->pairs[cv_key_idx].first != 0 && "l->pairs[cv_key_idx].first is 0!\n");
-                int free_idx =
-                    node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
+                // int free_idx =
+                //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
+                int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                    hasher(*(uint64_t*)l->pairs[cv_key_idx].first));
             #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(l->pairs[cv_key_idx].first));
@@ -638,8 +645,10 @@ public:
                 ensure_last_leaf_capacity();
             #ifdef VAR_KEY
                 assert(upsert_kvs_sit->first != 0 && "upsert_kvs_sit->first is 0!\n");
-                int free_idx =
-                    node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
+                // int free_idx =
+                //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
+                int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                    hasher(*(uint64_t*)upsert_kvs_sit->first));
             #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(upsert_kvs_sit->first));
@@ -729,8 +738,10 @@ public:
             #endif
                 {
                 #ifdef VAR_KEY
+                    // free_idx =
+                    //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     free_idx =
-                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -749,7 +760,8 @@ public:
             #endif
                 {
                 #ifdef VAR_KEY
-                    free_idx = node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)cv_key, key_size_, 1));
+                    // free_idx = node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)cv_key, key_size_, 1));
+                    free_idx = node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)cv_key));
                 #else
                     free_idx = node_alloc_bitmap->alloc_first_unset_bit(hasher(cv_key));
                 #endif
@@ -761,8 +773,10 @@ public:
                 else
                 {
                 #ifdef VAR_KEY
+                    // free_idx =
+                    //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     free_idx =
-                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -781,8 +795,10 @@ public:
                 int cv_key_idx = l->meta[cv].key_idx(i);
             #ifdef VAR_KEY
                 assert(l->pairs[cv_key_idx].first != 0 && "l->pairs[cv_key_idx].first is 0!!?\n");
+                // int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                //     std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
-                    std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
+                    hasher(*(uint64_t*)l->pairs[cv_key_idx].first));
             #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(l->pairs[cv_key_idx].first));
@@ -822,8 +838,10 @@ public:
             #endif
                 {
                 #ifdef VAR_KEY
+                    // int free_idx =
+                    //     l_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     int free_idx =
-                        l_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        l_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     int free_idx =
                         l_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -848,8 +866,10 @@ public:
                 else
                 {
                 #ifdef VAR_KEY
+                    // int free_idx =
+                    //     l_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     int free_idx =
-                        l_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        l_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     int free_idx =
                         l_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -958,8 +978,10 @@ public:
             #endif
                 {
                 #ifdef VAR_KEY
+                    // int free_idx =
+                    //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     int free_idx =
-                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     int free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -977,8 +999,10 @@ public:
                     // upsert: place updated value onto a new cell and modify the order
                     // array
                 #ifdef VAR_KEY
+                    // int free_idx =
+                    //     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
                     int free_idx =
-                        node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_key, key_size_, 1));
+                        node_alloc_bitmap->alloc_first_unset_bit(hasher(*(uint64_t*)upsert_key));
                 #else
                     int free_idx =
                         node_alloc_bitmap->alloc_first_unset_bit(hasher(upsert_key));
@@ -1003,8 +1027,10 @@ public:
             {
             #ifdef VAR_KEY
                 assert(upsert_kvs_sit->first != 0 && "upsert_kvs_sit->first is 0???\n");
+                // int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                //     std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
-                    std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
+                    hasher(*(uint64_t*)upsert_kvs_sit->first));
             #else
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     hasher(upsert_kvs_sit->first));
@@ -1087,8 +1113,10 @@ public:
                     ensure_last_leaf_capacity();
                 #ifdef VAR_KEY
                     assert(l->ith_key(j, nv) != 0 && "l->ith_key(j, nv) is 0!");
+                    // int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
+                    //     std::_Hash_bytes((char*)l->ith_key(j, nv), key_size_, 1));
                     int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
-                        std::_Hash_bytes((char*)l->ith_key(j, nv), key_size_, 1));
+                        hasher(*(uint64_t*)l->ith_key(j, nv)));
                 #else
                     int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                         hasher(l->ith_key(j, nv)));
@@ -1142,7 +1170,9 @@ public:
                 for (int i = 0; i < l1_key_count; ++i)
                 {
                 #ifdef VAR_KEY
-                    int free_idx = l2_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)l1->ith_key(i, nv), key_size_, 1));
+                    // int free_idx = l2_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)l1->ith_key(i, nv), key_size_, 1));
+                    int free_idx = l2_alloc_bitmap->alloc_first_unset_bit(
+                        hasher(*(uint64_t*)l1->ith_key(i, nv)));
                 #else
                     int free_idx = l2_alloc_bitmap->alloc_first_unset_bit(
                         hasher(l1->ith_key(i, nv)));
@@ -2000,9 +2030,7 @@ public:
 
     bool lookup(const key_type &key, value_type &value)
     {
-    #ifndef VAR_KEY
         std::hash<key_type> hasher;
-    #endif
         reader_epoch.register_to_manager(&reader_manager);
         epoch_guard g(reader_epoch);
         bool v = gv;
@@ -2027,7 +2055,7 @@ public:
             return false;
         auto cur = reinterpret_cast<leaf_node *>(ART_IDX::getLeafValue(leaf));
     #ifdef VAR_KEY
-        size_t h = std::_Hash_bytes((char*)key, key_size_, 1);
+        size_t h = hasher(*(uint64_t*)key); // std::_Hash_bytes((char*)key, key_size_, 1);
     #else
         size_t h = hasher(key);
     #endif
@@ -2370,7 +2398,7 @@ class durable_concur_buffer_btree
         auto btree_leaf_insert_func = [&key, &value, this]() {
             *local_record = log_record<key_type, value_type>(op_type::upsertion, key, value);
         #ifdef VAR_KEY
-            int id = std::_Hash_bytes((char*)key, key_size_, 1) % stripes;
+            int id = std::hash<key_type>()(*(uint64_t*)key) % stripes;// std::_Hash_bytes((char*)key, key_size_, 1) % stripes;
         #else
             int id = std::hash<key_type>()(key) % stripes;
         #endif
