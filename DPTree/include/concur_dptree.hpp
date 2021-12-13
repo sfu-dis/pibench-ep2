@@ -561,10 +561,9 @@ public:
                 int cv_key_idx = l->meta[cv].key_idx(i);
                 key_type cv_key = l->key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
-                assert(cv_key != 0 && "cv_key is 0!\n");
-                assert(upsert_key != 0 && "upsert_key is 0!\n");
                 int free_idx;
             #ifdef VAR_KEY
+                assert(cv_key != 0 && upsert_key != 0);
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
                 if (r == 0)
             #else
@@ -722,6 +721,7 @@ public:
                 assert(upsert_key != 0 && "upsert_key is 0!!?\n");
                 int free_idx;
             #ifdef VAR_KEY
+                assert(cv_key != 0 && upsert_key != 0);
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
                 if (r == 0)
             #else
@@ -814,6 +814,7 @@ public:
                 assert(upsert_key != 0 && "upsert_key is 0!??\n");
                 assert(i < l_key_count);
             #ifdef VAR_KEY
+                assert(cv_key != 0 && upsert_key != 0);
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
                 if (r == 0)
             #else
@@ -939,9 +940,8 @@ public:
                 int cv_key_idx = this->meta[cv].key_idx(i);
                 key_type cv_key = key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
-                assert(cv_key != 0 && "cv_key is 0???\n");
-                assert(upsert_key != 0 && "cv_key is 0???\n");
             #ifdef VAR_KEY
+                assert(cv_key != 0 && upsert_key != 0);
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
                 if (r < 0)
             #else
@@ -1301,7 +1301,7 @@ public:
             return nullptr;
         auto cur = reinterpret_cast<leaf_node *>(ART_IDX::getLeafValue(leaf));
     #ifdef VAR_KEY
-        assert(cur->max_key(v) != 0 && "cur->max_key(v) is 0!!!\n");
+        assert(key != 0 && cur->max_key(v) != 0);
         while (cur && vkcmp((char*)key, (char*)cur->max_key(v)) > 0)
     #else
         while (cur && key > cur->max_key(v))
@@ -1386,7 +1386,7 @@ public:
                 // printf("%p max_key %llu idx %d key count %d\n", h, mkey, node_idx,
                 // h->key_count(gv));
             #ifdef VAR_KEY
-                assert(mkey != 0 && "Max key is 0!\n");
+                assert(mkey != 0 && prev_mkey != 0);
                 if (vkcmp((char*)prev_mkey, (char*)mkey) > 0)
             #else
                 if (prev_mkey > mkey)
@@ -1399,6 +1399,7 @@ public:
                 // sane &= true;// prev_mkey <= mkey;
                 
             #ifdef VAR_KEY
+                assert(mkey != 0 && max_key != 0);
                 if (vkcmp((char*)mkey, (char*)max_key) > 0)
             #else
                 if (mkey > max_key)
@@ -1486,7 +1487,7 @@ public:
                     key_type cur_high_key = cur->max_key(cv);
                     std::vector<kv_pair> upsert_kvs;
                 #ifdef VAR_KEY
-                    assert(cur_high_key != 0 && "cur_high_key is 0!\n");
+                    assert(cur_high_key != 0 && sit.key() != 0);
                     while (sit != eit && vkcmp((char*)sit.key(), (char*)cur_high_key) <= 0)
                 #else
                     while (sit != eit && sit.key() <= cur_high_key)
@@ -1673,10 +1674,8 @@ public:
             else
             {
                 auto max_key = last_key;
-                assert(max_key != 0 && "max_key is 0!\n");
-                assert(sit.key() != 0 && "sit.key() is 0!\n");
-                assert(lb_leaf->max_key(cv) != 0 && "lb_leaf->max_key(cv) is 0!\n");
             #ifdef VAR_KEY
+                assert(sit.key() != 0 && lb_leaf->max_key(cv) != 0);
                 while (sit != end_it && vkcmp((char*)sit.key(), (char*)lb_leaf->max_key(cv)) <= 0)
             #else
                 while (sit != end_it && sit.key() <= lb_leaf->max_key(cv))
@@ -2035,6 +2034,7 @@ public:
         uint8_t search_key_fp = h & 0xff;
 
     #ifdef VAR_KEY
+        assert(key != 0 && cur->max_key(v) != 0);
         while (cur && vkcmp((char*)key, (char*)cur->max_key(v)) > 0)
     #else
         while (cur && key > cur->max_key(v))
@@ -2052,6 +2052,7 @@ public:
         {
             //++probes;
         #ifdef VAR_KEY
+            assert(cur->pairs[p].first != 0 && key != 0);
             if (bmap->test(p) && vkcmp((char*)cur->pairs[p].first, (char*)key) == 0)
         #else
             if (cur->pairs[p].first == key && bmap->test(p))
@@ -2070,6 +2071,7 @@ public:
         {
             //++probes;
         #ifdef VAR_KEY
+            assert(cur->pairs[p].first != 0 && key != 0);
             if (bmap->test(p) && vkcmp((char*)cur->pairs[p].first, (char*)key) == 0)
         #else
             if (cur->pairs[p].first == key && bmap->test(p))
