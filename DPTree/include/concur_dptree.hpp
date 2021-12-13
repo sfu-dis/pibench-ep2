@@ -2052,7 +2052,8 @@ public:
         {
             //++probes;
         #ifdef VAR_KEY
-            assert(cur->pairs[p].first != 0 && key != 0);
+            assert(cur->pairs[p].first != 0);
+            assert(key != 0);
             if (bmap->test(p) && vkcmp((char*)cur->pairs[p].first, (char*)key) == 0)
         #else
             if (cur->pairs[p].first == key && bmap->test(p))
