@@ -1859,9 +1859,10 @@ public:
                 {
                     uintptr_t value = (uintptr_t)p.second;
                 #ifdef VAR_KEY
+                    assert(p.first != 0);
                     uint64_t key = __builtin_bswap64(*(uint64_t*)p.first);
-                    assert(key != 0 && "key is 0!\n");
-                    art_trees[nv]->insert((uint8_t *)key, value, key_size_);
+                    // assert(key != 0 && "key is 0!\n");
+                    art_trees[nv]->insert((uint8_t *)&key, value, key_size_);
                 #else
                     uint64_t key = __builtin_bswap64(p.first);
                     art_trees[nv]->insert((uint8_t *)&key, value, sizeof(key_type));
@@ -2035,6 +2036,7 @@ public:
         bool pref = true;
     #ifdef VAR_KEY
         uint8_t lookup_key[key_size_];
+        assert(key != 0);
         *reinterpret_cast<uint64_t *>(lookup_key) = __builtin_bswap64(*(uint64_t*)key);
         // memcpy(lookup_key, (char*)key, key_size_);
         auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
