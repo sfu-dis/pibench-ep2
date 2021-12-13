@@ -561,6 +561,8 @@ public:
                 int cv_key_idx = l->meta[cv].key_idx(i);
                 key_type cv_key = l->key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
+                assert(cv_key != 0 && "cv_key is 0!\n");
+                assert(upsert_key != 0 && "upsert_key is 0!\n");
                 int free_idx;
             #ifdef VAR_KEY
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
@@ -619,6 +621,7 @@ public:
                 ensure_last_leaf_capacity();
                 int cv_key_idx = l->meta[cv].key_idx(i);
             #ifdef VAR_KEY
+                assert(l->pairs[cv_key_idx].first != 0 && "l->pairs[cv_key_idx].first is 0!\n");
                 int free_idx =
                     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
             #else
@@ -635,6 +638,7 @@ public:
             {
                 ensure_last_leaf_capacity();
             #ifdef VAR_KEY
+                assert(upsert_kvs_sit->first != 0 && "upsert_kvs_sit->first is 0!\n");
                 int free_idx =
                     node_alloc_bitmap->alloc_first_unset_bit(std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
             #else
@@ -714,6 +718,8 @@ public:
                 int cv_key_idx = l->meta[cv].key_idx(i);
                 key_type cv_key = l->key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
+                assert(cv_key != 0 && "cv_key is 0!!?\n");
+                assert(upsert_key != 0 && "upsert_key is 0!!?\n");
                 int free_idx;
             #ifdef VAR_KEY
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
@@ -774,6 +780,7 @@ public:
                 ensure_last_leaf_capacity();
                 int cv_key_idx = l->meta[cv].key_idx(i);
             #ifdef VAR_KEY
+                assert(l->pairs[cv_key_idx].first != 0 && "l->pairs[cv_key_idx].first is 0!!?\n");
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     std::_Hash_bytes((char*)l->pairs[cv_key_idx].first, key_size_, 1));
             #else
@@ -803,6 +810,8 @@ public:
                 int cv_key_idx = l->meta[cv].key_idx(i);
                 key_type cv_key = l->key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
+                assert(cv_key != 0 && "cv_key is 0!??\n");
+                assert(upsert_key != 0 && "upsert_key is 0!??\n");
                 assert(i < l_key_count);
             #ifdef VAR_KEY
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
@@ -930,6 +939,8 @@ public:
                 int cv_key_idx = this->meta[cv].key_idx(i);
                 key_type cv_key = key(cv_key_idx);
                 key_type upsert_key = upsert_kvs_sit->first;
+                assert(cv_key != 0 && "cv_key is 0???\n");
+                assert(upsert_key != 0 && "cv_key is 0???\n");
             #ifdef VAR_KEY
                 int r = vkcmp((char*)cv_key, (char*)upsert_key);
                 if (r < 0)
@@ -991,6 +1002,7 @@ public:
             while (upsert_kvs_sit != upsert_kvs_eit)
             {
             #ifdef VAR_KEY
+                assert(upsert_kvs_sit->first != 0 && "upsert_kvs_sit->first is 0???\n");
                 int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                     std::_Hash_bytes((char*)upsert_kvs_sit->first, key_size_, 1));
             #else
@@ -1074,6 +1086,7 @@ public:
                 {
                     ensure_last_leaf_capacity();
                 #ifdef VAR_KEY
+                    assert(l->ith_key(j, nv) != 0 && "l->ith_key(j, nv) is 0!");
                     int free_idx = node_alloc_bitmap->alloc_first_unset_bit(
                         std::_Hash_bytes((char*)l->ith_key(j, nv), key_size_, 1));
                 #else
@@ -1271,6 +1284,7 @@ public:
         if (tree == nullptr)
             return nullptr;
     #ifdef VAR_KEY
+        assert(key != 0 && "key is 0!!!\n");
         uint8_t lookup_key[key_size_];
         memcpy(lookup_key, (char*)key, key_size_);
         auto leaf = tree->lowerBound(lookup_key, key_size_, 0,
@@ -1287,6 +1301,7 @@ public:
             return nullptr;
         auto cur = reinterpret_cast<leaf_node *>(ART_IDX::getLeafValue(leaf));
     #ifdef VAR_KEY
+        assert(cur->max_key(v) != 0 && "cur->max_key(v) is 0!!!\n");
         while (cur && vkcmp((char*)key, (char*)cur->max_key(v)) > 0)
     #else
         while (cur && key > cur->max_key(v))
@@ -1371,6 +1386,7 @@ public:
                 // printf("%p max_key %llu idx %d key count %d\n", h, mkey, node_idx,
                 // h->key_count(gv));
             #ifdef VAR_KEY
+                assert(mkey != 0 && "Max key is 0!\n");
                 if (vkcmp((char*)prev_mkey, (char*)mkey) > 0)
             #else
                 if (prev_mkey > mkey)
@@ -1470,6 +1486,7 @@ public:
                     key_type cur_high_key = cur->max_key(cv);
                     std::vector<kv_pair> upsert_kvs;
                 #ifdef VAR_KEY
+                    assert(cur_high_key != 0 && "cur_high_key is 0!\n");
                     while (sit != eit && vkcmp((char*)sit.key(), (char*)cur_high_key) <= 0)
                 #else
                     while (sit != eit && sit.key() <= cur_high_key)
@@ -1656,6 +1673,9 @@ public:
             else
             {
                 auto max_key = last_key;
+                assert(max_key != 0 && "max_key is 0!\n");
+                assert(sit.key() != 0 && "sit.key() is 0!\n");
+                assert(lb_leaf->max_key(cv) != 0 && "lb_leaf->max_key(cv) is 0!\n");
             #ifdef VAR_KEY
                 while (sit != end_it && vkcmp((char*)sit.key(), (char*)lb_leaf->max_key(cv)) <= 0)
             #else
@@ -1798,6 +1818,7 @@ public:
             auto loadKey = [this, nv](uintptr_t tid, uint8_t key[]) {
                 leaf_node *l = reinterpret_cast<leaf_node *>(tid);
             #ifdef VAR_KEY
+                assert(l->max_key(nv) != 0 && "l->max_key(nv) is 0!\n");
                 reinterpret_cast<uint64_t *>(key)[0] = l->max_key(nv);
             #else
                 reinterpret_cast<uint64_t *>(key)[0] =
@@ -1816,6 +1837,7 @@ public:
                     uintptr_t value = (uintptr_t)p.second;
                 #ifdef VAR_KEY
                     uint64_t key = p.first;
+                    assert(key != 0 && "key is 0!\n");
                     art_trees[nv]->insert((uint8_t *)key, value, key_size_);
                 #else
                     uint64_t key = __builtin_bswap64(p.first);
