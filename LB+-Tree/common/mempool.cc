@@ -210,7 +210,9 @@ void threadNVMPools::init(int num_workers, const char *nvm_file, long long size)
         arg.units_per_block = 16;
         arg.header_type = POBJ_HEADER_NONE;
         PMEMobjpool * pop = pmemobj_create("./pool", POBJ_LAYOUT_NAME(LBtree), size, 0666);
+    #ifdef VAR_KEY
         pop_ = pop;
+    #endif
         if (pop)
             printf("PMDK pool of size %llu created!\n", size);
         else

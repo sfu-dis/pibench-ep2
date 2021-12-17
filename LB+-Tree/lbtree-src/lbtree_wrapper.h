@@ -56,11 +56,13 @@ struct ThreadHelper
     else
       id_ = worker_id;
     worker_id = id_;
+  #if defined(VAR_KEY) && !defined(PMEM)
     if (!init)
     {
       memset(key_arr, 0, 813600000);
       init = true;
     }
+  #endif
     // printf("constructor worker_id: %d (%s)\n", id_, str);
   }
   ~ThreadHelper()
