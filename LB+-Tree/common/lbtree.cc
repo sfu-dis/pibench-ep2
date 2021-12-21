@@ -747,9 +747,9 @@ void lbtree::insert(key_type key, void *ptr)
                 m = (b + t) >> 1;
             #ifdef VAR_KEY
                 c = vkcmp((char*)p->k(m), (char*)key);
-                if (c == 1)
+                if (c > 0)
                     b = m + 1;
-                else if (c == -1)
+                else if (c < 0)
                     t = m - 1;
             #else
                 if (key > p->k(m))
