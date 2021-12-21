@@ -529,9 +529,9 @@ Again1:
             m = (b + t) >> 1;
         #ifdef VAR_KEY
             c = vkcmp((char*)p->k(m), (char*)key);
-            if (c == 1)
+            if (c > 0)
                 b = m + 1;
-            else if (c == -1)
+            else if (c < 0)
                 t = m - 1;
         #else
             if (key > p->k(m))
@@ -549,7 +549,7 @@ Again1:
         // sequential search (which is slightly faster now)
         for (; b <= t; b++)
         #ifdef VAR_KEY
-            if (vkcmp((char*)key, (char*)p->k(b)) == 1)
+            if (vkcmp((char*)key, (char*)p->k(b)) > 0)
                 break;
         #else
             if (key < p->k(b))
@@ -642,7 +642,7 @@ void lbtree::qsortBleaf(bleaf *p, int start, int end, int pos[])
 #ifdef VAR_KEY
     while (l < r)
     {
-        while ((l < r) && (vkcmp((char*)p->k(pos[r]), (char*)key) == -1))
+        while ((l < r) && (vkcmp((char*)p->k(pos[r]), (char*)key) < 0))
             r--;
         if (l < r)
         {
@@ -768,7 +768,7 @@ void lbtree::insert(key_type key, void *ptr)
             // sequential search (which is slightly faster now)
             for (; b <= t; b++)
             #ifdef VAR_KEY
-                if (vkcmp((char*)key, (char*)p->k(b)) == 1)
+                if (vkcmp((char*)key, (char*)p->k(b)) > 0)
                     break;
             #else
                 if (key < p->k(b))
@@ -991,7 +991,7 @@ void lbtree::insert(key_type key, void *ptr)
 
         // 2.5 key > split_key: insert key into new node
     #ifdef VAR_KEY
-        if (vkcmp((char*)key, (char*)split_key) == -1)
+        if (vkcmp((char*)key, (char*)split_key) < 0)
     #else
         if (key > split_key)
     #endif

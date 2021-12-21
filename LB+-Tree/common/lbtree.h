@@ -342,14 +342,16 @@ void initUseful();
 
 #ifdef VAR_KEY
 static int vkcmp(char* a, char* b) {
-    // for (int i = 0; i < key_size_; i++)
-    // {
-    //     if (a[i] < b[i])
-    //         return 1;
-    //     else if (a[i] > b[i])
-    //         return -1;
-    // }
-    // return 0;
+/*
+    for (int i = 0; i < key_size_; i++)
+    {
+        if (a[i] < b[i])
+            return 1;
+        else if (a[i] > b[i])
+            return -1;
+    }
+    return 0;
+*/
     return memcmp(a, b, key_size_);
 }
 #endif

@@ -103,11 +103,13 @@ lbtree_wrapper::lbtree_wrapper(void *nvm_addr, bool recover)
   auto root = lbt->bulkload(num_bulkloaded, &input, bfill);
   worker_thread_num = worker_num;
   printf("%lld keys bulkloaded (deleted? %d), root is %d, bfill %f. ", num_bulkloaded, delbulk, root, bfill);
+#ifndef VAR_KEY
   key_type start, end;
   lbt->check(&start, &end);
   for (auto i = start; i < end && delbulk; i++)
     lbt->del(i);
   printf("lbt->check() start: %lld, end: %lld\n", start, end);
+#endif
 }
 
 lbtree_wrapper::~lbtree_wrapper()
