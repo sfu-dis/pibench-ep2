@@ -447,7 +447,8 @@ bool Tree::lookupRange(const Key *start, const Key *end, const Key *continueKey,
                         return;
                     }
 
-                    result[resultsFound] = leaf;
+                    // result[resultsFound] = leaf;
+                    memcmp((char*)&result[resultsFound*2], leaf->kv, 16); // assuming key + val = 16 bytes
                     resultsFound++;
                 }
             } else {
