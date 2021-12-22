@@ -52,6 +52,8 @@
 #define PMEM // comment this out to use DRAM as NVM (DRAM version LB+-Tree)
 //#define POOL // comment this out to use malloc and PMDK if #define PMEM
 
+//#define VAR_KEY
+
 #define ENTRY_MOVING
 #define PREFETCH
 
@@ -70,6 +72,12 @@ extern uint64_t class_id;
       POBJ_LAYOUT_BEGIN(LBtree);
       POBJ_LAYOUT_TOID(LBtree, dummy);
       POBJ_LAYOUT_END(LBtree);
+
+      #ifdef VAR_KEY
+         POBJ_LAYOUT_BEGIN(Char);
+         POBJ_LAYOUT_TOID(Char, char);
+         POBJ_LAYOUT_END(Char);
+      #endif
    #endif
 #endif
 

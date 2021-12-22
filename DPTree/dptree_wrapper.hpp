@@ -14,6 +14,8 @@
 
 extern int parallel_merge_worker_num;
 
+thread_local char k_[128];
+
 class dptree_wrapper : public tree_api
 {
 public:
@@ -45,7 +47,12 @@ dptree_wrapper::~dptree_wrapper()
 
 bool dptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 {
+#ifdef VAR_KEY
+    memcpy(k_, key, key_size_);
+    uint64_t v, k = (uint64_t)k_;
+#else
     uint64_t v, k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
+#endif
     if (!dptree.lookup(k, v))
     {
 #ifdef DEBUG_MSG
@@ -61,7 +68,15 @@ bool dptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 
 bool dptree_wrapper::insert(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
+#ifdef VAR_KEY // key size > 8
+    PMEMoid dst;
+    pmemobj_zalloc(pop, &dst, key_size_, TOID_TYPE_NUM(char));
+    char* new_k = (char*)pmemobj_direct(dst);
+    memcpy(new_k, key, key_size_);
+    uint64_t k = (uint64_t) new_k;
+#else
     uint64_t k = *reinterpret_cast<uint64_t*>(const_cast<char*>(key));
+#endif
     uint64_t v = *reinterpret_cast<uint64_t*>(const_cast<char*>(value));
     dptree.insert(k, v);
     return true;

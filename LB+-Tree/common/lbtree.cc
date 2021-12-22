@@ -148,7 +148,11 @@ int lbtree::bulkloadSubtree(
         {
 
             // get key from input
+        #ifdef VAR_KEY
+            key_type mykey = (key_type)(new uint64_t);
+        #else
             key_type mykey = (key_type)(input->get_key(key_id));
+        #endif
             key_id++;
 
             // entry
@@ -489,6 +493,9 @@ void *lbtree::lookup(key_type key, int *pos)
     bnode *p;
     bleaf *lp;
     int i, t, m, b;
+#ifdef VAR_KEY
+    int c;
+#endif
 
     unsigned char key_hash = hashcode1B(key);
     int ret_pos;
@@ -520,10 +527,18 @@ Again1:
         while (b + 7 <= t)
         {
             m = (b + t) >> 1;
+        #ifdef VAR_KEY
+            c = vkcmp((char*)p->k(m), (char*)key);
+            if (c > 0)
+                b = m + 1;
+            else if (c < 0)
+                t = m - 1;
+        #else
             if (key > p->k(m))
                 b = m + 1;
             else if (key < p->k(m))
                 t = m - 1;
+        #endif
             else
             {
                 p = p->ch(m);
@@ -533,8 +548,13 @@ Again1:
 
         // sequential search (which is slightly faster now)
         for (; b <= t; b++)
+        #ifdef VAR_KEY
+            if (vkcmp((char*)key, (char*)p->k(b)) > 0)
+                break;
+        #else
             if (key < p->k(b))
                 break;
+        #endif
         p = p->ch(b - 1);
 
     inner_done:;
@@ -577,11 +597,19 @@ Again1:
     {
         int jj = bitScan(mask) - 1; // next candidate
 
+    #ifdef VAR_KEY
+        if (vkcmp((char*)lp->k(jj), (char*)key) == 0)
+        { // found
+            ret_pos = jj;
+            break;
+        }
+    #else
         if (lp->k(jj) == key)
         { // found
             ret_pos = jj;
             break;
         }
+    #endif
 
         mask &= ~(0x1 << jj); // remove this bit
         /*  UBSan: implicit conversion from int -65 to unsigned int
@@ -611,6 +639,25 @@ void lbtree::qsortBleaf(bleaf *p, int start, int end, int pos[])
 
     l = start;
     r = end;
+#ifdef VAR_KEY
+    while (l < r)
+    {
+        while ((l < r) && (vkcmp((char*)p->k(pos[r]), (char*)key) < 0))
+            r--;
+        if (l < r)
+        {
+            pos[l] = pos[r];
+            l++;
+        }
+        while ((l < r) && (vkcmp((char*)p->k(pos[l]), (char*)key) >= 0))
+            l++;
+        if (l < r)
+        {
+            pos[r] = pos[l];
+            r--;
+        }
+    }
+#else
     while (l < r)
     {
         while ((l < r) && (p->k(pos[r]) > key))
@@ -628,6 +675,7 @@ void lbtree::qsortBleaf(bleaf *p, int start, int end, int pos[])
             r--;
         }
     }
+#endif
     pos[l] = pos_start;
     qsortBleaf(p, start, l - 1, pos);
     qsortBleaf(p, l + 1, end, pos);
@@ -657,6 +705,9 @@ void lbtree::insert(key_type key, void *ptr)
         bnode *p;
         bleaf *lp;
         int i, t, m, b;
+    #ifdef VAR_KEY
+        int c;
+    #endif
 
     Again2:
         // 1. RTM begin
@@ -694,10 +745,18 @@ void lbtree::insert(key_type key, void *ptr)
             while (b + 7 <= t)
             {
                 m = (b + t) >> 1;
+            #ifdef VAR_KEY
+                c = vkcmp((char*)p->k(m), (char*)key);
+                if (c > 0)
+                    b = m + 1;
+                else if (c < 0)
+                    t = m - 1;
+            #else
                 if (key > p->k(m))
                     b = m + 1;
                 else if (key < p->k(m))
                     t = m - 1;
+            #endif
                 else
                 {
                     p = p->ch(m);
@@ -708,8 +767,13 @@ void lbtree::insert(key_type key, void *ptr)
 
             // sequential search (which is slightly faster now)
             for (; b <= t; b++)
+            #ifdef VAR_KEY
+                if (vkcmp((char*)key, (char*)p->k(b)) > 0)
+                    break;
+            #else
                 if (key < p->k(b))
                     break;
+            #endif
             p = p->ch(b - 1);
             ppos[i] = b - 1;
 
@@ -753,13 +817,19 @@ void lbtree::insert(key_type key, void *ptr)
         while (mask)
         {
             int jj = bitScan(mask) - 1; // next candidate
-
+        #ifdef VAR_KEY
+            if (vkcmp((char*)lp->k(jj), (char*)key) == 0)
+            { // found: do nothing, return
+                _xend();
+                return;
+            }
+        #else
             if (lp->k(jj) == key)
             { // found: do nothing, return
                 _xend();
                 return;
             }
-
+        #endif
             mask &= ~(0x1 << jj); // remove this bit
             /*  UBSan: implicit conversion from int -33 to unsigned int 
                 changed the value to 4294967263 (32-bit, unsigned)      */
@@ -920,7 +990,11 @@ void lbtree::insert(key_type key, void *ptr)
         meta.v.alt = 1 - lp->alt;
 
         // 2.5 key > split_key: insert key into new node
+    #ifdef VAR_KEY
+        if (vkcmp((char*)key, (char*)split_key) < 0)
+    #else
         if (key > split_key)
+    #endif
         {
             newp->k(split - 1) = key;
             newp->ch(split - 1) = ptr;
@@ -930,7 +1004,7 @@ void lbtree::insert(key_type key, void *ptr)
             if (tree_meta->root_level > 0)
                 meta.v.lock = 0; // do not clear lock of root
         }
-
+    
         // 2.6 clwb newp, clwb lp line[3] and sfence
         #ifdef NVMPOOL_REAL
         LOOP_FLUSH(clwb, newp, LEAF_LINE_NUM);
@@ -946,7 +1020,11 @@ void lbtree::insert(key_type key, void *ptr)
         #endif
 
         // 2.8 key < split_key: insert key into old node
+    #ifdef VAR_KEY
+        if (vkcmp((char*)key, (char*)split_key) >= 0)
+    #else
         if (key <= split_key)
+    #endif
         {
 
             // note: lock bit is still set

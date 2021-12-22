@@ -25,6 +25,19 @@ private:
 };
 extern tree *the_treep;
 extern thread_local int worker_id;
+
+#ifdef VAR_KEY
+  thread_local char k[128];
+  extern PMEMobjpool * pop_;
+
+  #ifndef PMEM
+    thread_local char* key_arr = new char[813600000]; // 100M key + 1.7M for 10 seconds
+    thread_local char* cur_addr = key_arr;
+    thread_local char* end_addr = key_arr + 813600000;
+    thread_local bool init = false;
+  #endif
+#endif
+
 /**
  * LB+Tree divides memory space so each thread has its own range.
  * Threads cannot share this because there is no concurrency control.
@@ -43,6 +56,13 @@ struct ThreadHelper
     else
       id_ = worker_id;
     worker_id = id_;
+  #if defined(VAR_KEY) && !defined(PMEM)
+    if (!init)
+    {
+      memset(key_arr, 0, 813600000);
+      init = true;
+    }
+  #endif
     // printf("constructor worker_id: %d (%s)\n", id_, str);
   }
   ~ThreadHelper()
@@ -83,11 +103,13 @@ lbtree_wrapper::lbtree_wrapper(void *nvm_addr, bool recover)
   auto root = lbt->bulkload(num_bulkloaded, &input, bfill);
   worker_thread_num = worker_num;
   printf("%lld keys bulkloaded (deleted? %d), root is %d, bfill %f. ", num_bulkloaded, delbulk, root, bfill);
+#ifndef VAR_KEY
   key_type start, end;
   lbt->check(&start, &end);
   for (auto i = start; i < end && delbulk; i++)
     lbt->del(i);
   printf("lbt->check() start: %lld, end: %lld\n", start, end);
+#endif
 }
 
 lbtree_wrapper::~lbtree_wrapper()
@@ -112,9 +134,12 @@ bool lbtree_wrapper::find(const char *key, size_t key_sz, char *value_out)
   thread_local ThreadHelper t{FIND};
   void *p;
   int pos = -1;
-  auto k = PBkeyToLB(key);
-  p = lbt->lookup(k, &pos);
-
+#ifdef VAR_KEY
+  memcpy(k, key, key_size_);
+  p = lbt->lookup((key_type)k, &pos);
+#else
+  p = lbt->lookup(PBkeyToLB(key), &pos);
+#endif
   if (pos >= 0)
   {
     void *recptr = lbt->get_recptr(p, pos);
@@ -132,7 +157,27 @@ bool lbtree_wrapper::find(const char *key, size_t key_sz, char *value_out)
 bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t{INSERT};
+#ifdef VAR_KEY // key size > 8
+  #ifdef PMEM
+    PMEMoid dst;
+    pmemobj_zalloc(pop_, &dst, key_size_, TOID_TYPE_NUM(char));
+    char* new_k = (char*)pmemobj_direct(dst);
+    memcpy(new_k, key, key_size_);
+    key_type k = (key_type) new_k;
+  #else
+    // char* new_k = new char[key_size_];
+    if (cur_addr >= end_addr)
+    {
+      printf("insufficient Memory for keys!\n");
+      exit(1);
+    }
+    memcpy(cur_addr, key, key_size_);
+    key_type k = (key_type) cur_addr;
+    cur_addr += key_size_;
+  #endif
+#else
   auto k = PBkeyToLB(key);
+#endif
   lbt->insert(k, PBvalToLB(value));
   return true;
 }

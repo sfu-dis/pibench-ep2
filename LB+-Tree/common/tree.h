@@ -24,6 +24,7 @@
 #include <thread>
 #include <atomic>
 #include <vector>
+#include <bits/hash_bytes.h>
 
 #include <immintrin.h>
 /* ---------------------------------------------------------------------- */
@@ -80,11 +81,17 @@ Returns the number of 1-bits in x.
 #define bitScan(x) __builtin_ffs(x)
 #define countBit(x) __builtin_popcount(x)
 
+extern size_t key_size_;
+
 static inline unsigned char hashcode1B(key_type x)
 {
+#ifdef VAR_KEY
+   return std::_Hash_bytes((char*)x, key_size_, 1) & 0xff;
+#else
    x ^= x >> 32;
    x ^= x >> 16;
    x ^= x >> 8;
+#endif
    return (unsigned char)(x & 0x0ffULL);
 }
 

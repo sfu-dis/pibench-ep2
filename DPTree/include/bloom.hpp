@@ -92,7 +92,11 @@ class bloom1
 
     void insert(const key_type &key)
     {
+    #ifdef VAR_KEY
+        uint64_t h = MurmurHash64A((char*)key, key_size_, hash_seed);
+    #else
         uint64_t h = MurmurHash64A(&key, sizeof(key), hash_seed);
+    #endif
         int word_off = -1;
         uint64_t word_mask = make_word_mask(h, word_off);
         __sync_fetch_and_or(&words[word_off], word_mask);
@@ -100,7 +104,11 @@ class bloom1
 
     bool check(const key_type &key)
     {
+    #ifdef VAR_KEY
+        uint64_t h = MurmurHash64A((char*)key, key_size_, hash_seed);
+    #else
         uint64_t h = MurmurHash64A(&key, sizeof(key), hash_seed);
+    #endif
         int word_off = -1;
         uint64_t word_mask = make_word_mask(h, word_off);
         return (words[word_off] & word_mask) == word_mask;
