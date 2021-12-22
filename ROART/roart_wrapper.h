@@ -37,6 +37,12 @@ struct ThreadHelper
   }
 };
 
+struct KV
+{
+  uint64_t key;
+  uint64_t val;
+};
+
 roart_wrapper::roart_wrapper()
 {
 }
@@ -144,10 +150,15 @@ int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
   end_k.init((char*)&max, key_sz, (char*)&max, key_sz);
 #endif
   roart.lookupRange(&k, &end_k, nullptr, (PART_ns::Leaf**)&results, scan_sz, scanned);
-  auto arr = (PART_ns::Leaf**)&results;
-  std::sort(arr, arr + scanned, [] (const PART_ns::Leaf* l1, const PART_ns::Leaf* l2) {
-            return *(uint64_t*)(l1->kv) < *(uint64_t*)(l2->kv);
+  auto arr = (KV*)results;
+  std::sort(arr, arr + scanned, [] (const KV l1, const KV l2) {
+            return l1->key < l2->key;
     });
+  // auto arr = (PART_ns::Leaf**)&results;
+  // std::sort(arr, arr + scanned, [] (const PART_ns::Leaf* l1, const PART_ns::Leaf* l2) {
+  //           return *(uint64_t*)(l1->kv) < *(uint64_t*)(l2->kv);
+  //   });
+
 #ifdef DEBUG_MSG
   if (scanned != 100)
     printf("%d records scanned.\n", scanned);
