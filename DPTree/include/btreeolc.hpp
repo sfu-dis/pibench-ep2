@@ -18,14 +18,15 @@
 extern size_t key_size_;
 #ifdef VAR_KEY
 int vkcmp(char* a, char* b) {
-    // for (int i = 0; i < key_size_; i++)
-    // {
-    //     if (a[i] < b[i])
-    //         return 1;
-    //     else if (a[i] > b[i])
-    //         return -1;
-    // }
-    // return 0;
+/*
+    auto n = key_size_;
+    while(n--)
+        if( *a != *b )
+            return *a - *b;
+        else
+            a++,b++;
+    return 0;
+*/
     return memcmp(a, b, key_size_);
 }
 #endif
