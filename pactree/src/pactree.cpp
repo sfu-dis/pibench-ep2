@@ -176,7 +176,7 @@ void pactreeImpl::createWorkerThread(int numNuma, root_obj *root) {
 	printf("Worker thread created!\n");
 	usleep(1);
         wtArray->push_back(wt);
-        pinThread(wt, i % numNuma);
+        //pinThread(wt, i % numNuma);
         threadInitialized[i % numNuma] = true;
     }
 
