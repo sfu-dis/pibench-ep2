@@ -25,4 +25,4 @@ create new record on heap upon insert/update.
 ## This repo contains souce code from https://github.com/speedskater/hot.git
 The following modifications are made in order to compile the pibench wrapper
 1. Modified CMakeLists.txt to include libhot_wrapper
-2. hot\libs\hot\rowex\include\hot\rowex\HOTRowexNode.hpp posix_memalign is where memory allocation happens
+2. hot/libs/hot/rowex/include/hot/rowex/HOTRowexNode.hpp posix_memalign is where memory allocation happens

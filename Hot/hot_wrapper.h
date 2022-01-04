@@ -4,11 +4,13 @@
 #include <idx/contenthelpers/OptionalValue.hpp>
 #include "tree_api.hpp"
 #include <atomic>
+#include <unordered_map>
+
 
 // #define DEBUG_MSG
 
 std::atomic<uint64_t> dram_fp(0);
-
+std::unordered_map<uint64_t, uint64_t> map;
 
 struct KV {
   uint64_t key;
@@ -64,6 +66,9 @@ hot_wrapper::hot_wrapper()
 hot_wrapper::~hot_wrapper()
 {
   printf("DRAM Footprint: %llu\n", dram_fp.load());
+  for( const auto& [key, value] : u ) {
+    printf("Chunk size: %llu    Request time: %llu \n", key, value);
+  }
 }
 
 bool hot_wrapper::find(const char *key, size_t key_sz, char *value_out)
