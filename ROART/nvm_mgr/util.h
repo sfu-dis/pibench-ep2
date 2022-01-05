@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #define DRAM_MODE
+#define DRAM_MODE
 
 #define MOR __ATOMIC_SEQ_CST
 #define ATM_GET(var) (var)

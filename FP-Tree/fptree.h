@@ -42,7 +42,7 @@
 #include <thread>
 #include <boost/lockfree/queue.hpp>
 
-// #define MEMORY_FOOTPRINT
+#define MEMORY_FOOTPRINT
 static std::atomic<uint64_t> dram_footprint(0);
 static std::atomic<uint64_t> pmem_footprint(0);
 
@@ -69,7 +69,7 @@ enum Result { Insert, Update, Split, Abort, Delete, Remove, NotFound };
 #ifdef PMEM
     #include <libpmemobj.h>
 
-    #define PMEMOBJ_POOL_SIZE ((size_t)(1024 * 1024 * 64) * 1000)  /* 64 GB */
+    #define PMEMOBJ_POOL_SIZE ((size_t)(1024 * 1024 * 64) * 1024)  /* 64 GB */
 
     POBJ_LAYOUT_BEGIN(FPtree);
     POBJ_LAYOUT_ROOT(FPtree, struct List);

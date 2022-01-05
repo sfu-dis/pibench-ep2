@@ -66,7 +66,7 @@ hot_wrapper::hot_wrapper()
 hot_wrapper::~hot_wrapper()
 {
   printf("DRAM Footprint: %llu\n", dram_fp.load());
-  for( const auto& [key, value] : u ) {
+  for( const auto& [key, value] : map ) {
     printf("Chunk size: %llu    Request time: %llu \n", key, value);
   }
 }

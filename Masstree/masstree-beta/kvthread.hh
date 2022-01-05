@@ -24,6 +24,9 @@
 #include <pthread.h>
 #include <sys/mman.h>
 #include <stdlib.h>
+#include <atomic>
+
+extern std::atomic<uint64_t> dram_footprint;
 
 class threadinfo;
 class loginfo;

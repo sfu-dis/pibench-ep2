@@ -18,6 +18,10 @@
 #include "string_base.hh"
 #include <string>
 #include <utility>
+#include <atomic>
+
+extern std::atomic<uint64_t> dram_footprint;
+
 namespace lcdf {
 
 class String : public String_base<String> {

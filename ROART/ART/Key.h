@@ -10,7 +10,7 @@
 static const char * pool_path = "./pool.data";
 static const long long pool_size = 64LL * 1024 * 1024 * 1024; // default 64GB
 
-// #define DRAM_MODE
+#define DRAM_MODE
 #define ARTPMDK // If defined, will use PMDK allocator, otherwise will use ROART's DCMM
 
 #define KEY_INLINE  // inline for key <= 8B  Read, update is fine

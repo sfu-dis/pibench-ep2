@@ -5,7 +5,7 @@ CC=g++
 # CFLAGS=-O0 -g -std=c++11 -pthread -mrtm -msse4.1 -mavx2
 
 # Flag for test runs
-CFLAGS=-g -std=c++17 -pthread -mrtm -msse4.1 -mavx2 -Wall -O3 -ltbb -ljemalloc
+CFLAGS=-DMEMORY_FOOTPRINT -g -std=c++17 -pthread -mrtm -msse4.1 -mavx2 -Wall -O3 -ltbb -ljemalloc
 
 #CFLAGS=-g -std=c++17 -pthread -msse4.1 -mavx2 -Wall -O3 -fsanitize=undefined,implicit-conversion,nullability,float-divide-by-zero,unsigned-integer-overflow,bounds,bool
 

@@ -36,6 +36,9 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
+#include <atomic>
+
+extern std::atomic<uint64_t> dram_footprint;
 namespace lcdf {
 
 /** @class StringAccum
