@@ -5,6 +5,9 @@
 #include <iostream>
 #include <unistd.h>
 #include "arch.h"
+#include <atomic>
+
+extern std::atomic<uint64_t> pmem_footprint;
 
 #define MASK 0x8000FFFFFFFFFFFF
 #define MASK_DIRTY 0xDFFFFFFFFFFFFFFF //DIRTY_BIT

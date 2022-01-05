@@ -18,9 +18,6 @@
 
 //#define PACTREE_ENABLE_STATS
 
-extern std::atomic<uint64_t> pmem_footprint;
-extern std::atomic<uint64_t> dram_footprint;
-
 template <std::size_t keySize>
 class StringKey {
 private:

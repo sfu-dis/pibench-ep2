@@ -6,6 +6,8 @@
 #include "tbb/enumerable_thread_specific.h"
 #include "tbb/combinable.h"
 
+extern std::atomic<uint64_t> dram_footprint;
+
 namespace ART {
 
     struct LabelDelete {

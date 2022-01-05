@@ -5,6 +5,9 @@
 #include <cstring>
 #include <memory>
 #include <assert.h>
+#include <atomic>
+
+extern std::atomic<uint64_t> dram_footprint;
 
 using KeyLen = uint32_t;
 
