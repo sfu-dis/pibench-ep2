@@ -16,6 +16,9 @@
 #include <thread>
 #include <gperftools/profiler.h>
 
+extern std::atomic<uint64_t> dram_footprint;
+extern std::atomic<uint64_t> pmem_footprint;
+
 #define PMEM
 
 #ifdef PMEM
@@ -86,6 +89,9 @@ void *alloc(size_t size) {
 #ifdef USE_PMDK
   TOID(list_node_t) p;
   POBJ_ZALLOC(pop, &p, list_node_t, size);
+#ifdef MEMORY_FOOTPRINT
+  pmem_footprint += size;
+#endif
   return pmemobj_direct(p.oid);
 #else
   // void *ret = curr_addr;
@@ -162,7 +168,9 @@ class header{
   public:
     header() {
       mtx = new std::mutex();
-
+    #ifdef MEMORY_FOOTPRINT
+      dram_footprint += sizeof(mtx);
+    #endif
       leftmost_ptr = NULL;  
       sibling_ptr = NULL;
       pred_ptr = NULL;
@@ -386,6 +394,9 @@ class page{
           // overflow
           // create a new node
           page* sibling = new page(hdr.level); 
+        #ifdef MEMORY_FOOTPRINT
+          dram_footprint += sizeof(page);
+        #endif
           register int m = (int) ceil(num_entries/2);
           entry_key_t split_key = records[m].key;
 
@@ -434,6 +445,9 @@ class page{
           if(bt->root == (char *)this) { // only one node can update the root ptr
             page* new_root = new page((page*)this, split_key, sibling, 
                 hdr.level + 1);
+            #ifdef MEMORY_FOOTPRINT
+              dram_footprint += sizeof(page);
+            #endif
             bt->setNewRoot((char *)new_root);
 
             if(with_lock) {
@@ -559,6 +573,9 @@ class page{
           // overflow
           // create a new node
           page* sibling = new page(hdr.level); 
+        #ifdef MEMORY_FOOTPRINT
+          dram_footprint += sizeof(page);
+        #endif
           register int m = (int) ceil(num_entries/2);
           entry_key_t split_key = records[m].key;
 
@@ -608,6 +625,9 @@ class page{
           if(bt->root == (char *)this) { // only one node can update the root ptr
             page* new_root = new page((page*)this, split_key, sibling, 
                 hdr.level + 1);
+          #ifdef MEMORY_FOOTPRINT
+            dram_footprint += sizeof(page);
+          #endif
             bt->setNewRoot((char *)new_root);
 
             if(with_lock) {
@@ -1023,12 +1043,18 @@ void openPmemobjPool() {
  */
 btree::btree(){
   root = (char*)new page();
+#ifdef MEMORY_FOOTPRINT
+  dram_footprint += sizeof(page);
+#endif
 #ifdef USE_PMDK
   openPmemobjPool();
   list_head = (list_node_t *)alloc(sizeof(list_node_t));
 #else
   // printf("without pmdk!\n");
   list_head = new list_node_t();
+#ifdef MEMORY_FOOTPRINT
+  dram_footprint += sizeof(list_node_t);
+#endif
 #endif
   printf("list_head=%p\n", list_head);
   list_head->next = NULL;
@@ -1255,6 +1281,9 @@ void btree::insert(entry_key_t key, char *right) {
   list_node_t *n = (list_node_t *)alloc(sizeof(list_node_t));
   #else
   list_node_t *n = new list_node_t();
+#ifdef MEMORY_FOOTPRINT
+  dram_footprint += sizeof(list_node_t);
+#endif
   #endif
   //printf("n=%p\n", n);
   n->next = NULL;

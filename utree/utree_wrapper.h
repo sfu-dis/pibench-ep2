@@ -1,6 +1,10 @@
 #include "tree_api.hpp"
 #include "utree.h"
 #include <sys/types.h>
+#include <atomic>
+
+std::atomic<uint64_t> dram_footprint(0);
+std::atomic<uint64_t> pmem_footprint(0);
 
 // #define DEBUG_MSG
 
@@ -26,6 +30,10 @@ utree_wrapper::utree_wrapper()
 
 utree_wrapper::~utree_wrapper()
 {
+#ifdef MEMORY_FOOTPRINT
+  printf("DRAM Footprint: %llu \n", dram_footprint.load());
+  printf("PMEM Footprint: %llu \n", pmem_footprint.load());
+#endif
 }
 
 bool utree_wrapper::find(const char *key, size_t key_sz, char *value_out)
