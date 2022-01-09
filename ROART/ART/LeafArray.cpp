@@ -97,6 +97,9 @@ bool LeafArray::remove(const Key *k) {
             if (finger_print == thisfp && ptr->checkKey(k)) {
                 leaf[i].store(0);
                 flush_data(&leaf[i], sizeof(std::atomic<uintptr_t>));
+            #ifdef MEMORY_FOOTPRINT
+                pmem_deallocated += sizeof(PART_ns::NTypes::Leaf);
+            #endif
                 EpochGuard::DeleteNode(ptr);
                 b[i] = false;
                 bitmap.store(b);
@@ -261,6 +264,9 @@ void LeafArray::splitAndUnlock(N *parentNode, uint8_t parentKey,
     parentNode->writeUnlock();
 
     this->writeUnlockObsolete();
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(PART_ns::NTypes::LeafArray);
+#endif
     EpochGuard::DeleteNode(this);
 }
 Leaf *LeafArray::getLeafAt(size_t pos) const {

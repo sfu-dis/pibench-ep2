@@ -378,6 +378,9 @@ restart:
                 auto result = leaf_array->update(k, leaf);
                 node->writeUnlock();
                 if (!result) {
+                #ifdef MEMORY_FOOTPRINT
+                    pmem_deallocated += sizeof(Leaf);
+                #endif
                     EpochGuard::DeleteNode(leaf);
                     return OperationResults::NotFound;
                 } else {
@@ -926,10 +929,19 @@ restart:
             // new node, unlock
             parentNode->writeLockOrRestart(needRestart);
             if (needRestart) {
+            #ifdef MEMORY_FOOTPRINT
+                pmem_deallocated += sizeof(N4);
+            #endif
                 EpochGuard::DeleteNode((void *)newNode);
 #ifdef LEAF_ARRAY
+            #ifdef MEMORY_FOOTPRINT
+                pmem_deallocated += sizeof(LeafArray);
+            #endif
                 EpochGuard::DeleteNode(newLeafArray);
 #endif
+            #ifdef MEMORY_FOOTPRINT
+                pmem_deallocated += sizeof(Leaf);
+            #endif
                 EpochGuard::DeleteNode((void *)newLeaf);
 
                 node->writeUnlock();

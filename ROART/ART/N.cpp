@@ -370,6 +370,9 @@ void N::tryInsertOrGrowAndUnlock(curN *n, N *parentNode, uint8_t keyParent,
     parentNode->writeUnlock();
 
     n->writeUnlockObsolete();
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(curN);
+#endif
     EpochGuard::DeleteNode((void *)n);
 }
 
@@ -403,6 +406,9 @@ void N::compactAndInsertAndUnlock(curN *n, N *parentNode, uint8_t keyParent,
     parentNode->writeUnlock();
 
     n->writeUnlockObsolete();
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(curN);
+#endif
     EpochGuard::DeleteNode((void *)n);
 }
 
@@ -554,6 +560,9 @@ void N::removeAndShrink(curN *n, N *parentNode, uint8_t keyParent, uint8_t key,
 
     parentNode->writeUnlock();
     n->writeUnlockObsolete();
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(curN);
+#endif
     EpochGuard::DeleteNode((void *)n);
 }
 
