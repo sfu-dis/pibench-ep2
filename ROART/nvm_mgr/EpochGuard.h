@@ -9,18 +9,18 @@ class EpochGuard {
     ~EpochGuard() { LeaveThisEpoch(); }
     static void DeleteNode(void *node) { 
     #ifdef MEMORY_FOOTPRINT
-    	switch ((N*)node->getType()) {
-		    case NTypes::N4: {
-		        pmem_deallocated += sizeof(N4);
+    	switch ((PART_ns::N*)node->getType()) {
+		    case PART_ns::NTypes::N4: {
+		        pmem_deallocated += sizeof(PART_ns::NTypes::N4);
 		    }
-		    case NTypes::N16: {
-		        pmem_deallocated += sizeof(N16);
+		    case PART_ns::NTypes::N16: {
+		        pmem_deallocated += sizeof(PART_ns::NTypes::N16);
 		    }
-		    case NTypes::N48: {
-		        pmem_deallocated += sizeof(N48);
+		    case PART_ns::NTypes::N48: {
+		        pmem_deallocated += sizeof(PART_ns::NTypes::N48);
 		    }
-		    case NTypes::N256: {
-		        pmem_deallocated += sizeof(N256);
+		    case PART_ns::NTypes::N256: {
+		        pmem_deallocated += sizeof(PART_ns::NTypes::N256);
 		    }
 		    default: {
 		    	printf("Not a N type node!!!\n");
