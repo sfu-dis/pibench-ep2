@@ -151,6 +151,9 @@ N *N16::getAnyChild() const {
 }
 
 void N16::deleteChildren() {
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(N16);
+#endif
     for (std::size_t i = 0; i < compactCount; ++i) {
 #ifdef ZENTRY
         N *child = N::clearDirty(getZentryPtr(zens[i].load()));

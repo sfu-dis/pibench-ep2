@@ -97,6 +97,9 @@ N *N48::getAnyChild() const {
 }
 
 void N48::deleteChildren() {
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(N48);
+#endif
     for (unsigned i = 0; i < 256; i++) {
         uint8_t index = childIndex[i].load();
 #ifdef ZENTRY

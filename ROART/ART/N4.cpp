@@ -7,6 +7,9 @@
 namespace PART_ns {
 
 void N4::deleteChildren() {
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(N4);
+#endif
     for (uint32_t i = 0; i < compactCount; ++i) {
 #ifdef ZENTRY
         N *child = N::clearDirty(getZentryPtr(zens[i]));

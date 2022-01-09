@@ -7,6 +7,9 @@
 namespace PART_ns {
 
 void N256::deleteChildren() {
+#ifdef MEMORY_FOOTPRINT
+    pmem_deallocated += sizeof(N256);
+#endif
     for (uint64_t i = 0; i < 256; ++i) {
         N *child = N::clearDirty(children[i].load());
         if (child != nullptr) {
