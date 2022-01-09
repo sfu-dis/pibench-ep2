@@ -39,6 +39,10 @@ void *allocate_size(size_t size) {
     alloc_time->start();
 #endif
 
+#ifdef MEMORY_FOOTPRINT
+    pmem_allocated += size;
+#endif
+
 #ifdef DRAM_MODE
     void *addr = new (std::align_val_t(64)) char[size];
 #else

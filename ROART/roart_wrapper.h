@@ -4,8 +4,12 @@
 #include "threadinfo.h"
 #include <sys/types.h>
 #include <algorithm>
+#include <atomic>
 
 // #define DEBUG_MSG
+
+std::atomic<uint64_t> pmem_allocated(0);
+std::atomic<uint64_t> pmem_deallocated(0);
 
 using namespace PART_ns;
 
@@ -49,6 +53,10 @@ roart_wrapper::roart_wrapper()
 
 roart_wrapper::~roart_wrapper()
 {
+#ifdef MEMORY_FOOTPRINT
+  printf("PMEM Allocated: %llu\n", pmem_allocated.load());
+  printf("PMEM Deallocated: %llu\n", pmem_deallocated.load());
+#endif
 }
 
 bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)

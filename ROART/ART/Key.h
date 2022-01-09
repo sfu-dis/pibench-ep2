@@ -9,6 +9,9 @@
 static const char * pool_path = "./pool.data";
 static const long long pool_size = 64LL * 1024 * 1024 * 1024; // default 64GB
 
+extern std::atomic<uint64_t> pmem_allocated;
+extern std::atomic<uint64_t> pmem_deallocated;
+
 // #define DRAM_MODE
 #define ARTPMDK // If defined, will use PMDK allocator, otherwise will use ROART's DCMM
 
