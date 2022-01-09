@@ -9,7 +9,7 @@ class EpochGuard {
     ~EpochGuard() { LeaveThisEpoch(); }
     static void DeleteNode(void *node) { 
     #ifdef MEMORY_FOOTPRINT
-    	switch ((PART_ns::N*)node->getType()) {
+    	switch (((PART_ns::N*)node)->getType()) {
 		    case PART_ns::NTypes::N4: {
 		        pmem_deallocated += sizeof(PART_ns::NTypes::N4);
 		    }
