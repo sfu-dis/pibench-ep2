@@ -51,6 +51,9 @@ inline void DeletionList::add(void *n, uint64_t globalEpoch) {
             freeLabelDeletes = freeLabelDeletes->next;
         } else {
             label = new LabelDelete();
+        #ifdef MEMORY_FOOTPRINT
+            dram_allocated += sizeof(LabelDelete);
+        #endif
         }
         label->nodesCount = 0;
         label->next = headDeletionList;

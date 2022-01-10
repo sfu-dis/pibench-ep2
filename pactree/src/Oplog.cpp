@@ -35,6 +35,9 @@ void Oplog::enq(OpStruct *ops) {
 
 void Oplog::enq(OpStruct::Operation op, Key_t key, uint8_t hash, void* newNodePtr) {
     OpStruct* ops = new OpStruct;
+#ifdef MEMORY_FOOTPRINT
+    dram_allocated += sizeof(OpStruct);
+#endif
     ops->op = op;
     ops->key = key;
     ops->hash = static_cast<uint8_t>(hash % WORKER_THREAD_PER_NUMA);
@@ -70,6 +73,9 @@ Oplog* Oplog::getOpLog() {
     Oplog* perThreadLog = Oplog::getPerThreadInstance();
     if(!g_perThreadLog.count(perThreadLog)) {
         perThreadLog = new Oplog;
+    #ifdef MEMORY_FOOTPRINT
+        dram_allocated += sizeof(Oplog);
+    #endif
         g_perThreadLog.insert(perThreadLog);
         setPerThreadInstance(perThreadLog);
     }

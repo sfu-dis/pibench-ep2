@@ -226,6 +226,9 @@ pactreeImpl *initPT(int numa){
     PMEMobjpool *pop = (PMEMobjpool *)PMem::getBaseOf(1);
 
     int ret = pmemobj_alloc(pop, &(root->ptr[0]), sizeof(pactreeImpl), 0, NULL, NULL);
+#ifdef MEMORY_FOOTPRINT
+    pmem_allocated += sizeof(pactreeImpl);
+#endif
     void *rootVaddr = pmemobj_direct(root->ptr[0]);
     pactreeImpl *pt= (pactreeImpl *)new(rootVaddr) pactreeImpl(numa,sl_root);
     flushToNVM((char *)root, sizeof(root_obj));

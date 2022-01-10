@@ -12,6 +12,12 @@
 #include <atomic>
 #include <omp.h>
 
+std::atomic<uint64_t> dram_allocated(0);
+std::atomic<uint64_t> pmem_allocated(0);
+std::atomic<uint64_t> dram_freed(0);
+std::atomic<uint64_t> pmem_freed(0);
+
+
 class pactree_wrapper : public tree_api
 {
 public:
@@ -48,6 +54,12 @@ pactree_wrapper::pactree_wrapper()
 
 pactree_wrapper::~pactree_wrapper()
 {
+#ifdef MEMORY_FOOTPRINT
+    printf("DRAM Allocated: %llu\n", dram_allocated.load());
+    printf("DRAM Freed: %llu\n", dram_freed.load());
+    printf("PMEM Allocated: %llu\n", pmem_allocated.load());
+    printf("PMEM Freed: %llu\n", pmem_freed.load());
+#endif
     if (tree_ != nullptr)
         delete tree_;
     //tree_ = nullptr;

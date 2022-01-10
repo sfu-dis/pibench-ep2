@@ -10,6 +10,11 @@
 #define MASK_DIRTY 0xDFFFFFFFFFFFFFFF //DIRTY_BIT
 #define MASK_POOL 0x7FFFFFFFFFFFFFFF
 
+extern std::atomic<uint64_t> dram_allocated;
+extern std::atomic<uint64_t> pmem_allocated;
+extern std::atomic<uint64_t> dram_freed;
+extern std::atomic<uint64_t> pmem_freed;
+
 //#define MEM_AMOUNT
 typedef struct root_obj{
 	PMEMoid ptr[2];
@@ -35,6 +40,9 @@ class PMem {
 			PMEMobjpool *pop = (PMEMobjpool *)baseAddresses[poolId];            
 			PMEMoid oid;
 			int ret = pmemobj_alloc(pop, &oid, size, 0, NULL, NULL);
+		#ifdef MEMORY_FOOTPRINT
+			pmem_allocated += size;
+		#endif
 			if(ret){
 				std::cerr<<"alloc error"<<std::endl;	
 				return false;
@@ -50,6 +58,9 @@ class PMem {
 			// return true on succeed
 			PMEMobjpool *pop = (PMEMobjpool *)baseAddresses[poolId];            
 			int ret = pmemobj_alloc(pop, oid, size, 0, NULL, NULL);
+		#ifdef MEMORY_FOOTPRINT
+			pmem_allocated += size;
+		#endif
 			if(ret){
 				std::cerr<<"alloc error"<<std::endl;	
 				return false;
@@ -123,6 +134,9 @@ class PMem {
 				PMEMoid g_root = pmemobj_root(pop, sizeof(PMEMoid));
 				//       PMEMoid g_root = pmemobj_root(pop, 64UL*1024UL*1024UL*1024UL);
 				int ret = pmemobj_alloc(pop, &g_root, 512UL*1024UL*1024UL, 0, NULL, NULL);
+			#ifdef MEMORY_FOOTPRINT
+				pmem_allocated += (512UL*1024UL*1024UL);
+			#endif
 				if(ret){
 					std::cerr<<"!!! alloc error"<<std::endl;	
 					return false;
