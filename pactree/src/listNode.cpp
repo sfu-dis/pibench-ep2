@@ -845,7 +845,7 @@ bool ListNode::scan(Key_t startKey, int range, std::vector<Val_t> &rangeVector, 
     uint8_t startIndex = 0;
     if (startKey > min) startIndex = permuterLowerBound(startKey);
     for (uint8_t i = startIndex; i < numEntries && todo > 0; i++) {
-	rangeVector.push_back(keyArray[permuter[i]].first);
+	rangeVector.push_back((Val_t)(keyArray[permuter[i]].first.getData()));
         rangeVector.push_back(keyArray[permuter[i]].second);
         todo--;
     }
