@@ -163,6 +163,8 @@ bool LinkedList::insert(Key_t key, Val_t value, ListNode* head, int threadId) {
         cur->writeUnlock();
         goto restart;
     }
+    printf("Debug: After traversing to right node\n");
+
 #ifdef DIST
 	if(dist==0) dists[0]++;
 	else if(dist<2) dists[1]++;
@@ -173,6 +175,7 @@ bool LinkedList::insert(Key_t key, Val_t value, ListNode* head, int threadId) {
 
     bool ret = cur->insert(key, value,threadId);
     cur->writeUnlock();
+    printf("Debug: After insert into ListNode\n");
     return ret;
 }
 
