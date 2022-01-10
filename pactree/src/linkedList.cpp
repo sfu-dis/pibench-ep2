@@ -136,6 +136,7 @@ bool LinkedList::insert(Key_t key, Val_t value, ListNode* head, int threadId) {
 
 	int dist = 0;
     while (1) {
+        assert(cur != nullptr && "cur is nullptr!!!\n");
         if (cur->getMin() > key) {
 #ifdef DIST
 			dist++;
@@ -152,7 +153,7 @@ bool LinkedList::insert(Key_t key, Val_t value, ListNode* head, int threadId) {
         }
         break;
     }
-
+    printf("Debug: exit while loop\n");
     if (!cur->writeLock(genId))
         goto restart;
     if (cur->getDeleted()) {
