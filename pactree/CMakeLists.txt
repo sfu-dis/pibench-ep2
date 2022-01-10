@@ -4,6 +4,8 @@ include(FetchContent)
 set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_BUILD_TYPE Debug)
 
+#add_definitions(-DVAR_KEY)
+#add_definitions(-DMEMORY_FOOTPRINT)
 
 project(pactree)
 

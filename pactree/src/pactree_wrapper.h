@@ -55,10 +55,10 @@ pactree_wrapper::pactree_wrapper()
 pactree_wrapper::~pactree_wrapper()
 {
 #ifdef MEMORY_FOOTPRINT
-    printf("DRAM Allocated: %llu\n", dram_allocated.load());
-    printf("DRAM Freed: %llu\n", dram_freed.load());
+    // printf("DRAM Allocated: %llu\n", dram_allocated.load());
+    // printf("DRAM Freed: %llu\n", dram_freed.load());
     printf("PMEM Allocated: %llu\n", pmem_allocated.load());
-    printf("PMEM Freed: %llu\n", pmem_freed.load());
+    // printf("PMEM Freed: %llu\n", pmem_freed.load());
 #endif
     if (tree_ != nullptr)
         delete tree_;
@@ -68,12 +68,6 @@ pactree_wrapper::~pactree_wrapper()
 
 bool pactree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 {
-/*    if (!thread_init)
-    {
-        tree_->registerThread();
-        thread_init = true;
-    }
-*/
     thread_local ThreadHelper t(tree_);
     Val_t value = tree_->lookup(*reinterpret_cast<Key_t*>(const_cast<char*>(key)));
     if (value == 0)
@@ -86,15 +80,6 @@ bool pactree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 
 bool pactree_wrapper::insert(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
-/*    if (!thread_init)
-    {
-        tree_->registerThread();
-        thread_init = true;
-    }
-*/
-    //auto x = i_.fetch_add(1, std::memory_order_relaxed);
-    //printf("%lu", x);
-
     thread_local ThreadHelper t(tree_);
     if (!tree_->insert(*reinterpret_cast<Key_t*>(const_cast<char *>(key)), *reinterpret_cast<Val_t*>(const_cast<char *>(value))))
     {
@@ -105,12 +90,6 @@ bool pactree_wrapper::insert(const char* key, size_t key_sz, const char* value, 
 
 bool pactree_wrapper::update(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
-/*    if (!thread_init)
-    {
-        tree_->registerThread();
-        thread_init = true;
-    }
-*/
     thread_local ThreadHelper t(tree_);
     if (!tree_->update(*reinterpret_cast<Key_t*>(const_cast<char*>(key)), *reinterpret_cast<Val_t*>(const_cast<char*>(value))))
     {
@@ -120,12 +99,6 @@ bool pactree_wrapper::update(const char* key, size_t key_sz, const char* value, 
 }
 
 bool pactree_wrapper::remove(const char* key, size_t key_sz) {
-/*    if (!thread_init)
-    {
-        tree_->registerThread();
-        thread_init = true;
-    }
-*/
     thread_local ThreadHelper t(tree_);
     if (!tree_->remove(*reinterpret_cast<Key_t*>(const_cast<char*>(key))))
     {
@@ -136,12 +109,6 @@ bool pactree_wrapper::remove(const char* key, size_t key_sz) {
 
 int pactree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& values_out)
 {
-/*    if (!thread_init)
-    {
-        tree_->registerThread();
-        thread_init = true;
-    }
-*/
     thread_local ThreadHelper t(tree_);
     constexpr size_t ONE_MB = 1ULL << 20;
     //static thread_local char results[ONE_MB];
