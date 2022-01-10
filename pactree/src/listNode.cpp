@@ -712,6 +712,7 @@ int ListNode:: getFreeIndex(Key_t key, uint8_t keyHash) {
 bool ListNode::insert(Key_t key, Val_t value,int threadId) {
     uint8_t keyHash = getKeyFingerPrint(key);
     int index = getFreeIndex(key, keyHash);
+    printf("Debug: got FP and Free Index\n");
     if (index == -1) return false; // Key exitst
     if (index == -2) { //No free index
 		pptr<ListNode> newNodePtr=split(key, value, keyHash,threadId);
