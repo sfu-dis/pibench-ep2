@@ -715,6 +715,7 @@ bool ListNode::insert(Key_t key, Val_t value,int threadId) {
     printf("Debug: got FP and Free Index\n");
     if (index == -1) return false; // Key exitst
     if (index == -2) { //No free index
+        printf("Debug: before split\n");
 		pptr<ListNode> newNodePtr=split(key, value, keyHash,threadId);
         ListNode* newNode =newNodePtr.getVaddr();
         ListNode* nextNode = newNode->getNext();
