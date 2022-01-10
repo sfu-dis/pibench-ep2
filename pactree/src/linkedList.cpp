@@ -141,6 +141,8 @@ bool LinkedList::insert(Key_t key, Val_t value, ListNode* head, int threadId) {
 #ifdef DIST
 			dist++;
 #endif
+            if (!cur->getPrev())
+                break;
             cur = cur->getPrev();
             continue;
         }
@@ -148,6 +150,8 @@ bool LinkedList::insert(Key_t key, Val_t value, ListNode* head, int threadId) {
 #ifdef DIST
 			dist++;
 #endif
+            if (!cur->getNext())
+                break;
             cur = cur->getNext();
             continue;
         }
