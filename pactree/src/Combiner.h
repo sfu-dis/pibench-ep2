@@ -35,7 +35,7 @@ public:
             logQueue.push(make_pair(doneCountCombiner, mergedLog));
             doneCountCombiner++;
         #ifdef MEMORY_FOOTPRINT
-            dram_allocated += (mergedLog.size()*sizeof(OpStruct *));
+            dram_allocated += (mergedLog->size()*sizeof(OpStruct *));
         #endif
             return mergedLog;
         } else {

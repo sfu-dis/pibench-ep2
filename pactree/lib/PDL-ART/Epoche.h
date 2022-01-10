@@ -6,6 +6,11 @@
 #include "tbb/enumerable_thread_specific.h"
 #include "tbb/combinable.h"
 
+extern std::atomic<uint64_t> dram_allocated;
+extern std::atomic<uint64_t> pmem_allocated;
+extern std::atomic<uint64_t> dram_freed;
+extern std::atomic<uint64_t> pmem_freed;
+
 namespace ART {
 
     struct LabelDelete {

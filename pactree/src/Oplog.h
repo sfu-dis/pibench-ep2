@@ -13,6 +13,10 @@
 #include <set>
 #include <mutex>
 
+extern std::atomic<uint64_t> dram_allocated;
+extern std::atomic<uint64_t> pmem_allocated;
+extern std::atomic<uint64_t> dram_freed;
+extern std::atomic<uint64_t> pmem_freed;
 
 class Oplog {
 private:
