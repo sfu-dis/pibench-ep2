@@ -348,7 +348,7 @@ bool pactreeImpl::insert(Key_t &key, Val_t val) {
 #else
 	jumpNode = getJumpNode(key);
 #endif
-    printf("Debug: After getJumpNode\n");
+    // printf("Debug: After getJumpNode\n");
     // hydralist_stop_timer(ticks);
     hydralist_start_timer();
     acc_sl_time(ticks);
@@ -360,7 +360,7 @@ bool pactreeImpl::insert(Key_t &key, Val_t val) {
         JumpNodewithUnLock(art_node) ;
 	}
 #endif
-    printf("Debug: After dl.insert\n");
+    // printf("Debug: After dl.insert\n");
 
     hydralist_stop_timer(ticks);
     acc_dl_time(ticks);

@@ -503,19 +503,19 @@ bool ListNode :: insertAtIndex(std::pair<Key_t, Val_t> key, int index, uint8_t k
     if(flush){
         flushToNVM((char*)&keyArray[index],sizeof(keyArray[index]));
     }
-    printf("Debug: after first flush\n");
+    // printf("Debug: after first flush\n");
     fingerPrint[index] = keyHash;
     if(flush){
        flushToNVM((char*)&fingerPrint[index],sizeof(uint8_t));
        smp_wmb();
     }
-    printf("Debug: after second flush\n");
+    // printf("Debug: after second flush\n");
     bitMap.set(index);
     if(flush){
         flushToNVM((char*)this, L1_CACHE_BYTES);
         smp_wmb();
     }
-    printf("Debug: after third flush\n");
+    // printf("Debug: after third flush\n");
     return true;
 }
 
@@ -712,21 +712,21 @@ int ListNode:: getFreeIndex(Key_t key, uint8_t keyHash) {
 bool ListNode::insert(Key_t key, Val_t value,int threadId) {
     uint8_t keyHash = getKeyFingerPrint(key);
     int index = getFreeIndex(key, keyHash);
-    printf("Debug: got FP and Free Index\n");
+    // printf("Debug: got FP and Free Index\n");
     if (index == -1) return false; // Key exitst
     if (index == -2) { //No free index
-        printf("Debug: before split\n");
+        // printf("Debug: before split\n");
 		pptr<ListNode> newNodePtr=split(key, value, keyHash,threadId);
         ListNode* newNode =newNodePtr.getVaddr();
         ListNode* nextNode = newNode->getNext();
         nextNode->setPrev(newNodePtr);
-        printf("Debug: after split\n");
+        // printf("Debug: after split\n");
         return true;
     }
-    printf("Debug: before insertAtIndex\n");
+    // printf("Debug: before insertAtIndex\n");
     if (!insertAtIndex(std::make_pair(key, value), (uint8_t)index, keyHash, true))
     {
-        printf("Debug: after insertAtIndex\n");
+        // printf("Debug: after insertAtIndex\n");
         return false;
     }
     return true;
