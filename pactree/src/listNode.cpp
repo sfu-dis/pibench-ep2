@@ -17,6 +17,10 @@ ListNode :: ListNode(){
     deleted = false;
     bitMap.clear();
     lastScanVersion = 0;
+#ifdef STRINGKEY
+    min = Key_t();
+    max = Key_t();
+#endif
 }
 
 void ListNode::setCur(pptr<ListNode> ptr) {
