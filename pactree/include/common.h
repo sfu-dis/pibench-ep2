@@ -21,7 +21,7 @@
 
 template <std::size_t keySize>
 class StringKey {
-private:
+public:
     char data[keySize];
     // size_t keyLength = 0;
 public:

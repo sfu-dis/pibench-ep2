@@ -20,7 +20,7 @@ ListNode :: ListNode(){
 #ifdef STRINGKEY
     min = Key_t();
     max = Key_t();
-    memset(max.getData(), 0xff, KEYLENGTH);
+    memset(max.data, 0xff, KEYLENGTH);
 #endif
 }
 
