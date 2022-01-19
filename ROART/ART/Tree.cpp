@@ -164,6 +164,15 @@ Tree::Tree() {
 
 #endif
     std::cout << "[DLART]\tP-ART Initialization Complete\n";
+
+#ifdef MEMORY_FOOTPRINT
+    printf("N4: %ld bytes\n", sizeof(N4));
+    printf("N16: %ld bytes\n", sizeof(N16));
+    printf("N48: %ld bytes\n", sizeof(N48));
+    printf("N256: %ld bytes\n", sizeof(N256));
+    printf("LeafArray: %ld bytes\n", sizeof(LeafArray));
+    printf("Leaf: %ld bytes\n", sizeof(Leaf));
+#endif
 }
 
 Tree::~Tree() {
