@@ -11,6 +11,7 @@
 std::atomic<uint64_t> pmem_allocated(0);
 std::atomic<uint64_t> pmem_deallocated(0);
 
+
 using namespace PART_ns;
 
 class roart_wrapper : public tree_api
