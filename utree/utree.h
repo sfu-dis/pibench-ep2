@@ -27,6 +27,16 @@
 #define CACHE_LINE_SIZE 64 
 #define IS_FORWARD(c) (c % 2 == 0)
 
+#define BREAKDOWN
+uint64_t LEAF_ALLOC = 0;
+uint64_t TRAVERSAL = 0;
+uint64_t LEAF_INSERT = 0;
+uint64_t rdtsc(){
+    unsigned int lo,hi;
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+    return ((uint64_t)hi << 32) | lo;
+}
+
 const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
 
 using entry_key_t = uint64_t; //int64_t; // key type
@@ -1039,6 +1049,11 @@ btree::~btree() {
 #ifdef USE_PMDK
   pmemobj_close(pop); 
 #endif
+#ifdef BREAKDOWN
+  printf("Leaf alloc time: %llu", LEAF_ALLOC);
+  printf("Traversal time: %llu", TRAVERSAL);
+  printf("Leaf insert time: %llu", LEAF_INSERT);
+#endif
 }
 
 void btree::setNewRoot(char *new_root) {
@@ -1251,11 +1266,18 @@ void btree::update(entry_key_t key, char* right) {
 }
 
 void btree::insert(entry_key_t key, char *right) {
+#ifdef BREAKDOWN
+  auto start = rdtsc();
+#endif
   #ifdef PMEM
   list_node_t *n = (list_node_t *)alloc(sizeof(list_node_t));
   #else
   list_node_t *n = new list_node_t();
   #endif
+#ifdef BREAKDOWN
+  auto end = rdtsc();
+  LEAF_ALLOC += end - start;
+#endif
   //printf("n=%p\n", n);
   n->next = NULL;
   n->key = key;
@@ -1266,6 +1288,12 @@ void btree::insert(entry_key_t key, char *right) {
   bool update;
   bool rt = false;
   btree_insert_pred(key, (char *)n, (char **)&prev, &update); 
+
+#ifdef BREAKDOWN
+  start = rdtsc();
+  TRAVERSAL += start - end;
+#endif
+
   if (update && prev != NULL) { 
     // Overwrite.
     prev->ptr = (uint64_t)right; 
@@ -1329,6 +1357,9 @@ retry:
         goto retry;
     }
   }
+#ifdef BREAKDOWN
+  LEAF_INSERT += rdtsc() - start;
+#endif
 }
 
 
