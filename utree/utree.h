@@ -104,6 +104,7 @@ void *alloc(size_t size) {
 
   PMEMoid p;
   pmemobj_alloc(pop, &p, sizeof(list_node_t), 0, NULL, NULL);
+  return pmemobj_direct(p);
 #else
   // void *ret = curr_addr;
   // memset(ret, 0, sizeof(list_node_t));
