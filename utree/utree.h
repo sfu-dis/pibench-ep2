@@ -94,9 +94,16 @@ PMEMobjpool *pop;
 #endif
 void *alloc(size_t size) {
 #ifdef USE_PMDK
-  TOID(list_node_t) p;
-  POBJ_ZALLOC(pop, &p, list_node_t, size);
-  return pmemobj_direct(p.oid);
+  // TOID(list_node_t) p;
+  // POBJ_ZALLOC(pop, &p, list_node_t, size);
+  // return pmemobj_direct(p.oid);
+
+  // PMEMoid p;
+  // pmemobj_zalloc(pop, &p, sizeof(list_node_t), TOID_TYPE_NUM(list_node_t));
+  // return pmemobj_direct(p);
+
+  PMEMoid p;
+  pmemobj_alloc(pop, &p, sizeof(list_node_t), 0, NULL, NULL);
 #else
   // void *ret = curr_addr;
   // memset(ret, 0, sizeof(list_node_t));
@@ -1050,9 +1057,9 @@ btree::~btree() {
   pmemobj_close(pop); 
 #endif
 #ifdef BREAKDOWN
-  printf("Leaf alloc time: %llu", LEAF_ALLOC);
-  printf("Traversal time: %llu", TRAVERSAL);
-  printf("Leaf insert time: %llu", LEAF_INSERT);
+  printf("Leaf alloc time: %llu\n", LEAF_ALLOC);
+  printf("Traversal time: %llu\n", TRAVERSAL);
+  printf("Leaf insert time: %llu\n", LEAF_INSERT);
 #endif
 }
 
