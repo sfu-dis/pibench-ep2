@@ -1,20 +1,21 @@
 # DPTree PiBench Wrapper
 
 ## Installation
-1. Set # of merge workers in dptree_wrapper.cpp (Skip if running benchmark.sh)
-2. Set PMEM pool size in include/util.h (POOL_SIZE)
-4. mkdir build
-5. cd build
-6. cmake ..
-7. make
+1. Set # of merge workers in dptree_wrapper.cpp (optional, default # of worker threads)
+2. Set POOL_SIZE in include/util.h (optional, default 60 GB)
+
+```
+mkdir build && cd build && cmake ..
+make
+```
 
 ## Important information
-This repo contains source code from https://github.com/zxjcarrot/DPTree-code.git
+Source code originated from https://github.com/zxjcarrot/DPTree-code.git
+
 commit 027d9122e6fa831a8ab48fa3a7d7a566adda85ae
 
-Some modifications are made to compile dptree wrapper
-
+Modifications were applied:
 1. Changed const key_type &key to const key_type &k in concur_dptree.hpp line 2438 (compiler error)
 2. Added scan that returns both key and value (lookup_range only returns value)
 3. Modified CMakeLists.txt
-4. Add PMDK allocator in util.h .cpp
+4. Added PMDK allocator support in util.h .cpp
