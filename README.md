@@ -2,6 +2,8 @@
 
 Here hosts resources for benchmarking newly proposed persistent indexes on Pibench, including benchmark scripts (benchmark.sh & benchmark.py), source code of 6 indexes (see below) and pre-compiled pibench wrappers (wrappers/).
 
+See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
+
 # Dependencies
 Pibench [https://github.com/sfu-dis/pibench.git] is needed to run any benchmark. <br/>
 PMDK [https://pmem.io/pmdk/] is required to run most index under persistent mode. <br/>
