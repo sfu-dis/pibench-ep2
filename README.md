@@ -1,6 +1,6 @@
 # Benchmarking New Persistent Indexes
 
-Here hosts resources for benchmarking newly proposed persistent indexes on Pibench, including benchmark scripts (benchmark.sh & benchmark.py), source code of 6 indexes (see below) and pre-compiled pibench wrappers (wrappers/).
+Here hosts resources for benchmarking newly proposed persistent indexes on Pibench, including benchmark scripts (benchmark.sh & benchmark.py), source code of 6 indexes (see below).
 
 See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 
