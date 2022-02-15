@@ -1,6 +1,6 @@
-# Benchmarking New Persistent Indexes
+# Benchmarking New Persistent Memory Range Indexes
 
-Here hosts resources for benchmarking newly proposed persistent indexes on Pibench, including benchmark scripts (benchmark.sh & benchmark.py), source code of 6 indexes (see below).
+Here hosts resources for benchmarking newly proposed persistent memory range indexes on Pibench, including benchmark scripts (benchmark.sh & benchmark.py) and source code of 6 indexes (see below).
 
 See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 
