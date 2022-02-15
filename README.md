@@ -16,7 +16,7 @@ The `README` in each index directory contains instructions for building a PiBenc
 4. [LB+-Tree](LB+-Tree/README.md)
 5. [Masstree](Masstree/README.md)
 6. [ROART](ROART/README.md)
-7. [utree](utree/README.md)
+7. [uTree](utree/README.md)
 
 # Benchmarking script
 ```
