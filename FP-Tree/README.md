@@ -18,7 +18,7 @@ $ cmake -DPMEM_BACKEND=${BACKEND} -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .
 $ make
 ````
 
-## Important Notes
+### 3. Notes
 FPTree code from https://github.com/sfu-dis/fptree.git (commit `98c25fa65070fe188ec4ae163e8b440c00cceaaf`)
 
 A summary of modifications made:
