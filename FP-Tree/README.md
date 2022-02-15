@@ -2,7 +2,7 @@
 
 ### 1. Customize TBB
 
-To achieve better scalability, we are using a customized Intel TBB library for FP-Tree (which is also the approach taken by the original author). Here are the steps to generate `libtbb.so`:
+To achieve better scalability, we customized Intel TBB library for FP-Tree (which is also the approach taken by the original author). Here are the steps to generate `libtbb.so`:
 
 - Clone oneTBB from its original repo: https://github.com/oneapi-src/oneTBB.git
 - Modify the read/write retry from 10 to 256 in `oneTBB/src/tbb/rtm_mutex.cpp` and `oneTBB/src/tbb/rtm_rw_mutex.cpp`
@@ -22,6 +22,6 @@ $ make
 FPTree code from https://github.com/sfu-dis/fptree.git (commit `98c25fa65070fe188ec4ae163e8b440c00cceaaf`)
 
 A summary of modifications made:
-1. Modified `CMakeLists.txt` to use the customized TBB (with # retries increased to 256).
-2. Changed header files in `fptree.h` to include those from the customized TBB.
-3. For DRAM mode, we introduced in-place node updates for better performance.
+- Modified `CMakeLists.txt` to use the customized TBB (with # retries increased to 256).
+- Changed header files in `fptree.h` to include those from the customized TBB.
+- For DRAM mode, we introduced in-place node updates for better performance.
