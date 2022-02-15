@@ -5,7 +5,7 @@ Here hosts resources for benchmarking newly proposed persistent memory range ind
 See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 
 # Dependencies
-* [Pibench](https://github.com/sfu-dis/pibench.git): for running all benchmarks.
+* [PiBench](https://github.com/sfu-dis/pibench.git): for running all benchmarks.
 * [PMDK](https://pmem.io/pmdk/): required by most indexes for persistent memory management.
 
 # Installation
