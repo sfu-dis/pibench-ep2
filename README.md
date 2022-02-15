@@ -19,6 +19,5 @@ The `README` in each index directory contains instructions for building a PiBenc
 7. [uTree](utree/)
 
 # Benchmarking script
-```
 See also `benchmark.sh` and `benchmark.py`
-```
+
