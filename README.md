@@ -10,13 +10,13 @@ See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 
 # Building index wrappers for PiBench
 The `README` in each index directory contains instructions for building a PiBench wrapper:
-1. [DPTree](DPTree/README.md)
-2. [FPTree](FP-Tree/README.md)
-3. [HOT](Hot/README.md)
-4. [LB+-Tree](LB+-Tree/README.md)
-5. [Masstree](Masstree/README.md)
-6. [ROART](ROART/README.md)
-7. [uTree](utree/README.md)
+1. [DPTree](DPTree/)
+2. [FPTree](FP-Tree/)
+3. [HOT](Hot/)
+4. [LB+-Tree](LB+-Tree/)
+5. [Masstree](Masstree/)
+6. [ROART](ROART/)
+7. [uTree](utree/)
 
 # Benchmarking script
 ```
