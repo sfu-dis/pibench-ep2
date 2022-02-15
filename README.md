@@ -8,7 +8,7 @@ See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 * [PiBench](https://github.com/sfu-dis/pibench.git): for running all benchmarks.
 * [PMDK](https://pmem.io/pmdk/): required by most indexes for persistent memory management.
 
-# Installation
+# Building index wrappers for PiBench
 The `README` in each index directory contains instructions for building a PiBench wrapper:
 1. [DPTree](DPTree/README.md)
 2. [FPTree](FP-Tree/README.md)
@@ -20,6 +20,5 @@ The `README` in each index directory contains instructions for building a PiBenc
 
 # Benchmarking script
 ```
-cp benchmark.py /youPathTo_PiBench_Build_Src
-python3 benchmark.py
+See also `benchmark.sh` and `benchmark.py`
 ```
