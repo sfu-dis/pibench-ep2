@@ -112,7 +112,7 @@ for op in OPs:
         else:
             NUMA_COMMAND = "numactl --cpunodebind=0 --membind=0"
             
-        command = "hog-machine.sh {numa_command} sudo {ld_preload} ./PiBench {binary_path}             -n {n} -p {p} {op} {skew} --mode time --seconds 10 -t {t} >> {file}".format(numa_command=NUMA_COMMAND,                 ld_preload=LD_PRELOAD, binary_path=BINARY_PATH, n=N, p=P, op=op, skew=SKEW, t=T, file=output_file)
+        command = "{numa_command} sudo {ld_preload} ./PiBench {binary_path}             -n {n} -p {p} {op} {skew} --mode time --seconds 10 -t {t} >> {file}".format(numa_command=NUMA_COMMAND,                 ld_preload=LD_PRELOAD, binary_path=BINARY_PATH, n=N, p=P, op=op, skew=SKEW, t=T, file=output_file)
 
         for i in range(TRIAL):
             print(command)
