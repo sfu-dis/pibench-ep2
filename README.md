@@ -5,19 +5,11 @@ Here hosts resources for benchmarking newly proposed persistent memory range ind
 See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 
 # Dependencies
-Pibench [https://github.com/sfu-dis/pibench.git] is needed to run any benchmark. <br/>
-PMDK [https://pmem.io/pmdk/] is required to run most index under persistent mode. <br/>
-
-# Python benchmark scripts
-```
-cp -r wrappers /youPathTo_PiBench_Build_Src 
-cp benchmark.py /youPathTo_PiBench_Build_Src
-python3 benchmark.py
-```
+* [Pibench](https://github.com/sfu-dis/pibench.git): for running all benchmarks.
+* [PMDK](https://pmem.io/pmdk/): required by most indexes for persistent memory management.
 
 # Installation
-Pre-compiled shared libs can be found under wrappers directory.<br/>
-The README file in each index folder also contains instructions for configuring and producing .so file
+The `README` in each index directory contains instructions for building a PiBench wrapper:
 1. [DPTree](DPTree/README.md)
 2. [FPTree](FP-Tree/README.md)
 3. [HOT](Hot/README.md)
@@ -25,3 +17,9 @@ The README file in each index folder also contains instructions for configuring 
 5. [Masstree](Masstree/README.md)
 6. [ROART](ROART/README.md)
 7. [utree](utree/README.md)
+
+# Benchmarking script
+```
+cp benchmark.py /youPathTo_PiBench_Build_Src
+python3 benchmark.py
+```
