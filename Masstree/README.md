@@ -1,6 +1,6 @@
 # Masstree PiBench Wrapper
 
-PiBench wrapper for Masstree.
+PiBench wrapper for Masstree (volatile-only).
 
 ## Installation
 ```bash
@@ -11,7 +11,7 @@ make
 ```
 
 
-## This repo contains souce code from https://github.com/kohler/masstree-beta 
+## This repo contains code from https://github.com/kohler/masstree-beta 
 
 commit cef4cc4f68953bdc4d0aec736cb8e1ce0700a4ae
 
