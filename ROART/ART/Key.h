@@ -13,7 +13,7 @@ extern std::atomic<uint64_t> pmem_allocated;
 extern std::atomic<uint64_t> pmem_deallocated;
 
 // #define DRAM_MODE
-#define ARTPMDK // If defined, will use PMDK allocator, otherwise will use ROART's DCMM
+// #define ARTPMDK // If defined, will use PMDK allocator, otherwise will use ROART's DCMM
 
 #define KEY_INLINE  // inline for key <= 8B  Read, update is fine
 #define ZENTRY  // Stores key bytes in inner node pointers

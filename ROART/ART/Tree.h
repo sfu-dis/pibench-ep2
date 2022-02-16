@@ -85,10 +85,10 @@ class Tree {
     // void graphviz_debug();
 } __attribute__((aligned(64)));
 
-#ifdef ARTPMDK
+//#ifdef ARTPMDK
 void *allocate_size(size_t size);
 
-#endif
+//#endif
 
 #ifdef COUNT_ALLOC
 double getalloctime();

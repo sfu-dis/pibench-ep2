@@ -49,7 +49,7 @@
  */
 #include <libpmemobj.h>
 
-#define PMEM // comment this out to use DRAM as NVM (DRAM version LB+-Tree)
+//#define PMEM // comment this out to use DRAM as NVM (DRAM version LB+-Tree)
 //#define POOL // comment this out to use malloc and PMDK if #define PMEM
 
 //#define VAR_KEY

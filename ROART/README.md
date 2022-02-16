@@ -4,19 +4,28 @@ PiBench wrapper for ROART.
 
 ## Installation
 1. (optional) Configure pool_path and pool_size in Key.h
-2. (optional) Add -DDRAM_MODE in Makefile if running purely in DRAM
-3. Toggle allocator (#define ARTPMDK) only when DRAM_MODE is not defined.
-If DRAM_MODE is defined then malloc will be used for all allocation.
+
+To build PMEM ROART that uses its own DCMM allocator
 ```
 make
 ```
+
+To build PMEM ROART that uses PMDK allocator
+```
+make CFLAGS=-DARTPMDK
+```
+
+To build DRAM ROART
+```
+make CFLAGS=-DDRAM_MODE
+```
+
 
 ## Important information
 This repo contains source code from https://github.com/MiracleMa/ROART 
 
 commit f3b30f56a722fc0b96a107da7eddec225baf3b70
 
-Modifications:
 ## The original code is modified as follows:
 * Modified Tree constructor in Tree.cpp
 * Removed #include "generator.h" in util.h (file is not provided)

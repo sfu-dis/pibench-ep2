@@ -26,12 +26,12 @@ __thread cpuCycleTimer *alloc_time = nullptr;
 double getalloctime() { return alloc_time->duration(); }
 #endif
 
-#ifdef ARTPMDK
+#ifndef DRAM_MODE
 POBJ_LAYOUT_BEGIN(DLART);
 POBJ_LAYOUT_TOID(DLART, char);
 POBJ_LAYOUT_END(DLART);
 PMEMobjpool *pmem_pool;
-
+#endif
 void *allocate_size(size_t size) {
 #ifdef COUNT_ALLOC
     if (alloc_time == nullptr)
@@ -47,7 +47,8 @@ void *allocate_size(size_t size) {
     void *addr = new (std::align_val_t(64)) char[size];
 #else
     PMEMoid ptr;
-    pmemobj_zalloc(pmem_pool, &ptr, size, TOID_TYPE_NUM(char));
+    // pmemobj_zalloc(pmem_pool, &ptr, size, TOID_TYPE_NUM(char));
+    pmemobj_alloc(pmem_pool, &ptr, size, 0, NULL, NULL);
     void *addr = (void *)pmemobj_direct(ptr);
 #endif
 
@@ -56,7 +57,7 @@ void *allocate_size(size_t size) {
 #endif
     return addr;
 }
-#endif
+//#endif
 
 // Tree::Tree() {
 //     std::cout << "[P-ART]\tnew P-ART\n";

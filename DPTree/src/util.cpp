@@ -338,9 +338,12 @@ int nvm_dram_alloc(void **ptr, size_t align, size_t size)
 {
 // printf("Size: %llu \n", size);
 #ifdef PMEM
-    TOID(leaf_node) p;
-    POBJ_ZALLOC(pop, &p, leaf_node, size);
-    *ptr = pmemobj_direct(p.oid);
+    // TOID(leaf_node) p;
+    // POBJ_ZALLOC(pop, &p, leaf_node, size);
+    // *ptr = pmemobj_direct(p.oid);
+    PMEMoid p;
+    pmemobj_alloc(pop, &p, size, 0, NULL, NULL);
+    *ptr = pmemobj_direct(p);
     return 0;
 #else
     assert(size < 1073741824UL);
