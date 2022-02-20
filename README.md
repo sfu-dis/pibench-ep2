@@ -1,7 +1,6 @@
 # Benchmarking New Persistent Memory Range Indexes
 
-Here hosts resources for benchmarking newly proposed persistent memory range indexes on Pibench, including benchmark scripts (benchmark.sh & benchmark.py) and source code of five PM indexes + two DRAM index (see below).
-To generate pibench binary automatically for indexes except FPTree and PACTree, configure and run ./generate_wrappers.sh
+Here hosts resources for benchmarking newly proposed persistent memory range indexes on Pibench, including benchmark and wrapper generation scripts (generate_wrappers.sh & benchmark.py) and source code of five PM indexes + two DRAM index (see below).
 
 See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 
@@ -19,6 +18,8 @@ The `README` in each index directory contains instructions for building a PiBenc
 6. [ROART](ROART/)
 7. [uTree](utree/)
 
+Or configure and run ./generate_wrappers.sh to generate pibench wrappers for selected indexes
+
 # Benchmarking script
-See also `benchmark.sh` and `benchmark.py`
+See also `benchmark.py`
 

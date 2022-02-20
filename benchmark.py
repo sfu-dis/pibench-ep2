@@ -5,127 +5,228 @@
 
 
 import os
+import sys
+import time
 
-def define_output_name(op, tree):
-    output_file = tree
-    if op == "-r 1":
-        output_file += "_read_results.txt"
-    elif op == "-r 0 -i 1":
-        output_file += "_insert_results.txt"
-    elif op == "-r 0 -u 1":
-        output_file += "_update_results.txt"
-    elif op == "-r 0 -d 1":
-        output_file += "_delete_results.txt"
-    elif op == "-r 0 -s 1":
-        output_file += "_scan_results.txt"
-    elif op == "-r 0.1 -i 0.9":
-        output_file += "_read0.1_insert0.9_results.txt"
-    elif op == "-r 0.5 -i 0.5":
-        output_file += "_read0.5_insert0.5_results.txt"
-    elif op == "-r 0.9 -i 0.1":
-        output_file += "_read0.9_insert0.1_results.txt"
-    else: 
-        os.system("echo Unknown benchmark type!") 
-    return output_file
+### Configure parameters
 
-def default_pool_name(mode, tree):
-    if mode == "dram":
-        return ""
-    if tree == "fptree":
-        return "test_pool"
-    elif tree == "roart" or tree == "roart_dcmm":
-        return "pool.data"
+# Modify this according to your own machine configuration
+cores = [0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,\
+40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78];
+
+numa_cores = [0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,\
+1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39];
+
+repeat = 3 # # runs for each point
+base_size = 100000000 # each run starts with 100M record base index (load phase)
+seconds = 10 # followed by 10 seconds operation (only operation will be measured)
+
+
+pibench_path = "/mnt/pmem0/georgehe/tb_pibench/pibench/build/src/PiBench" # path to pibench executable
+lib_dir = "/mnt/pmem0/georgehe/pibench-ep2/wrappers/" # path to binary folder
+result_dir = "./results" # path to folder for which results will be saved into
+base_command = "numactl --membind=0 sudo LD_PRELOAD=/usr/lib64/libjemalloc.so"
+
+
+# "HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"
+Uniform = [] 
+uniform_threads = [40,30,20,10,5,1] # [40,30,20,10,5,1]  customize your choice of data points
+uniform_ops = ["-r 1","-r 0 -i 1","-r 0 -u 1","-r 0 -s 1"] # "-r 1","-r 0 -i 1","-r 0 -u 1","-r 0 -s 1"
+
+# "HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"
+Skewed = [] 
+skewed_threads = [40,30,20,10,5,1] # [40,30,20,10,5,1]
+skewed_ops = ["-r 1","-r 0 -u 1","-r 0 -s 1"] # "-r 1","-r 0 -u 1","-r 0 -s 1"
+self_similar = 0.2
+
+# "HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"
+Mixed = []
+mixed_threads = [40,30,20,10,5,1] # [40,30,20,10,5,1]
+mixed_ops = ["-r 0.9 -i 0.1","-r 0.5 -i 0.5","-r 0.1 -i 0.9"] # "-r 0.9 -i 0.1","-r 0.5 -i 0.5","-r 0.1 -i 0.9"
+
+# "HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"
+Latency = []
+latency_threads = [40,30,20,10,5,1] # [40,30,20,10,5,1]
+latency_ops = ["-r 1","-r 0 -i 1","-r 0 -s 1"] # "-r 1","-r 0 -i 1","-r 0 -u 1","-r 0 -s 1"
+sampling = 0.1
+
+# "HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"
+NUMA = []
+numa_threads = [40,30] # [40,30]
+numa_ops = ["-r 1","-r 0 -i 1","-r 0 -u 1","-r 0 -s 1"] # "-r 1","-r 0 -i 1","-r 0 -u 1","-r 0 -s 1"
+
+# "FPTree_PMEM","DPTree","LBTree_PMEM"
+VarKey = []
+varkey_threads = [40,30,20,10,5,1] # [40,30,20,10,5,1]
+varkey_ops = ["-r 1","-r 0 -i 1"] # "-r 1","-r 0 -i 1"
+
+
+# Modify following dictionaries if you changed default pool paths/names or binary names
+tree_to_pool = {"HOT":"", "Masstree":"", "ROART_DRAM":"", "ROART_DCMM":"pool.data", "ROART_PMDK":"pool.data",
+"FPTree_DRAM":"", "FPTree_PMEM":"pool", "DPTree":"pool", "PACTree":"dl sl log", "LBTree_DRAM":"", "LBTree_PMEM":"pool"}
+
+tree_to_lib = {"HOT":"libhot_wrapper.so", "Masstree":"libmasstree_wrapper.so", "ROART_DRAM":"libroart_dram.so", 
+"ROART_DCMM":"libroart_dcmm.so", "ROART_PMDK":"libroart_pmdk.so", "FPTree_DRAM":"libfptree_dram.so", 
+"FPTree_PMEM":"libfptree_pmem.so", "DPTree":"libdptree_pmem.so", "PACTree":"libpactree_pmem.so", 
+"LBTree_DRAM":"liblbtree_dram.so", "LBTree_PMEM":"liblbtree_pmem.so"}
+
+tree_to_lib_varkey = {"FPTree_PMEM":"libfptree_pmem_varkey.so", "DPTree":"libdptree_pmem_varkey.so", 
+"LBTree_PMEM":"liblbtree_pmem_varkey.so"}
+
+
+
+
+### Benchmark code start
+
+def create_result_folders(tree, exp):
+    if not os.path.isdir(result_dir):
+        os.mkdir(result_dir);
+    tree_dir = result_dir + "/" + tree
+    if not os.path.isdir(tree_dir):
+        os.mkdir(tree_dir);
+    exp_dir = tree_dir + "/" + exp
+    if not os.path.isdir(exp_dir):
+        os.mkdir(exp_dir);  
+    return exp_dir
+
+def create_command(num_thread, cores, tree, op, exp):
+    l = []
+    for i in range(min(num_thread, len(cores))):
+        l.append(str(cores[i]))
+    s = "OMP_PLACES=\'{" + ",".join(l) + "}\' OMP_PROC_BIND=TRUE OMP_NESTED=TRUE"
+    if exp == "VarKey":
+        lib = tree_to_lib_varkey[tree]
     else:
-        return "pool"
-    
-def default_binary_path(mode, tree):
-    parent_path = "./wrappers/" + mode + "_wrappers/"
-    if tree == "fptree":
-        return parent_path + "libfptree_pibench_wrapper.so"
-    elif tree == "lbtree":
-        return parent_path + "liblbtree_wrapper.so"
-    elif tree == "roart":
-        return parent_path + "libroart_wrapper.so"
-    elif tree == "roart_dcmm":
-        return parent_path + "libroart_dcmm_wrapper.so"
-    elif tree == "dptree":
-        return parent_path + "libdptree_pibench_wrapper.so"
-    elif tree == "utree":
-        return parent_path + "libutree_pibench_wrapper.so"
-    elif tree == "hot":
-        return parent_path + "libhot_wrapper.so"
-    elif tree == "masstree":
-        return parent_path + "libmasstree_wrapper.so"
-    else:
-        return "unknow tree"
-    
-def define_dptree_cpubind(threads):
-    cpubind = list(range(0, threads * 2, 2))
-    cpubind = list(map(str, cpubind))
-    str_cpubind = ','.join(cpubind)
-    return str_cpubind
-    
-OPs = ["-r 1", "-r 0 -i 1", "-r 0 -u 1", "-r 0 -s 1"]
-TREE = "dptree" # name of index choose from [masstree, hot, fptree, lbtree, dptree, roart, roart_dcmm, utree]
-MODE = "pmem" # dram or pmem tree DRAM: [fptree, lbtree, roart, masstree, hot] PMEM: [fptree, lbtree, roart, roart_dcmm, dptree, utree]
-OUTPUT_DIR = "./results" # generate output directory 
-DISTRIBUTION = "uniform" # choose from [uniform, skew]
-THREAD = [40, 30, 20, 10, 5, 1]
-TRIAL = 3
-N = 100000000
-P = 100000000
-POOL_NAME = default_pool_name(MODE, TREE) # name of pool file to delete (assume on pmem0), set to "" if running dram index
-BINARY_PATH = default_binary_path(MODE, TREE)
-OUTPUT_DIR = OUTPUT_DIR + "_" + MODE + '_' + DISTRIBUTION + '/'
+        lib = tree_to_lib[tree]
+    command_list = [
+        base_command, 
+        s, 
+        pibench_path, 
+        lib_dir + "/" + lib, 
+        "-n " + str(base_size), 
+        "--mode time --seconds " + str(seconds),
+        op,
+        "-t " + str(thread)
+        ]
+    if exp == "Skewed":
+        command_list.append("--distribution SELFSIMILAR --skew " + str(self_similar))
+    elif exp == "Latency":
+        command_list.append("--latency_sampling " + str(sampling))
+    return " ".join(command_list)
 
+op_to_filename = {"-r 1":"lookup", "-r 0 -i 1":"insert", "-r 0 -u 1":"update", "-r 0 -s 1":"scan", 
+"-r 0.9 -i 0.1":"read_heavy", "-r 0.5 -i 0.5":"balanced", "-r 0.1 -i 0.9":"write_heavy"}
 
-# In[33]:
+# Uniform
+for tree in Uniform:
+    exp_dir = create_result_folders(tree, "Uniform") # create result and tree folder if necessary
+    for op in uniform_ops:
+        file_path = exp_dir + "/" + tree.lower() + "_" + op_to_filename[op] + "_results.txt" # path to result file that will be (re)created
+        if os.path.exists(file_path): # remove old result file if exists
+            os.remove(file_path)
+        for thread in uniform_threads: # for each # thread
+            command = create_command(thread, cores, tree, op, "Uniform") + " >> " + file_path
+            # print(command)
+            for i in range(repeat): # repeat runs at each data point
+                with open(file_path, 'a') as f:
+                    f.write(command + '\n')
+                    f.close()
+                os.system(command)
+                if tree_to_pool[tree] != "":
+                    os.system("rm " + tree_to_pool[tree])
+                time.sleep(2)
 
+# Skewed
+for tree in Skewed:
+    exp_dir = create_result_folders(tree, "Skewed") # create result and tree folder if necessary
+    for op in skewed_ops:
+        file_path = exp_dir + "/" + tree.lower() + "_" + op_to_filename[op] + "_results.txt" # path to result file that will be (re)created
+        if os.path.exists(file_path): # remove old result file if exists
+            os.remove(file_path)
+        for thread in skewed_threads: # for each # thread
+            command = create_command(thread, cores, tree, op, "Skewed") + " >> " + file_path
+            # print(command)
+            for i in range(repeat): # repeat runs at each data point
+                with open(file_path, 'a') as f:
+                    f.write(command + '\n')
+                    f.close()
+                os.system(command)
+                if tree_to_pool[tree] != "":
+                    os.system("rm " + tree_to_pool[tree])
+                time.sleep(2)
 
-# running script
-for op in OPs: 
-    benchmark_type = "Benchmark Type: " + op
-    command_benchmark_type = "echo {benchmark_type}".format(benchmark_type = benchmark_type)
-    os.system(command_benchmark_type)
+# Mixed
+for tree in Mixed:
+    exp_dir = create_result_folders(tree, "Mixed") # create result and tree folder if necessary
+    for op in mixed_ops:
+        file_path = exp_dir + "/" + tree.lower() + "_" + op_to_filename[op] + "_results.txt" # path to result file that will be (re)created
+        if os.path.exists(file_path): # remove old result file if exists
+            os.remove(file_path)
+        for thread in mixed_threads: # for each # thread
+            command = create_command(thread, cores, tree, op, "Mixed") + " >> " + file_path
+            # print(command)
+            for i in range(repeat): # repeat runs at each data point
+                with open(file_path, 'a') as f:
+                    f.write(command + '\n')
+                    f.close()
+                os.system(command)
+                if tree_to_pool[tree] != "":
+                    os.system("rm " + tree_to_pool[tree])
+                time.sleep(2)
 
-    output_file = OUTPUT_DIR + define_output_name(op, TREE)
-    command_output_file = "echo Output file name: {file}".format(file = output_file)
-    os.system(command_output_file)
-    
-    # create a output directory
-    os.system("mkdir {output_dir}".format(output_dir = OUTPUT_DIR))
+# Latency
+for tree in Latency:
+    exp_dir = create_result_folders(tree, "Latency") # create result and tree folder if necessary
+    for op in latency_ops:
+        file_path = exp_dir + "/" + tree.lower() + "_" + op_to_filename[op] + "_results.txt" # path to result file that will be (re)created
+        if os.path.exists(file_path): # remove old result file if exists
+            os.remove(file_path)
+        for thread in latency_threads: # for each # thread
+            command = create_command(thread, cores, tree, op, "Latency") + " >> " + file_path
+            # print(command)
+            for i in range(repeat): # repeat runs at each data point
+                with open(file_path, 'a') as f:
+                    f.write(command + '\n')
+                    f.close()
+                os.system(command)
+                if tree_to_pool[tree] != "":
+                    os.system("rm " + tree_to_pool[tree])
+                time.sleep(2)
 
-    command_binary_path = "echo Index binary path: {binary_path}".format(binary_path = BINARY_PATH)
-    os.system(command_binary_path)
-        
-    LD_PRELOAD = "LD_PRELOAD=/usr/lib64/libjemalloc.so"
-    
-    if DISTRIBUTION == "skew":
-        SKEW = "--distribution SELFSIMILAR --skew 0.2"
-    else:
-        SKEW = ""
+# NUMA
+for tree in NUMA:
+    exp_dir = create_result_folders(tree, "NUMA") # create result and tree folder if necessary
+    for op in numa_ops:
+        file_path = exp_dir + "/" + tree.lower() + "_" + op_to_filename[op] + "_results.txt" # path to result file that will be (re)created
+        if os.path.exists(file_path): # remove old result file if exists
+            os.remove(file_path)
+        for thread in numa_threads: # for each # thread
+            command = create_command(thread, numa_cores, tree, op, "NUMA") + " >> " + file_path
+            # print(command)
+            for i in range(repeat): # repeat runs at each data point
+                with open(file_path, 'a') as f:
+                    f.write(command + '\n')
+                    f.close()
+                os.system(command)
+                if tree_to_pool[tree] != "":
+                    os.system("rm " + tree_to_pool[tree])
+                time.sleep(2)
 
-    for T in THREAD:
-        
-        if TREE == "dptree":
-            NUMA_COMMAND = "numactl --physcpubind={cpubind} --membind=0".format(cpubind = define_dptree_cpubind(T))
-        else:
-            NUMA_COMMAND = "numactl --cpunodebind=0 --membind=0"
-            
-        command = "{numa_command} sudo {ld_preload} ./PiBench {binary_path}             -n {n} -p {p} {op} {skew} --mode time --seconds 10 -t {t} >> {file}".format(numa_command=NUMA_COMMAND,                 ld_preload=LD_PRELOAD, binary_path=BINARY_PATH, n=N, p=P, op=op, skew=SKEW, t=T, file=output_file)
-
-        for i in range(TRIAL):
-            print(command)
-            os.system("echo {command}".format(command=command))
-            os.system("eval {command}".format(command=command))
-            os.system("sleep 1")
-            if POOL_NAME != "":
-                os.system("sudo rm {pool_name}".format(pool_name=POOL_NAME))
-            os.system("sleep 3")
-
-
-# In[ ]:
-
-
-
-
+# VarKey
+for tree in VarKey:
+    exp_dir = create_result_folders(tree, "VarKey") # create result and tree folder if necessary
+    for op in varkey_ops:
+        file_path = exp_dir + "/" + tree.lower() + "_" + op_to_filename[op] + "_results.txt" # path to result file that will be (re)created
+        if os.path.exists(file_path): # remove old result file if exists
+            os.remove(file_path)
+        for thread in varkey_threads: # for each # thread
+            command = create_command(thread, cores, tree, op, "VarKey") + " >> " + file_path
+            # print(command)
+            for i in range(repeat): # repeat runs at each data point
+                with open(file_path, 'a') as f:
+                    f.write(command + '\n')
+                    f.close()
+                os.system(command)
+                if tree_to_pool[tree] != "":
+                    os.system("rm " + tree_to_pool[tree])
+                time.sleep(2)

@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 
-#add_definitions(-DVAR_KEY)
+if(${VAR_KEY})
+    add_definitions(-DVAR_KEY)
+    message(STATUS "VAR_KEY: defined")
+endif()
 
 #if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -g2 -std=c++17 -lpmem -lpmemobj -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -pthread")
@@ -80,7 +83,7 @@ if (NOT pibench_POPULATED)
 endif ()
 
 link_directories(oneTBB/build/gnu_11.1_cxx11_64_release)
-include_directories(/mnt/pmem0/georgehe/oneTBB/include)
+include_directories(oneTBB/include)
 
 
 add_library(fptree_pibench_wrapper SHARED fptree_wrapper.cpp

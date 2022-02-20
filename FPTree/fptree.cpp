@@ -255,7 +255,7 @@ FPtree::FPtree()
 {
     root = nullptr;
     #ifdef PMEM
-        const char *path = "./test_pool";
+        const char *path = "./pool";
 
         if (file_pool_exists(path) == 0) 
         {

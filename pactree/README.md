@@ -2,9 +2,18 @@
 
 PiBench wrapper for PACTree.
 
-## Installation
-see https://github.com/cosmoss-vt/pactree
+### 1. Installation
+Install packages if necessary
+sudo apt-get install g++ libtbb-dev libjemalloc-dev libnuma-dev libpmem-dev libpmemobj-dev python zlib1g-dev libboost-dev 
 
-## This repo contains souce code from https://github.com/cosmoss-vt/pactree 
+Configure macros in include/common.h
 
-commit f173a0f30a3ea492cdc194e6e83a00f9807a8cc8
+Configure pool paths and sizes in src/pactree.cpp (function initPT)
+
+```
+$ mkdir build && cmake .. && make
+```
+
+
+### 3. Notes
+PACTree code from https://github.com/cosmoss-vt/pactree (commit `f173a0f30a3ea492cdc194e6e83a00f9807a8cc8`)

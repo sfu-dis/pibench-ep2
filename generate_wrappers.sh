@@ -2,9 +2,9 @@
 
 
 # Can choose multiple indexes to generate pibench wrappers, for example: indexes="HOT Masstree"
-indexes="" # DPTree HOT LBTree Masstree ROART uTree
+indexes="FPTree DPTree HOT LBTree Masstree ROART PACTree uTree" # FPTree DPTree HOT LBTree Masstree ROART PACTree uTree
 
-# This is the absolute path for which the generated binaries will be copied to, will be created if not exist
+# This is the absolute path to folder for which the generated binaries will be copied to, will be created if not exist
 binary_path="/mnt/pmem0/georgehe/pibench-ep2/wrappers"
 
 
@@ -15,6 +15,29 @@ if [ ! -d "$binary_path" ]; then
 	echo "Directory ${binary_path} created."
 fi
 
+
+# FPTree
+if [[ "$indexes" == *"FPTree"* ]]; then
+	eval "cd FPTree"
+	if [ ! -d "./oneTBB" ]; then
+		eval "git clone https://github.com/oneapi-src/oneTBB.git"
+	fi
+	eval "cp rtm_mutex.cpp oneTBB/src/tbb/rtm_mutex.cpp && cp rtm_rw_mutex.cpp oneTBB/src/tbb/rtm_rw_mutex.cpp"
+	eval "cd oneTBB && rm -rf build && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j"
+	eval "cd ../../ && rm -rf build && mkdir build && cd build"
+
+	eval "cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. && make"
+	eval "mv src/libfptree_pibench_wrapper.so ${binary_path}/libfptree_pmem.so"
+
+	eval "cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 -DVAR_KEY=1 .. && make"
+        eval "mv src/libfptree_pibench_wrapper.so ${binary_path}/libfptree_pmem_varkey.so"	
+
+	eval "cmake -DPMEM_BACKEND=DRAM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. && make"
+	eval "mv src/libfptree_pibench_wrapper.so ${binary_path}/libfptree_dram.so"
+
+	eval "cd ../../"
+        echo "FPTree wrappers built complete."
+fi
 
 # DPTree
 if [[ "$indexes" == *"DPTree"* ]]; then
@@ -64,13 +87,15 @@ if [[ "$indexes" == *"ROART"* ]]; then
 fi
 
 # PACTree
-#if [[ "$indexes" == *"PACTree"* ]]; then	
-	#echo "PACTree wrappers built complete."
-#fi
+if [[ "$indexes" == *"PACTree"* ]]; then
+	eval "cd pactree && rm -rf build && mkdir build && cd build && cmake .. && make && cp src/libpactree_pibench_wrapper.so ${binary_path}/libpactree_pmem.so"
+	eval "cd ../../"	
+	echo "PACTree wrappers built complete."
+fi
 
 # uTree
 if [[ "$indexes" == *"uTree"* ]]; then
 	eval "cd utree && rm -rf build && mkdir build && cd build && cmake .. && make && cp src/libutree_pibench_wrapper.so ${binary_path}/libutree_wrapper.so"
-	eval "cd ../../../"
+	eval "cd ../../"
 	echo "uTree wrapper built complete."
 fi
