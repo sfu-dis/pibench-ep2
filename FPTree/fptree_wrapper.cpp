@@ -23,7 +23,7 @@ extern "C" tree_api* create_tree(const tree_options_t& opt)
     if (*path_ptr != "")
     	pool_path_ = (*path_ptr).c_str();
     else
-	pool_path_ = "./pool";
+		pool_path_ = "./pool";
     if (opt.pool_size != 0)
     	pool_size_ = opt.pool_size;
 
