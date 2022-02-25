@@ -43,6 +43,8 @@
 #include <boost/lockfree/queue.hpp>
 
 extern size_t key_size_;
+extern size_t pool_size_;
+extern char *pool_path_;
 
 #ifdef TEST_MODE
     #define MAX_INNER_SIZE 3
@@ -66,8 +68,6 @@ enum Result { Insert, Update, Split, Abort, Delete, Remove, NotFound };
 
 #ifdef PMEM
     #include <libpmemobj.h>
-
-    #define PMEMOBJ_POOL_SIZE ((size_t)(1024 * 1024 * 64) * 1000)  /* 64 GB */
 
     POBJ_LAYOUT_BEGIN(FPtree);
     POBJ_LAYOUT_ROOT(FPtree, struct List);
