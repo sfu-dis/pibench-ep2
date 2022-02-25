@@ -33,7 +33,7 @@ extern "C" tree_api *create_tree(const tree_options_t &opt)
   worker_thread_num = opt.num_threads;
   
   // std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
-  // the_thread_mempools.init(opt.num_threads, mempool_size, MEMPOOL_ALIGNMENT);
+  the_thread_mempools.init(opt.num_threads, 4096, MEMPOOL_ALIGNMENT);
   // std::chrono::time_point<std::chrono::steady_clock> end = std::chrono::steady_clock::now();
   // std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   // printf("mempools init time: %lld ms \n", ms.count());
