@@ -2,7 +2,7 @@
 
 
 # Can choose multiple indexes to generate pibench wrappers, for example: indexes="HOT Masstree"
-indexes="FPTree DPTree HOT LBTree Masstree ROART PACTree uTree" # FPTree DPTree HOT LBTree Masstree ROART PACTree uTree
+indexes="FPTree" # FPTree DPTree HOT LBTree Masstree ROART PACTree uTree
 
 # This is the absolute path to folder for which the generated binaries will be copied to, will be created if not exist
 binary_path="/mnt/pmem0/georgehe/pibench-ep2/wrappers"

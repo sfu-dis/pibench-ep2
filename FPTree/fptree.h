@@ -44,7 +44,7 @@
 
 extern size_t key_size_;
 extern size_t pool_size_;
-extern char *pool_path_;
+extern const char *pool_path_;
 
 #ifdef TEST_MODE
     #define MAX_INNER_SIZE 3

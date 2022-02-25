@@ -128,3 +128,4 @@ int fptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& val
 #endif
     return scanned;
 }
+#endif
