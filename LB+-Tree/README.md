@@ -1,7 +1,6 @@
 # LB+-Tree PiBench Wrapper
 
 ## Installation
-1. Set mempool and nvmpool size in lbtree_wrapper.cpp (Optional and Only if running in PMEM mode)
 2. (Optional) Set the weak isolation fix type in lbtree.h (NONTEMP or UNLOCK_AFTER, the later is the default)
 
 To make DRAM LBTree
