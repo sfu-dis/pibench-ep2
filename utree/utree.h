@@ -17,7 +17,7 @@
 #include <gperftools/profiler.h>
 
 extern size_t pool_size_;
-extern char *pool_path_;
+extern const char *pool_path_;
 
 #define PMEM
 
