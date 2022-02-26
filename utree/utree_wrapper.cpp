@@ -1,23 +1,22 @@
 #include "utree_wrapper.h"
 #include <chrono>
 
+size_t pool_size_ = ((size_t)(1024 * 1024 * 10) * 1024);
+const char *pool_path_;
+
 extern "C" tree_api *create_tree(const tree_options_t &opt)
 {
-  // long long nvmpool_size = opt.pool_size; 
-  // if (const char *env_p = std::getenv("ROART_POOL_SIZE"))
-  // {
-  //   nvmpool_size = atoll(env_p);
-  // }
-  // if (nvmpool_size == 0)
-  //   nvmpool_size = 64LL * 1024 * 1024 * 1024; // default 8GB
+  auto path_ptr = new std::string(opt.pool_path);
+  if (*path_ptr != "")
+    pool_path_ = (*path_ptr).c_str();
+  else
+    pool_path_ = "./pool";
 
-  // auto path_ptr = new std::string(opt.pool_path); // init method keeps reference to string
-  // if (const char *env_p = std::getenv("ROART_POOL_PATH"))
-  // {
-  //   path_ptr->assign(env_p);
-  // }
-  // if (*path_ptr == "")
-  //   path_ptr->assign("./pool"); // default pool path
+  if (opt.pool_size != 0)
+    pool_size_ = opt.pool_size;
+
+  printf("PMEM Pool Path: %s\n", pool_path_);
+  printf("PMEM Pool size: %lld\n", pool_size_);
 
   return new utree_wrapper();
 }

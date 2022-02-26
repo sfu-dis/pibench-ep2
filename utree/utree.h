@@ -16,6 +16,9 @@
 #include <thread>
 #include <gperftools/profiler.h>
 
+extern size_t pool_size_;
+extern char *pool_path_;
+
 #define PMEM
 
 #ifdef PMEM
@@ -36,8 +39,6 @@ uint64_t rdtsc(){
     __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
     return ((uint64_t)hi << 32) | lo;
 }
-
-const uint64_t POOL_SIZE = 30ULL * 1024ULL * 1024ULL * 1024ULL; // 30 GB
 
 using entry_key_t = uint64_t; //int64_t; // key type
 
@@ -1016,20 +1017,19 @@ int file_exists(const char *filename) {
 
 void openPmemobjPool() {
   printf("use pmdk!\n");
-  char pathname[100] = "./pool";
   int sds_write_value = 0;
   pmemobj_ctl_set(NULL, "sds.at_create", &sds_write_value);
-  if (file_exists(pathname) != 0) {
+  if (file_exists(pool_path_) != 0) {
     printf("create new one.\n");
-    if ((pop = pmemobj_create(pathname, POBJ_LAYOUT_NAME(btree),
-                              POOL_SIZE, 0666)) ==
+    if ((pop = pmemobj_create(pool_path_, POBJ_LAYOUT_NAME(btree),
+                              pool_size_, 0666)) ==
         NULL) {
       perror("failed to create pool.\n");
       return;
     }
   } else {
     printf("open existing one.\n");
-    if ((pop = pmemobj_open(pathname, POBJ_LAYOUT_NAME(btree))) == NULL) {
+    if ((pop = pmemobj_open(pool_path_, POBJ_LAYOUT_NAME(btree))) == NULL) {
       perror("failed to open pool.\n");
       return;
     }

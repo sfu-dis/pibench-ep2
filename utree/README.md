@@ -3,7 +3,7 @@
 PiBench wrapper for utree.
 
 ## Installation
-1. Set POOL_SIZE in utree.h
+
 ```bash
 mkdir build
 cd build 
