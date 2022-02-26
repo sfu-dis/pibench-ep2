@@ -188,25 +188,26 @@ void pactreeImpl::createCombinerThread() {
 }
 
 pactreeImpl *initPT(int numa){
-    const char* path = "./dl";
-    size_t sz = 32UL*1024UL*1024UL*1024UL; //32GB
+
+    auto path = *pool_dir_ + "/dl";
+    // size_t sz = 32UL*1024UL*1024UL*1024UL; //32GB
     int isCreated = 0;
     int isCreated2 = 0;
     root_obj* root = nullptr;
     root_obj* sl_root = nullptr;
 
-   const char *sl_path = "./sl";
-   size_t sl_size = 32UL*1024UL*1024UL*1024UL;
+   auto sl_path = *pool_dir_ + "/sl";
+   // size_t sl_size = 32UL*1024UL*1024UL*1024UL;
 
-   PMem::bind(0,sl_path,sl_size,(void **)&sl_root,&isCreated);
+   PMem::bind(0,sl_path.c_str(),pool_size_,(void **)&sl_root,&isCreated);
     if (isCreated == 0) {
         printf("Reading Search layer from an existing pactree.\n");
 	
     }
-    const char* log_path = "./log";
-    PMem::bindLog(0,log_path,sz);
+    auto log_path = *pool_dir_ + "/log";
+    PMem::bindLog(0,log_path.c_str(),pool_size_);
 
-    PMem::bind(1,path,sz,(void **)&root,&isCreated2);
+    PMem::bind(1,path.c_str(),pool_size_,(void **)&root,&isCreated2);
 
 #ifdef MULTIPOOL
    const char* path2 = "/mnt/pmem1/georgehe/dl";
@@ -214,9 +215,9 @@ pactreeImpl *initPT(int numa){
    const char* log_path2 = "/mnt/pmem1/georgehe/log";
    root_obj* root2 = nullptr;
    root_obj* sl_root2 = nullptr;
-   PMem::bind(3,sl_path2,sl_size,(void **)&sl_root2,&isCreated);
-   PMem::bind(4,path2,sz,(void **)&root2,&isCreated);
-   PMem::bindLog(1,log_path2,sz);
+   PMem::bind(3,sl_path2,pool_size_,(void **)&sl_root2,&isCreated);
+   PMem::bind(4,path2,pool_size_,(void **)&root2,&isCreated);
+   PMem::bindLog(1,log_path2,pool_size_);
 #endif
     if (isCreated2 == 0) {
 		pactreeImpl *pt = (pactreeImpl*) pmemobj_direct(root->ptr[0]);
