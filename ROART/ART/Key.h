@@ -6,8 +6,8 @@
 #include <memory>
 #include <stdint.h>
 
-static const char * pool_path = "./pool.data";
-static const long long pool_size = 64LL * 1024 * 1024 * 1024; // default 64GB
+extern size_t pool_size_;
+extern const char *pool_path_;
 
 extern std::atomic<uint64_t> pmem_allocated;
 extern std::atomic<uint64_t> pmem_deallocated;

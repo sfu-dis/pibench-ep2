@@ -2,7 +2,6 @@
 
 ## Installation
 1. Set # of merge workers in dptree_wrapper.cpp (optional, default equals to # of worker threads)
-2. Set POOL_SIZE in include/util.h (optional, default 60 GB)
 
 ```
 mkdir build && cd build && cmake ..

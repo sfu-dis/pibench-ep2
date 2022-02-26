@@ -55,6 +55,8 @@ extern void mfence();
 extern double secs_now(void);
 extern void cpu_pause();
 extern size_t key_size_;
+extern size_t pool_size_;
+extern const char *pool_path_;
 
 namespace dptree
 {
@@ -2591,17 +2593,14 @@ class concur_dptree
           merge_state(0), merge_time(0), merge_wait_time(0)
     {
     #ifdef PMEM
-    	printf("use pmdk!\n");
-    	const char *path = "./pool";
-		if (file_pool_exists(path) == 0) {
-			printf("create new pool.\n");
-			if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(DPTree),
-			                          POOL_SIZE, 0666)) == NULL) {
+		if (!file_pool_exists(pool_path_)) {
+			if ((pop = pmemobj_create(pool_path_, POBJ_LAYOUT_NAME(DPTree),
+			                          pool_size_, 0666)) == NULL) {
 			  perror("failed to create pool.\n");
 			  exit(1);;
 			}
 		} else {
-			printf("file already exists.\n");
+			printf("pool already exists.\n");
 			exit(1);
 		}
     #endif

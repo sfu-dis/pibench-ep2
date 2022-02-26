@@ -20,8 +20,6 @@ To achieve better scalability, we customized Intel TBB library for FP-Tree (whic
 - Make sure that `libtbb.so` exists in `oneTBB/build/gnu_11.1_cxx11_64_release`
 
 ### 2. Build FPTree
-First Modify `PMEMOBJ_POOL_SIZE` in `fptree.h` if `BACKEND = PMEM`. Then:
-
 ```
 $ mkdir build && cd build
 ```

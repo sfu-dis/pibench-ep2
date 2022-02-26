@@ -4,6 +4,8 @@
 constexpr const auto MEMPOOL_ALIGNMENT = 4096LL;
 
 size_t key_size_ = 0;
+size_t pool_size_ = ((size_t)(1024 * 1024 * 6) * 1024);
+const char *pool_path_;
 
 extern "C" tree_api *create_tree(const tree_options_t &opt)
 {
@@ -21,40 +23,42 @@ extern "C" tree_api *create_tree(const tree_options_t &opt)
 #ifdef TSX_FAKE
   puts("Using Faked TSX Instructions! Multithreaded not valid");
 #endif
-  long long mempool_size = (long long)16 * (long long)1024 * (long long)MB; // 16 GB for inner nodes
-  if (const char *env_p = std::getenv("MEMPOOL"))
-  {
-    mempool_size = atoll(env_p);
-  }
+  // long long mempool_size = (long long)16 * (long long)1024 * (long long)MB; // 16 GB for inner nodes
+  // if (const char *env_p = std::getenv("MEMPOOL"))
+  // {
+  //   mempool_size = atoll(env_p);
+  // }
   initUseful();
   worker_id = 0;
   worker_thread_num = opt.num_threads;
-  long long nvmpool_size = (opt.pool_size == 0) ? (long long)32 * (long long)1024 * (long long)MB : opt.pool_size; // 32 for leaves
-  if (const char *env_p = std::getenv("NVMSIZE"))
-  {
-    nvmpool_size = atoll(env_p);
-  }
-  auto path_ptr = new std::string(opt.pool_path); // init method keeps reference to string
-  if (const char *env_p = std::getenv("NVMPOOL"))
-  {
-    path_ptr->assign(env_p);
-  }
-  if (*path_ptr == "")
-    path_ptr->assign("./pool");
-  std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
-  the_thread_mempools.init(opt.num_threads, mempool_size, MEMPOOL_ALIGNMENT);
-  std::chrono::time_point<std::chrono::steady_clock> end = std::chrono::steady_clock::now();
-  std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  printf("mempools init time: %lld ms \n", ms.count());
+  
+  // std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
+  the_thread_mempools.init(opt.num_threads, 4096, MEMPOOL_ALIGNMENT);
+  // std::chrono::time_point<std::chrono::steady_clock> end = std::chrono::steady_clock::now();
+  // std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  // printf("mempools init time: %lld ms \n", ms.count());
 
-  start = std::chrono::steady_clock::now();
-  the_thread_nvmpools.init(opt.num_threads, path_ptr->c_str(), nvmpool_size);
-  end = std::chrono::steady_clock::now();
-  ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  auto path_ptr = new std::string(opt.pool_path);
+  if (*path_ptr != "")
+    pool_path_ = (*path_ptr).c_str();
+  else
+    pool_path_ = "./pool";
+
+  if (opt.pool_size != 0)
+    pool_size_ = opt.pool_size;
+
+#ifdef PMEM
+  printf("PMEM Pool Path: %s\n", pool_path_);
+  printf("PMEM Pool size: %lld\n", pool_size_);
+#endif
+  auto start = std::chrono::steady_clock::now();
+  the_thread_nvmpools.init(opt.num_threads, pool_path_, pool_size_);
+  auto end = std::chrono::steady_clock::now();
+  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   printf("nvmpools init time: %lld ms \n", ms.count());
   char *nvm_addr = (char *)nvmpool_alloc(256);
   nvmLogInit(opt.num_threads);
 
-  printf("MemPool Size: %lld, NVMPool Size: %lld. Using file %s\n", mempool_size, nvmpool_size, path_ptr->c_str());
+  // printf("MemPool Size: %lld, NVMPool Size: %lld. Using file %s\n", mempool_size, nvmpool_size, path_ptr->c_str());
   return new lbtree_wrapper(nvm_addr, false);
 }

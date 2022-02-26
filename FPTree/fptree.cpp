@@ -255,17 +255,15 @@ FPtree::FPtree()
 {
     root = nullptr;
     #ifdef PMEM
-        const char *path = "./pool";
-
-        if (file_pool_exists(path) == 0) 
+        if (!file_pool_exists(pool_path_)) 
         {
-            if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(FPtree), PMEMOBJ_POOL_SIZE, 0666)) == NULL) 
+            if ((pop = pmemobj_create(pool_path_, POBJ_LAYOUT_NAME(FPtree), pool_size_, 0666)) == NULL) 
                 perror("failed to create pool\n");
             root_LogArray = allocLogArray();
         } 
         else 
         {
-            if ((pop = pmemobj_open(path, POBJ_LAYOUT_NAME(FPtree))) == NULL)
+            if ((pop = pmemobj_open(pool_path_, POBJ_LAYOUT_NAME(FPtree))) == NULL)
                 perror("failed to open pool\n");
             else 
             {
