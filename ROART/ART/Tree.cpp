@@ -120,7 +120,7 @@ Tree::Tree() {
     root = new (std::align_val_t(64)) N256(0, {});
 #elif defined(ARTPMDK) 
     const char *layout_name = "DLART";
-    if (pool_size == 0)
+    if (pool_size_ == 0)
         std::cout << "[DLART]\tpool size is 0\n";
 
     if (access(pool_path_, 0)) {
