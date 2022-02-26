@@ -57,7 +57,7 @@ class NVMMgr {
         thread_local_start + PGSIZE * max_threads;
 
     static const char *get_filename() {
-        return pool_path;
+        return pool_path_;
     }
 
     struct Head {

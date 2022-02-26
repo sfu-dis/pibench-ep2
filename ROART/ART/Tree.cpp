@@ -123,7 +123,7 @@ Tree::Tree() {
     if (pool_size == 0)
         std::cout << "[DLART]\tpool size is 0\n";
 
-    if (access(pool_path, 0)) {
+    if (access(pool_path_, 0)) {
         pmem_pool = pmemobj_create(pool_path_, layout_name, pool_size_, 0666);
         if (pmem_pool == nullptr) {
             std::cout << "[DLART]\tcreate fail\n";
