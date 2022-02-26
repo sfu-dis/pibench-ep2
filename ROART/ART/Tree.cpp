@@ -124,14 +124,14 @@ Tree::Tree() {
         std::cout << "[DLART]\tpool size is 0\n";
 
     if (access(pool_path, 0)) {
-        pmem_pool = pmemobj_create(pool_path, layout_name, pool_size, 0666);
+        pmem_pool = pmemobj_create(pool_path_, layout_name, pool_size_, 0666);
         if (pmem_pool == nullptr) {
             std::cout << "[DLART]\tcreate fail\n";
             assert(0);
         }
         std::cout << "[DLART]\tcreate\n";
     } else {
-        pmem_pool = pmemobj_open(pool_path, layout_name);
+        pmem_pool = pmemobj_open(pool_path_, layout_name);
         std::cout << "[DLART]\topen\n";
     }
     std::cout << "[DLART]\topen pmem pool successfully!\n";

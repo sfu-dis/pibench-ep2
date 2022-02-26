@@ -3,7 +3,6 @@
 PiBench wrapper for ROART.
 
 ## Installation
-1. (optional) Configure pool_path and pool_size in Key.h
 
 To build PMEM ROART that uses its own DCMM allocator
 ```
