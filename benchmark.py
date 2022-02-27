@@ -31,9 +31,9 @@ print(cores)
 # 40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78];
 
 numa_cores = []
-for i in range(0, int(cpu_cores/cpu_sockets), cpu_sockets):
+for i in range(0, int(cpu_cores/2), cpu_sockets):
     numa_cores.append(i)
-for i in range(1, int(cpu_cores/cpu_sockets), cpu_sockets):
+for i in range(1, int(cpu_cores/2), cpu_sockets):
     numa_cores.append(i)
 print(numa_cores)
 # numa_cores = [0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,\

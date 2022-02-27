@@ -5,7 +5,7 @@
 indexes="FPTree DPTree HOT LBTree Masstree ROART PACTree uTree" # FPTree DPTree HOT LBTree Masstree ROART PACTree uTree
 
 # This is the absolute path to folder for which the generated binaries will be copied to, will be created if not exist
-# by default this will be filled with absolute_path_to/pibench-ep2/wrappers
+# Leave it empty and generated binaries will be copied to absolute_path_to/pibench-ep2/wrappers
 binary_path="" 
 
 if [ "$binary_path" == "" ]; then
