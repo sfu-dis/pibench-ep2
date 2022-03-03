@@ -1,7 +1,7 @@
 #include "utree_wrapper.h"
 #include <chrono>
 
-size_t pool_size_ = ((size_t)(1024 * 1024 * 10) * 1024);
+size_t pool_size_ = ((size_t)(1024 * 1024 * 16) * 1024);
 const char *pool_path_;
 
 extern "C" tree_api *create_tree(const tree_options_t &opt)

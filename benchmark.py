@@ -39,7 +39,7 @@ print(numa_cores)
 # numa_cores = [0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,\
 # 1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39];
 
-repeat = 3 # # runs for each point
+repeat = 1 # # runs for each point
 base_size = 100000000 # each run starts with 100M record base index (load phase)
 seconds = 10 # followed by 10 seconds operation (only operation will be measured)
 
@@ -49,7 +49,8 @@ lib_dir = "wrappers/" # default path to binary folder
 result_dir = "./results" # default path to folder for which results will be saved into
 pool_path = "" # by default PMem pool will be created in current dir
 
-base_command = "numactl --membind=0 sudo LD_PRELOAD=/usr/lib64/libjemalloc.so"
+numactl = "numactl --membind=0"
+base_command = "sudo LD_PRELOAD=/usr/lib64/libjemalloc.so"
 
 
 # "HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"
@@ -58,7 +59,7 @@ uniform_threads = [40,30,20,10,5,1] # [40,30,20,10,5,1]  customize your choice o
 uniform_ops = ["-r 1","-r 0 -i 1","-r 0 -u 1","-r 0 -s 1"] # "-r 1","-r 0 -i 1","-r 0 -u 1","-r 0 -s 1"
 
 # "HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"
-Skewed = ["HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"] 
+Skewed = ["HOT","Masstree","ROART_DRAM","ROART_DCMM","ROART_PMDK","FPTree_DRAM","FPTree_PMEM","DPTree","LBTree_DRAM","LBTree_PMEM","PACTree"]
 skewed_threads = [40,30,20,10,5,1] # [40,30,20,10,5,1]
 skewed_ops = ["-r 1","-r 0 -u 1","-r 0 -s 1"] # "-r 1","-r 0 -u 1","-r 0 -s 1"
 self_similar = 0.2
@@ -123,6 +124,7 @@ def create_command(num_thread, cores, tree, op, exp):
     else:
         lib = tree_to_lib[tree]
     command_list = [
+        numactl,
         base_command, 
         s, 
         pibench_path, 
@@ -130,12 +132,14 @@ def create_command(num_thread, cores, tree, op, exp):
         "-n " + str(base_size), 
         "--mode time --seconds " + str(seconds),
         op,
-        "-t " + str(thread)
+        "-t " + str(num_thread)
         ]
     if exp == "Skewed":
         command_list.append("--distribution SELFSIMILAR --skew " + str(self_similar))
     elif exp == "Latency":
         command_list.append("--latency_sampling " + str(sampling))
+        command_list[0] = command_list[0] + " --cpunodebind=0"
+        del command_list[2]
     if pool_path != "":
         if tree == "PACTree":
             command_list.append("--pool_path=" + pool_path)

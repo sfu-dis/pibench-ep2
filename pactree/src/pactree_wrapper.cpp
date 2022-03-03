@@ -1,6 +1,6 @@
 #include "pactree_wrapper.h"
 
-size_t pool_size_ = ((size_t)(1024 * 1024 * 4) * 1024);
+size_t pool_size_ = ((size_t)(1024 * 1024 * 16) * 1024);
 std::string *pool_dir_;
 
 extern "C" tree_api* create_tree(const tree_options_t& opt) {
