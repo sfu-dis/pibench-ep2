@@ -32,8 +32,6 @@ else()
   message(FATAL_ERROR "Unsupported persistent memory backend: ${PMEM_BACKEND}")
 endif()
 
-option(BUILD_INSPECTOR "Build inspector to check correctness of single/multi-thread operation" ON)
-
 option(TEST_MODE "Test mode will test leaf nodes and inner node smaller to help debug" ON)
 
 option(NDEBUG "Disable assert statements" ON)
@@ -53,23 +51,6 @@ else()
   message(STATUS "NDEBUG: not defined")
 endif()
 
-if(${BUILD_INSPECTOR})
-  add_definitions(-DBUILD_INSPECTOR)
-  message(STATUS "BUILD_INSPECTOR: defined")
-  add_executable(
-    inspector
-    fptree.cpp
-    fptree.h
-    inspector.cpp
-  )
-else()
-  message(STATUS "BUILD_INSPECTOR: not defined")
-  #add_executable(
-  #  fptree
-  #  fptree.cpp
-  #  fptree.h
-  #)
-endif()
 
 ##################### PiBench #########################
 FetchContent_Declare(

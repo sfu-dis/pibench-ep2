@@ -389,11 +389,11 @@ struct FPtree
 
     // TODO: fix/optimize iterator based scan methods
     // initialize scan by finding the first kv with kv.key >= key
-    void scanInitialize(uint64_t key);
+    // void scanInitialize(uint64_t key);
 
-    KV scanNext();
+    // KV scanNext();
 
-    bool scanComplete();
+    // bool scanComplete();
 
     uint64_t rangeScan(uint64_t key, uint64_t scan_size, char* result);
 

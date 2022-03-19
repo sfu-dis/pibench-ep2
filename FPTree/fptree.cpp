@@ -1182,57 +1182,57 @@ void FPtree::sortKV()
 }
 
 
-void FPtree::scanInitialize(uint64_t key)
-{
-    if (!root)
-        return;
+// void FPtree::scanInitialize(uint64_t key)
+// {
+//     if (!root)
+//         return;
 
-    this->current_leaf = root->isInnerNode? findLeaf(key) : reinterpret_cast<LeafNode*> (root);
-    while (this->current_leaf != nullptr)
-    {
-        this->sortKV();
-        for (uint64_t i = 0; i < this->size_volatile_kv; i++)
-        {
-            if (this->volatile_current_kv[i].key >= key)
-            {
-                this->bitmap_idx = i;
-                return;
-            }
-        }
-        #ifdef PMEM
-            this->current_leaf = (struct LeafNode *) pmemobj_direct((this->current_leaf->p_next).oid);
-        #else
-            this->current_leaf = this->current_leaf->p_next;
-        #endif
-    }
-}
-
-
-KV FPtree::scanNext()
-{
-    assert(this->current_leaf != nullptr && "Current scan node was deleted!");
-    struct KV kv = this->volatile_current_kv[this->bitmap_idx++];
-    if (this->bitmap_idx == this->size_volatile_kv)
-    {
-        #ifdef PMEM
-            this->current_leaf = (struct LeafNode *) pmemobj_direct((this->current_leaf->p_next).oid);
-        #else
-            this->current_leaf = this->current_leaf->p_next;
-        #endif
-        if (this->current_leaf != nullptr)
-        {
-            this->sortKV();
-            this->bitmap_idx = 0;
-        }
-    }
-    return kv;
-}
+//     this->current_leaf = root->isInnerNode? findLeaf(key) : reinterpret_cast<LeafNode*> (root);
+//     while (this->current_leaf != nullptr)
+//     {
+//         this->sortKV();
+//         for (uint64_t i = 0; i < this->size_volatile_kv; i++)
+//         {
+//             if (this->volatile_current_kv[i].key >= key)
+//             {
+//                 this->bitmap_idx = i;
+//                 return;
+//             }
+//         }
+//         #ifdef PMEM
+//             this->current_leaf = (struct LeafNode *) pmemobj_direct((this->current_leaf->p_next).oid);
+//         #else
+//             this->current_leaf = this->current_leaf->p_next;
+//         #endif
+//     }
+// }
 
 
-bool FPtree::scanComplete()
-{
-    return this->current_leaf == nullptr;
-}
+// KV FPtree::scanNext()
+// {
+//     assert(this->current_leaf != nullptr && "Current scan node was deleted!");
+//     struct KV kv = this->volatile_current_kv[this->bitmap_idx++];
+//     if (this->bitmap_idx == this->size_volatile_kv)
+//     {
+//         #ifdef PMEM
+//             this->current_leaf = (struct LeafNode *) pmemobj_direct((this->current_leaf->p_next).oid);
+//         #else
+//             this->current_leaf = this->current_leaf->p_next;
+//         #endif
+//         if (this->current_leaf != nullptr)
+//         {
+//             this->sortKV();
+//             this->bitmap_idx = 0;
+//         }
+//     }
+//     return kv;
+// }
+
+
+// bool FPtree::scanComplete()
+// {
+//     return this->current_leaf == nullptr;
+// }
 
 
 uint64_t FPtree::rangeScan(uint64_t key, uint64_t scan_size, char* result)
@@ -1334,72 +1334,5 @@ uint64_t FPtree::rangeScan(uint64_t key, uint64_t scan_size, char* result)
             }
         }
         return true;
-    }
-#endif
-
-
-#if BUILD_INSPECTOR == 0
-    int main(int argc, char *argv[]) 
-    {
-        srand( (unsigned) time(NULL) * getpid());
-        FPtree fptree;
-
-        #ifdef PMEM
-            const char* command = argv[1];
-            if (command != NULL && strcmp(command, "show") == 0)
-            {  
-                showList();
-                return 0;
-            }
-        #endif
-
-        int64_t key;
-        uint64_t value;
-        while (true)
-        {
-            fptree.printFPTree("├──", fptree.getRoot());
-            std::cout << "\nEnter the key to insert, delete or update (-1): "; 
-            std::cin >> key;
-            std::cout << std::endl;
-            KV kv = KV(key, key);
-            if (key == 0)
-                break;
-            else if (key == -1)
-            {
-                std::cout << "\nEnter the key to update: ";
-                std::cin >> key;
-                std::cout << "\nEnter the value to update: ";
-                std::cin >> value;
-                fptree.update(KV(key, value));
-            }
-            else if (fptree.find(kv.key))
-                fptree.deleteKey(kv.key);
-            else
-            {
-                // fptree.insert(kv);
-                if (!fptree.getRoot())
-                    for (size_t i = 0; i < 100; i++)
-                        fptree.insert(KV(rand() % 100 + 2, 1));
-                else
-                    fptree.insert(kv);
-            }
-            // fptree.printFPTree("├──", fptree.getRoot());
-            #ifdef PMEM
-                std::cout << std::endl;
-                std::cout << "show list: " << std::endl;
-                showList();
-            #endif
-        }
-
-        std::cout << "\nEnter the key to initialize scan: "; 
-        std::cin >> key;
-        std::cout << std::endl;
-        fptree.scanInitialize(key);
-        while(!fptree.scanComplete())
-        {
-            KV kv = fptree.scanNext();
-            std::cout << kv.key << "," << kv.value << " ";
-        }
-        std::cout << std::endl;
     }
 #endif

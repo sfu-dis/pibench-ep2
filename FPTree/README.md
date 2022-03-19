@@ -26,23 +26,21 @@ $ mkdir build && cd build
 
 To build PMEM FPTree
 ```
-$ cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. && make
+$ cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DNDEBUG=1 .. && make
 ````
 
 To build PMEM FPTree with var-key support
 ```
-$ cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 -DVAR_KEY=1 .. && make                      
+$ cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DNDEBUG=1 -DVAR_KEY=1 .. && make                      
 ````
 
 To build DRAM FPTree 
 ``` 
-$ cmake -DPMEM_BACKEND=DRAM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. && make 
+$ cmake -DPMEM_BACKEND=DRAM -DTEST_MODE=0 -DNDEBUG=1 .. && make 
 ```
 
 
 ### 3. Notes
-FPTree code from https://github.com/sfu-dis/fptree.git (commit `98c25fa65070fe188ec4ae163e8b440c00cceaaf`)
-
 A summary of modifications made:
 - Modified `CMakeLists.txt` to use the customized TBB (with # retries increased to 256).
 - Changed header files in `fptree.h` to include those from the customized TBB.
