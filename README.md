@@ -7,10 +7,12 @@ See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
 # Clone repo and submodule
 ```
 git clone https://github.com/sfu-dis/pibench-ep2.git
+cd pibench-ep2
 git submodule update --init --recursive
 ```
 
 # Dependencies
+* CMake with VERSION >= 3.14 (pip install cmake --upgrade)
 * [PiBench](https://github.com/sfu-dis/pibench.git): for running all benchmarks. Will be automatically cloned and built if run benchmark.py
 * [PMDK](https://pmem.io/pmdk/): required by most indexes for persistent memory management.
 * HTM(TSX support) needs to be turned on for FPTree and LB+-Tree. See FPTree `README` for details.
