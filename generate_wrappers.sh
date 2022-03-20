@@ -22,6 +22,9 @@ fi
 
 # FPTree
 if [[ "$indexes" == *"FPTree"* ]]; then
+	if [ ! -d "./FPTree" ]; then
+		eval "git submodule update --init --recursive"
+	fi
 	eval "cd FPTree"
 	if [ ! -d "./oneTBB" ]; then
 		eval "git clone https://github.com/oneapi-src/oneTBB.git"

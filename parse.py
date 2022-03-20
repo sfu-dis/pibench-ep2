@@ -291,7 +291,7 @@ def mem_stat(exp, indexes, operations, file_name, header, thread):
 		writer.writerow(line)
 	os.system("mv " + csv_dir + "temp.csv " + csv_dir + file_name)
 
-# if "Throughput" in csvs:
+if "Throughput" in csvs:
 	# DRAM Uniform
 	throughput('Uniform', dram_idx, uniform_ops, exp_to_fname["D_Uniform"], exp_to_headers["D_Uniform"])
 
