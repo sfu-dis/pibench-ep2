@@ -15,7 +15,6 @@ git submodule update --init --recursive
 * [PMDK](https://pmem.io/pmdk/): required by most indexes for persistent memory management.
 * HTM(TSX support) needs to be turned on for FPTree and LB+-Tree. See FPTree `README` for details.
 
-# To bring
 
 # Building index wrappers for PiBench
 To generate pibench wrappers for selected indexes:
@@ -30,6 +29,7 @@ The `README` in each index directory contains instructions for building each ind
 
 # Benchmarking script
 The benchmark script will clone and built pibench for you if it is not found in current folder.
+
 Run it under default settings (Warning! This could take hours to finish!):
 ```
 sudo ./benchmark.py
@@ -71,7 +71,8 @@ sampling - percentage of samples collected for Latency experiment (default 0.1)
 
 
 # Parse experiment results
-By default the experiment results should be saved in ./results folder
+By default the experiment results should be saved in ./results folder.
+
 To generate .csv files for all experiments:
 ```
 ./parse.py
