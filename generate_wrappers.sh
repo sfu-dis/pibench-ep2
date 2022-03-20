@@ -30,13 +30,13 @@ if [[ "$indexes" == *"FPTree"* ]]; then
 	eval "cd oneTBB && rm -rf build && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j"
 	eval "cd ../../ && rm -rf build && mkdir build && cd build"
 
-	eval "cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. && make"
+	eval "cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DNDEBUG=1 .. && make"
 	eval "mv src/libfptree_pibench_wrapper.so ${binary_path}/libfptree_pmem.so"
 
-	eval "cmake -DPMEM_BACKEND=DRAM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 .. && make"
+	eval "cmake -DPMEM_BACKEND=DRAM -DTEST_MODE=0 -DNDEBUG=1 .. && make"
         eval "mv src/libfptree_pibench_wrapper.so ${binary_path}/libfptree_dram.so"
 
-	eval "cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DBUILD_INSPECTOR=0 -DNDEBUG=1 -DVAR_KEY=1 .. && make"
+	eval "cmake -DPMEM_BACKEND=PMEM -DTEST_MODE=0 -DNDEBUG=1 -DVAR_KEY=1 .. && make"
         eval "mv src/libfptree_pibench_wrapper.so ${binary_path}/libfptree_pmem_varkey.so"	
 
 	eval "cd ../../"
