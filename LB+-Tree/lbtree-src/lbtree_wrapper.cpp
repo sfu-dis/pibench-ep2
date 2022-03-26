@@ -1,4 +1,4 @@
-#include "lbtree_wrapper.h"
+#include "lbtree_wrapper.hpp"
 #include <chrono>
 
 constexpr const auto MEMPOOL_ALIGNMENT = 4096LL;

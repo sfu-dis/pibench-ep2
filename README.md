@@ -13,6 +13,7 @@ git submodule update --init --recursive
 
 # Dependencies
 * CMake with VERSION >= 3.14 (pip install cmake --upgrade)
+* glibc with VERSION >= 2.34
 * [PiBench](https://github.com/sfu-dis/pibench.git): for running all benchmarks. Will be automatically cloned and built if run benchmark.py
 * [PMDK](https://pmem.io/pmdk/): required by most indexes for persistent memory management.
 * HTM(TSX support) needs to be turned on for FPTree and LB+-Tree. See FPTree `README` for details.

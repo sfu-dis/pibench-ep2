@@ -184,54 +184,92 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
 
 bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
-  thread_local ThreadHelper t{UPDATE};
-  //FIXME
-  // Try to find the record first.
-  bleaf *p;
-  int pos = -1;
+  thread_local ThreadHelper T{UPDATE};
+  bnode *p;
+  bleaf *lp;
+  int i, t, m, b, jj;
   auto k = PBkeyToLB(key);
-  IdxEntry ent;
-Retry:
-  p = (bleaf *)lbt->lookup(k, &pos);
-  if (!p || pos < 0)
-  {
-#ifdef DEBUG_MSG
-    printf("Update key not found!\n");
+  unsigned char key_hash = hashcode1B(k);
+  bool found = false;
+  
+  Again4:
+    if (_xbegin() != _XBEGIN_STARTED)
+      goto Again4;
+    p = ((lbtree*)lbt)->tree_meta->tree_root;
+    for (i = ((lbtree*)lbt)->tree_meta->root_level; i > 0; i--)
+    {
+    #ifdef PREFETCH
+        NODE_PREF(p);
+    #endif
+        if (p->lock())
+        {
+            _xabort(1);
+            goto Again4;
+        }
+        // binary search to narrow down to at most 8 entries
+        b = 1;
+        t = p->num();
+        while (b + 7 <= t)
+        {
+            m = (b + t) >> 1;
+            if (k > p->k(m))
+                b = m + 1;
+            else if (k < p->k(m))
+                t = m - 1;
+            else
+            {
+                p = p->ch(m);
+                goto inner_done;
+            }
+        }
+        // sequential search (which is slightly faster now)
+        for (; b <= t; b++)
+            if (k < p->k(b))
+                break;
+        p = p->ch(b - 1);
+
+    inner_done:;
+    }
+
+    lp = (bleaf *)p;
+#ifdef PREFETCH
+    LEAF_PREF(lp);
 #endif
-    return false;
-  }
-  // volatile long long sum;
-  // void *recptr;
-  // {
-  //   Again:
-  //   // 1. RTM begin
-  //   if (_xbegin() != _XBEGIN_STARTED)
-  //   {
-  //     // sum = 0;
-  //     // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
-  //     std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-  //     goto Again;
-  //   }
-  //   if (p->lock)
-  //   {
-  //     _xabort(4);
-  //     std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-  //     goto Again;
-  //   }
-  //   p->lock = 1;
-  //   _xend();
-  // }
-  // ent = p->ent[pos];
-  // if (p->lock || ent.k != k || !__sync_bool_compare_and_swap((uint64_t*)&(p->ent[pos].ch), *(uint64_t*)&(ent.ch), *(uint64_t*)value))
-  //   goto Retry;
-  void *recptr = lbt->get_recptr(p, pos);
-  memcpy(&recptr, value, ITEM_SIZE);
-#ifdef NVMPOOL_REAL
-  clwb(p);
-  sfence();
-#endif
-  // p->lock = 0;
-  return true;
+    if (lp->lock)
+    {
+        _xabort(2);
+        goto Again4;
+    }
+
+    __m128i key_16B = _mm_set1_epi8((char)key_hash);
+    __m128i fgpt_16B = _mm_load_si128((const __m128i *)lp);
+    __m128i cmp_res = _mm_cmpeq_epi8(key_16B, fgpt_16B);
+    unsigned int mask = (unsigned int)
+        _mm_movemask_epi8(cmp_res); // 1: same; 0: diff
+    mask = (mask >> 2) & ((unsigned int)(lp->bitmap));
+
+    while (mask)
+    {
+        jj = bitScan(mask) - 1; // next candidate
+        if (lp->k(jj) == k)
+        { // found
+            lp->lock = 1;
+            found = true;
+            break;
+        }
+        mask &= ~(0x1 << jj); // remove this bit
+    } // end while
+    _xend();
+    if (found) {
+      lp->ch(jj) = PBvalToLB(value);
+      #ifdef NVMPOOL_REAL
+        clwb(&(lp->ch(jj)));
+        sfence();
+      #endif
+      ((bleafMeta *)lp)->v.lock = 0;
+      // lp->lock = 0;
+    }
+  return found;
 }
 
 bool lbtree_wrapper::remove(const char *key, size_t key_sz)

@@ -23,7 +23,7 @@ TARGETS=lbtree_wrapper
 all: ${TARGETS}
 
 # -----------------------------------------------------------------------------
-lbtree_wrapper: lbtree-src/lbtree_wrapper.h lbtree-src/lbtree_wrapper.cpp ${COMMON_DEPENDS}
+lbtree_wrapper: lbtree-src/lbtree_wrapper.hpp lbtree-src/lbtree_wrapper.cpp ${COMMON_DEPENDS}
 	${CC} -o liblbtree_wrapper.so ${CFLAGS} -fPIC -shared ${INCLUDE} lbtree-src/lbtree_wrapper.cpp ${COMMON_SOURCES} ${LIB}
 # lbtree: lbtree-src/lbtree.h lbtree-src/lbtree.cc ${COMMON_DEPENDS}
 # 	${CC} -o $@ ${CFLAGS} ${INCLUDE} lbtree-src/lbtree.cc ${COMMON_SOURCES} ${LIB}
