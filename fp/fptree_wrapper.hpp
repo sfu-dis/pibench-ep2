@@ -2,7 +2,7 @@
 #define __FPTREE_WRAPPER_HPP__
 
 #include "tree_api.hpp"
-#include "fptree.h"
+#include "fptree.cpp"
 
 #include <cstring>
 #include <mutex>

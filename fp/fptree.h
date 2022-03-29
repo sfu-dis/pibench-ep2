@@ -21,14 +21,17 @@
 
 #include <libpmemobj.h>
 #include <sys/stat.h>
+#include <immintrin.h>
 #include "utils.h"
 
+/*
 extern "C" {
 #include "gc/portable_defns.h"
 #include "gc/ptst.h"
 #include "gc/set.h"
 #include "atomic_ops/atomic_ops.h"
 }
+*/
 
 extern size_t pool_size_;
 extern const char *pool_path_;
