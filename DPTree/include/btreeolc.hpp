@@ -15,6 +15,12 @@
 #include <utility>
 #include <functional>
 
+#define PREFETCH
+#ifdef PREFETCH
+    #include "nodepref.h"
+    #define LEAF_LINE_NUM sizeof(BTreeLeaf<Key, Value>)/64
+#endif
+
 extern size_t key_size_;
 #ifdef VAR_KEY
 int vkcmp(char* a, char* b) {
@@ -782,15 +788,26 @@ struct BTree
             parent = inner;
             versionParent = versionNode;
 
-            node = inner->children[inner->lowerBound(k)];
-            inner->checkOrRestart(versionNode, needRestart);
+	    int i = inner->lowerBound(k);
+            #ifdef PREFETCH
+                if (inner->children[i]->type != PageType::BTreeInner) {
+                    LEAF_PREF(inner->children[i]);
+                    if (i + 1 < node->count)
+                        LEAF_PREF(inner->children[i + 1]);
+                    if (i + 2 < node->count)
+                        LEAF_PREF(inner->children[i + 2]);
+                }                
+            #endif
+            node = inner->children[i];
+            
+	    inner->checkOrRestart(versionNode, needRestart);
             if (needRestart)
                 goto restart;
             versionNode = node->readLockOrRestart(needRestart);
             if (needRestart)
                 goto restart;
         }
-
+	
         BTreeLeaf<Key, Value> *leaf = static_cast<BTreeLeaf<Key, Value> *>(node);
         unsigned pos = leaf->lowerBound(k);
         int count = 0;
