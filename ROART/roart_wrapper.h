@@ -7,6 +7,7 @@
 #include <atomic>
 
 // #define DEBUG_MSG
+#define LONG_KEY
 
 std::atomic<uint64_t> pmem_allocated(0);
 std::atomic<uint64_t> pmem_deallocated(0);
@@ -63,12 +64,18 @@ roart_wrapper::~roart_wrapper()
 bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
 {
   thread_local ThreadHelper t;
-#ifdef KEY_INLINE
-  Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
-#else
+#ifdef LONG_KEY
   Key k;
   k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value_out), 8);
+#else
+  #ifdef KEY_INLINE
+    Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, 0);
+  #else
+    Key k;
+    k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value_out), 8);
+  #endif
 #endif
+
   auto leaf = roart.lookup(&k);
 
   if (leaf != nullptr)
@@ -85,11 +92,16 @@ bool roart_wrapper::find(const char *key, size_t key_sz, char *value_out)
 bool roart_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
   thread_local ThreadHelper t;
-#ifdef KEY_INLINE
-  Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
-#else
+#ifdef LONG_KEY
   Key k;
   k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
+#else
+  #ifdef KEY_INLINE
+    Key k = Key(*reinterpret_cast<const uint64_t*>(key), key_sz, *reinterpret_cast<const uint64_t*>(value));
+  #else
+    Key k;
+    k.Init(const_cast<char*>(key), key_sz, const_cast<char*>(value), value_sz);
+  #endif
 #endif
   Tree::OperationResults result = roart.insert(&k);
   if (result != Tree::OperationResults::Success)
