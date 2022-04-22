@@ -883,9 +883,9 @@ restart:
     N *parentNode = nullptr;
     uint8_t parentKey, nodeKey = 0;
     uint32_t level = 0;
-    printf("Begin of insert\n"); //segfault
+    // printf("Begin of insert\n"); //segfault
     while (true) {
-        printf("Begin of while\n"); //segfault
+        // printf("Begin of while\n"); //segfault
         parentNode = node;
         parentKey = nodeKey;
         node = nextNode;
@@ -897,18 +897,18 @@ restart:
 
         uint8_t nonMatchingKey;
         Prefix remainingPrefix;
-        printf("Begin of switch\n"); //segfault
+        // printf("Begin of switch\n"); //segfault
         switch (
             checkPrefixPessimistic(node, k, nextLevel, nonMatchingKey,
                                    remainingPrefix)) { // increases nextLevel
         case CheckPrefixPessimisticResult::SkippedLevel:
-            printf("restart on SkippedLevel!\n"); //segfault
+            // printf("restart on SkippedLevel!\n"); //segfault
             goto restart;
         case CheckPrefixPessimisticResult::NoMatch: {
             assert(nextLevel < k->getKeyLen()); // prevent duplicate key
             node->lockVersionOrRestart(v, needRestart);
             if (needRestart) {
-                printf("restart on first needRestart!\n"); //segfault
+                // printf("restart on first needRestart!\n"); //segfault
                 goto restart;
             }
 
@@ -961,7 +961,7 @@ restart:
                 EpochGuard::DeleteNode((void *)newLeaf);
 
                 node->writeUnlock();
-                printf("restart on second needRestart!\n"); //segfault
+                // printf("restart on second needRestart!\n"); //segfault
                 goto restart;
             }
 
@@ -975,15 +975,15 @@ restart:
             //            std::cout<<"insert success\n";
 
             node->writeUnlock();
-            printf("end of NoMatch, return Success!\n"); //segfault
+            // printf("end of NoMatch, return Success!\n"); //segfault
             return OperationResults::Success;
 
         } // end case  NoMatch
         case CheckPrefixPessimisticResult::Match:
-            printf("Match, break switch!\n"); //segfault
+            // printf("Match, break switch!\n"); //segfault
             break;
         }
-        printf("End of switch\n"); //segfault
+        // printf("End of switch\n"); //segfault
         assert(nextLevel < k->getKeyLen()); // prevent duplicate key
         // TODO: maybe one string is substring of another, so it fkey[level]
         // will be 0 solve problem of substring
@@ -991,36 +991,36 @@ restart:
         nodeKey = k->fkey[level];
 
         // segfault
-        switch (node->getType()) {
-        case NTypes::N4: {
-            printf("N4\n");
-            break;
-        }
-        case NTypes::N16: {
-            printf("N16\n");
-            break;
-        }
-        case NTypes::N48: {
-            printf("N48\n");
-            break;
-        }
-        case NTypes::N256: {
-            printf("N256\n");
-            break;
-        }
-        case NTypes::LeafArray: {
-            printf("LeafArray\n");
-            break;
-        }
-        default: {
-            assert(false);
-        }
-        }
+        // switch (node->getType()) {
+        // case NTypes::N4: {
+        //     printf("N4\n");
+        //     break;
+        // }
+        // case NTypes::N16: {
+        //     printf("N16\n");
+        //     break;
+        // }
+        // case NTypes::N48: {
+        //     printf("N48\n");
+        //     break;
+        // }
+        // case NTypes::N256: {
+        //     printf("N256\n");
+        //     break;
+        // }
+        // case NTypes::LeafArray: {
+        //     printf("LeafArray\n");
+        //     break;
+        // }
+        // default: {
+        //     assert(false);
+        // }
+        // }
         nextNode = N::getChild(nodeKey, node);
-        printf("%p\n", nextNode); //segfault
-        printf("NextLevel: %d, KeyLen: %d\n", nextLevel, k->getKeyLen()); //segfault
+        // printf("%p\n", nextNode); //segfault
+        // printf("NextLevel: %d, KeyLen: %d\n", nextLevel, k->getKeyLen()); //segfault
         if (nextNode == nullptr) { //  || nextNode == (void*)0x303030303030) {
-            printf("nextNode == nullptr\n"); //segfault
+            // printf("nextNode == nullptr\n"); //segfault
             node->lockVersionOrRestart(v, needRestart);
             if (needRestart)
                 goto restart;
@@ -1029,8 +1029,8 @@ restart:
             auto newLeafArray =
                 new (alloc_new_node_from_type(NTypes::LeafArray)) LeafArray();
             newLeafArray->insert(newLeaf, true);
-            printf("New leaf ptr: %p\n", newLeaf); //segfault
-            printf("Newly leaf array ptr: %p\n", newLeafArray); //segfault
+            // printf("New leaf ptr: %p\n", newLeaf); //segfault
+            // printf("Newly leaf array ptr: %p\n", newLeafArray); //segfault
             N::insertAndUnlock(node, parentNode, parentKey, nodeKey,
                                N::setLeafArray(newLeafArray), needRestart);
 #else
@@ -1042,10 +1042,10 @@ restart:
 
             return OperationResults::Success;
         }
-        printf("Keep going\n"); //segfault
+        // printf("Keep going\n"); //segfault
 #ifdef LEAF_ARRAY
         if (N::isLeafArray(nextNode)) {
-            printf("nextNode is LeafArray\n"); //segfault
+            // printf("nextNode is LeafArray\n"); //segfault
             auto leaf_array = N::getLeafArray(nextNode);
             if (leaf_array->lookup(k) != nullptr) {
                 return OperationResults::Existed;
@@ -1132,10 +1132,10 @@ restart:
             return OperationResults::Success;
         }
 #endif
-        printf("level ++!\n"); //segfault
+        // printf("level ++!\n"); //segfault
         level++;
     }
-    printf("Insert finished!\n"); //segfault
+    // printf("Insert finished!\n"); //segfault
     //    std::cout<<"ohfinish\n";
 }
 
@@ -1319,8 +1319,8 @@ Tree::checkPrefixPessimistic(N *n, const Key *k, uint32_t &level,
                              Prefix &nonMatchingPrefix) {
     Prefix p = n->getPrefi();
     if (p.prefixCount + level != n->getLevel()) {
-        printf("Shoud not be called during normal operations\n"); //segfault
-        exit(1);
+        // printf("Shoud not be called during normal operations\n"); //segfault
+        // exit(1);
         // Intermediate or inconsistent state from path compression
         // "splitAndUnlock" or "merge" is detected Inconsistent path compressed
         // prefix should be recovered in here
