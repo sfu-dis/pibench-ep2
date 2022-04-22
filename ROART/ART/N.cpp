@@ -419,6 +419,7 @@ void N::insertAndUnlock(N *node, N *parentNode, uint8_t keyParent, uint8_t key,
 #endif
     switch (node->getType()) {
     case NTypes::N4: {
+        printf("N4\n"); //segfault
         auto n = static_cast<N4 *>(node);
         if (n->compactCount == 4 && n->count <= 3) {
             compactAndInsertAndUnlock<N4>(n, parentNode, keyParent, key, val,
@@ -430,6 +431,7 @@ void N::insertAndUnlock(N *node, N *parentNode, uint8_t keyParent, uint8_t key,
         break;
     }
     case NTypes::N16: {
+        printf("N16\n"); //segfault
         auto n = static_cast<N16 *>(node);
         if (n->compactCount == 16 && n->count <= 14) {
             compactAndInsertAndUnlock<N16>(n, parentNode, keyParent, key, val,
@@ -441,17 +443,21 @@ void N::insertAndUnlock(N *node, N *parentNode, uint8_t keyParent, uint8_t key,
         break;
     }
     case NTypes::N48: {
+        printf("N48\n"); //segfault
         auto n = static_cast<N48 *>(node);
         if (n->compactCount == 48 && n->count != 48) {
+            printf("compact, insert and unlock\n"); //segfault
             compactAndInsertAndUnlock<N48>(n, parentNode, keyParent, key, val,
                                            NTypes::N48, needRestart);
             break;
         }
+        printf("Grow from 48 to 256\n"); //segfault
         tryInsertOrGrowAndUnlock<N48, N256>(n, parentNode, keyParent, key, val,
                                             NTypes::N256, needRestart);
         break;
     }
     case NTypes::N256: {
+        printf("N256\n"); //segfault
         auto n = static_cast<N256 *>(node);
         n->insert(key, val, true);
         node->writeUnlock();

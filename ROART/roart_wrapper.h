@@ -173,6 +173,6 @@ int roart_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&valu
     printf("%d records scanned.\n", scanned);
 #endif
   
-  return scanned;
+  return scanned; 
 }
 

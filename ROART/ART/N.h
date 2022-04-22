@@ -119,6 +119,7 @@ class N : public BaseNode {
 
     virtual ~N() {}
 
+  public:
     // 3b type 59b version 1b lock 1b obsolete
     // obsolete means this node has been deleted
     std::atomic<uint64_t> *type_version_lock_obsolete;
@@ -137,7 +138,6 @@ class N : public BaseNode {
 
     static uint64_t convertTypeToVersion(NTypes type);
 
-  public:
     static inline N *setDirty(N *val) {
         return (N *)((uint64_t)val | dirty_bit);
     }

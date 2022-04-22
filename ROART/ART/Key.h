@@ -63,27 +63,18 @@ struct Key {
         fkey = (uint8_t *)key_;
     }
 
-    inline Key *make_leaf(char *key, size_t key_len, uint64_t value);
-
+#ifdef KEY_INLINE
     inline Key *make_leaf(uint64_t key, size_t key_len, uint64_t value);
+#else
+    inline Key *make_leaf(char *key, size_t key_len, uint64_t value);
+#endif
 
     inline size_t getKeyLen() const;
 
     inline uint16_t getFingerPrint() const;
 } __attribute__((aligned(64)));
 
-inline Key *Key::make_leaf(char *key, size_t key_len, uint64_t value) {
-    void *aligned_alloc;
-    posix_memalign(&aligned_alloc, 64, sizeof(Key) + key_len);
-    Key *k = reinterpret_cast<Key *>(aligned_alloc);
-
-    k->value = value;
-    k->key_len = key_len;
-    memcpy(k->fkey, key, key_len);
-
-    return k;
-}
-
+#ifdef KEY_INLINE 
 inline Key *Key::make_leaf(uint64_t key, size_t key_len, uint64_t value) {
     void *aligned_alloc;
     posix_memalign(&aligned_alloc, 64, sizeof(Key) + key_len);
@@ -95,6 +86,19 @@ inline Key *Key::make_leaf(uint64_t key, size_t key_len, uint64_t value) {
 
     return k;
 }
+#else
+inline Key *Key::make_leaf(char *key, size_t key_len, uint64_t value) {
+    void *aligned_alloc;
+    posix_memalign(&aligned_alloc, 64, sizeof(Key) + key_len);
+    Key *k = reinterpret_cast<Key *>(aligned_alloc);
+
+    k->value = value;
+    k->key_len = key_len;
+    memcpy(k->fkey, key, key_len);
+
+    return k;
+}
+#endif
 
 inline size_t Key::getKeyLen() const {
     return key_len;

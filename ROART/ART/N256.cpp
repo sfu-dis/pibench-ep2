@@ -23,7 +23,10 @@ bool N256::insert(uint8_t key, N *val, bool flush) {
     if (flush) {
         uint64_t oldp = (1ull << 56) | ((uint64_t)key << 48);
     }
-
+    if (val == (void*)0x303030303030) {
+        printf("0x303030303030 inserted!\n"); //segfault
+        exit(1);
+    }
     children[key].store(val, std::memory_order_seq_cst);
     if (flush) {
         flush_data((void *)&children[key], sizeof(std::atomic<N *>));
