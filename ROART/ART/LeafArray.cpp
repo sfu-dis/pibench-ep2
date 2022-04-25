@@ -176,10 +176,13 @@ void LeafArray::splitAndUnlock(N *parentNode, uint8_t parentKey,
 
     auto b = bitmap.load();
     auto leaf_count = b.count();
+    // printf("# of leaves: %d\n", leaf_count);
     std::vector<char *> keys;
     //    char **keys = new char *[leaf_count];
     std::vector<int> lens;
     //    int *lens = new int[leaf_count];
+    int level = 0;
+    level = parentNode->getLevel() + 1;
 
     auto i = b[0] ? 0 : 1;
     while (i < LeafArrayLength) {
@@ -189,16 +192,29 @@ void LeafArray::splitAndUnlock(N *parentNode, uint8_t parentKey,
             auto ptr = reinterpret_cast<Leaf *>(
                 fingerprint_ptr ^
                 (static_cast<uintptr_t>(thisfp) << FingerPrintShift));
-            keys.push_back(ptr->GetKey());
-            lens.push_back(ptr->key_len);
+            // keys.push_back(ptr->GetKey());
+            // lens.push_back(ptr->key_len);
+            if (ptr->key_len > level) {
+                keys.push_back(ptr->GetKey());
+                lens.push_back(ptr->key_len);
+            }
+            else {
+                // printf("replace prefix key at index: %d!\n", i);
+                this->leaf[i].store(leaf[leaf_count-1].load());
+                bitmap.store(b.reset(leaf_count-1));
+                leaf_count--;
+                // b = bitmap.load();
+                if (i != leaf_count-1) {
+                    continue;
+                }
+            } 
         }
         i = b._Find_next(i);
     }
     //    printf("spliting\n");
 
     std::vector<char> common_prefix;
-    int level = 0;
-    level = parentNode->getLevel() + 1;
+    
     // assume keys are not substring of another key
 
     // todo: get common prefix can be optimized by binary search
@@ -219,15 +235,18 @@ void LeafArray::splitAndUnlock(N *parentNode, uint8_t parentKey,
                 }
             } else {
                 // assume keys are not substring of another key
-                assert(0);
+                //printf("assert0\n");
+                // assert(0);
             }
         }
         if (out)
             break;
         level++;
     }
+    // printf("while loop finished!\n");
     std::map<char, LeafArray *> split_array;
     for (i = 0; i < leaf_count; i++) {
+        // printf("accessing leaf at idx: %d\n", i);
         if (split_array.count(keys[i][level]) == 0) {
             split_array[keys[i][level]] =
                 new (alloc_new_node_from_type(NTypes::LeafArray))
@@ -235,7 +254,7 @@ void LeafArray::splitAndUnlock(N *parentNode, uint8_t parentKey,
         }
         split_array.at(keys[i][level])->insert(getLeafAt(i), false);
     }
-
+    // printf("for loop finished!\n");
     N *n;
     uint8_t *prefix_start = reinterpret_cast<uint8_t *>(common_prefix.data());
     auto prefix_len = common_prefix.size();
@@ -259,7 +278,7 @@ void LeafArray::splitAndUnlock(N *parentNode, uint8_t parentKey,
         unchecked_insert(n, p.first, setLeafArray(p.second), true);
         flush_data(p.second, sizeof(LeafArray));
     }
-
+    // printf("ifs finished!\n");
     N::change(parentNode, parentKey, n);
     parentNode->writeUnlock();
 
@@ -268,6 +287,7 @@ void LeafArray::splitAndUnlock(N *parentNode, uint8_t parentKey,
     pmem_deallocated += sizeof(PART_ns::NTypes::LeafArray);
 #endif
     EpochGuard::DeleteNode(this);
+    // printf("split finished\n");
 }
 Leaf *LeafArray::getLeafAt(size_t pos) const {
     auto t = reinterpret_cast<uintptr_t>(this->leaf[pos].load());

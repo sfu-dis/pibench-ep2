@@ -897,7 +897,7 @@ restart:
 
         uint8_t nonMatchingKey;
         Prefix remainingPrefix;
-        // printf("Begin of switch\n"); //segfault
+        //printf("Begin of switch\n"); //segfault
         switch (
             checkPrefixPessimistic(node, k, nextLevel, nonMatchingKey,
                                    remainingPrefix)) { // increases nextLevel
@@ -905,7 +905,9 @@ restart:
             // printf("restart on SkippedLevel!\n"); //segfault
             goto restart;
         case CheckPrefixPessimisticResult::NoMatch: {
-            assert(nextLevel < k->getKeyLen()); // prevent duplicate key
+	    if (nextLevel >= k->getKeyLen())
+		return OperationResults::Existed;
+            //assert(nextLevel < k->getKeyLen()); // prevent duplicate key
             node->lockVersionOrRestart(v, needRestart);
             if (needRestart) {
                 // printf("restart on first needRestart!\n"); //segfault
@@ -980,12 +982,18 @@ restart:
 
         } // end case  NoMatch
         case CheckPrefixPessimisticResult::Match:
-            // printf("Match, break switch!\n"); //segfault
+            //printf("Match, break switch!\n"); //segfault
             break;
         }
         // printf("End of switch\n"); //segfault
-        assert(nextLevel < k->getKeyLen()); // prevent duplicate key
-        // TODO: maybe one string is substring of another, so it fkey[level]
+        //assert(nextLevel < k->getKeyLen()); // prevent duplicate key
+        if (nextLevel >= k->getKeyLen()){
+	    //printf("Key is: %s    key len: %d       nextlevel: %d\n", k->fkey, k->key_len, nextLevel);
+	    //exit(1);
+	    return OperationResults::Existed;
+	}
+
+	// TODO: maybe one string is substring of another, so it fkey[level]
         // will be 0 solve problem of substring
         level = nextLevel;
         nodeKey = k->fkey[level];
