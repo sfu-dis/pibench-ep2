@@ -57,6 +57,7 @@ extern void cpu_pause();
 extern size_t key_size_;
 extern size_t pool_size_;
 extern const char *pool_path_;
+extern std::atomic<uint64_t> pmem_lookup;
 
 namespace dptree
 {
@@ -3057,6 +3058,9 @@ class concur_dptree
                 }
             }
         }
+	#ifdef PROFILE
+	    pmem_lookup ++;
+	#endif
         return rear_base_tree->lookup(key, value);
     }
 

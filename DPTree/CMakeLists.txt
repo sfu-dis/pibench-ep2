@@ -11,6 +11,9 @@ IF(VAR_KEY)
     add_definitions(-DVAR_KEY)
 ENDIF(VAR_KEY)
 
+IF(PROFILE)
+    add_definitions(-DPROFILE)
+ENDIF(PROFILE)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17 -DNDEBUG -lpmem -lpmemobj -ljemalloc -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -ltbb -pthread")
 

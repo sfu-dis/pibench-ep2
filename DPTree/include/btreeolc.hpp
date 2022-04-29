@@ -22,7 +22,15 @@
 #endif
 
 extern size_t key_size_;
+extern thread_local uint64_t vkcmp_time;
 #ifdef VAR_KEY
+
+uint64_t rdtsc(){
+    unsigned int lo,hi;
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+    return ((uint64_t)hi << 32) | lo;
+}
+
 int vkcmp(char* a, char* b) {
 /*
     auto n = key_size_;
@@ -33,7 +41,15 @@ int vkcmp(char* a, char* b) {
             a++,b++;
     return 0;
 */
-    return memcmp(a, b, key_size_);
+#ifdef PROFILE
+    auto start = rdtsc();
+#endif
+    auto res = memcmp(a, b, key_size_);
+#ifdef PROFILE
+    vkcmp_time += (rdtsc() - start);
+    vkcmp_time /= 2;
+#endif
+    return res;
 }
 #endif
 

@@ -9,12 +9,15 @@
 #include <mutex>
 #include <shared_mutex>
 #include <libpmemobj.h>
+#include <atomic>
 
 // #define DEBUG_MSG
 
 extern int parallel_merge_worker_num;
 
 thread_local char k_[128];
+thread_local uint64_t vkcmp_time = 0;
+std::atomic<uint64_t> pmem_lookup;
 
 class dptree_wrapper : public tree_api
 {
@@ -39,10 +42,17 @@ struct KV {
 
 dptree_wrapper::dptree_wrapper()
 {
+#ifdef PROFILE
+    pmem_lookup.store(0);
+#endif
 }
 
 dptree_wrapper::~dptree_wrapper()
 {
+#ifdef PROFILE
+    printf("vkcmp time: %llu\n", vkcmp_time);
+    printf("pmem lookup: %llu\n", pmem_lookup.load());
+#endif
 }
 
 bool dptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
@@ -68,6 +78,9 @@ bool dptree_wrapper::find(const char* key, size_t key_sz, char* value_out)
 
 bool dptree_wrapper::insert(const char* key, size_t key_sz, const char* value, size_t value_sz)
 {
+#ifdef PROFILE
+    vkcmp_time = 0;
+#endif
 #ifdef VAR_KEY // key size > 8
     PMEMoid dst;
     pmemobj_zalloc(pop, &dst, key_size_, TOID_TYPE_NUM(char));
