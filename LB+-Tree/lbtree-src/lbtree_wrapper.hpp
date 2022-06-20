@@ -45,31 +45,31 @@ extern thread_local int worker_id;
  * It cannot be namespace scope because initialization of "worker_id"
  * and the helper is unsequenced and leads to undefined behaviour.
  */
-struct ThreadHelper
-{
-  const char *str;
-  int id_ = -69;
-  ThreadHelper(const char *s) : str{s}
-  {
-    if (worker_id < 0)
-      id_ = omp_get_thread_num();
-    else
-      id_ = worker_id;
-    worker_id = id_;
-  #if defined(VAR_KEY) && !defined(PMEM)
-    if (!init)
-    {
-      memset(key_arr, 0, 813600000);
-      init = true;
-    }
-  #endif
-    // printf("constructor worker_id: %d (%s)\n", id_, str);
-  }
-  ~ThreadHelper()
-  {
-    // printf("destructor worker_id: %d (%s)\n", id_, str);
-  }
-};
+// struct ThreadHelper
+// {
+//   const char *str;
+//   int id_ = -69;
+//   ThreadHelper(const char *s) : str{s}
+//   {
+//     if (worker_id < 0)
+//       id_ = omp_get_thread_num();
+//     else
+//       id_ = worker_id;
+//     worker_id = id_;
+//   #if defined(VAR_KEY) && !defined(PMEM)
+//     if (!init)
+//     {
+//       memset(key_arr, 0, 813600000);
+//       init = true;
+//     }
+//   #endif
+//     // printf("constructor worker_id: %d (%s)\n", id_, str);
+//   }
+//   ~ThreadHelper()
+//   {
+//     // printf("destructor worker_id: %d (%s)\n", id_, str);
+//   }
+// };
 
 static const constexpr auto FIND = "find";
 static const constexpr auto INSERT = "insert";
@@ -131,7 +131,7 @@ inline void *PBvalToLB(const char *value, size_t size = 8)
 
 bool lbtree_wrapper::find(const char *key, size_t key_sz, char *value_out)
 {
-  thread_local ThreadHelper t{FIND};
+  // thread_local ThreadHelper t{FIND};
   void *p;
   int pos = -1;
 #ifdef VAR_KEY
@@ -156,7 +156,7 @@ bool lbtree_wrapper::find(const char *key, size_t key_sz, char *value_out)
 
 bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
-  thread_local ThreadHelper t{INSERT};
+  // thread_local ThreadHelper t{INSERT};
 #ifdef VAR_KEY // key size > 8
   #ifdef PMEM
     PMEMoid dst;
@@ -184,7 +184,7 @@ bool lbtree_wrapper::insert(const char *key, size_t key_sz, const char *value, s
 
 bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
-  thread_local ThreadHelper T{UPDATE};
+  // thread_local ThreadHelper T{UPDATE};
   bnode *p;
   bleaf *lp;
   int i, t, m, b, jj;
@@ -274,7 +274,7 @@ bool lbtree_wrapper::update(const char *key, size_t key_sz, const char *value, s
 
 bool lbtree_wrapper::remove(const char *key, size_t key_sz)
 {
-  thread_local ThreadHelper t{REMOVE};
+  // thread_local ThreadHelper t{REMOVE};
   //FIXME
   lbt->del(PBkeyToLB(key));
   // Check whether the record is indeed removed.
@@ -289,7 +289,7 @@ bool lbtree_wrapper::remove(const char *key, size_t key_sz)
 
 int lbtree_wrapper::scan(const char *key, size_t key_sz, int scan_sz, char *&values_out)
 {
-  thread_local ThreadHelper t{SCAN};
+  // thread_local ThreadHelper t{SCAN};
   constexpr size_t ONE_MB = 1ULL << 20;
   static thread_local char results[ONE_MB];
   // //FIXME

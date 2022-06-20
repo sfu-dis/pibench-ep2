@@ -40,19 +40,6 @@ private:
 
 static const uint64_t offset = (1ull << 63ull) - 1ull;
 
-struct InsertHelper
-{
-  InsertHelper()
-  {
-    int id = omp_get_thread_num();
-    // if (id == 0)
-    //   records.reserve(150000000u); // load thread needs more memory to hold 100M index + 50M insert ops
-    // else
-    //   records.reserve(50000000u);
-  }
-  ~InsertHelper() {}
-};
-
 hot_wrapper::hot_wrapper()
 {
 }
@@ -78,7 +65,6 @@ bool hot_wrapper::find(const char *key, size_t key_sz, char *value_out)
 
 bool hot_wrapper::insert(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
-  thread_local InsertHelper i;
   uint64_t k = *reinterpret_cast<const uint64_t*>(key) & offset; // at most 63 bits can be embedded into the index
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   // records.emplace_back(k, v);
@@ -93,7 +79,6 @@ bool hot_wrapper::insert(const char *key, size_t key_sz, const char *value, size
 
 bool hot_wrapper::update(const char *key, size_t key_sz, const char *value, size_t value_sz)
 {
-  thread_local InsertHelper i;
   uint64_t k = *reinterpret_cast<const uint64_t*>(key) & offset; // at most 63 bits can be embedded into the index
   uint64_t v = *reinterpret_cast<const uint64_t*>(value);
   // records.emplace_back(k, v);

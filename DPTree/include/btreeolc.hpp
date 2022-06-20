@@ -15,12 +15,6 @@
 #include <utility>
 #include <functional>
 
-#define PREFETCH
-#ifdef PREFETCH
-    #include "nodepref.h"
-    #define LEAF_LINE_NUM sizeof(BTreeLeaf<Key, Value>)/64
-#endif
-
 extern size_t key_size_;
 extern thread_local uint64_t vkcmp_time;
 #ifdef VAR_KEY

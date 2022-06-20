@@ -40,11 +40,8 @@ struct ThreadHelper
 {
     ThreadHelper(pactree* t){
         t->registerThread();
-	// int id = omp_get_thread_num();
-        // printf("Thread ID: %d\n", id);
     }
     ~ThreadHelper(){}
-    
 };
 
 pactree_wrapper::pactree_wrapper()

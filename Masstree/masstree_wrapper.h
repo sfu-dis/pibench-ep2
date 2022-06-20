@@ -46,10 +46,10 @@ struct ThreadHelper
   {
     if (masstree_wrapper::ti == nullptr)
     {
-      int id = omp_get_thread_num();
-      if (id == 0)
-        masstree_wrapper::ti = main_threadinfo;
-      else
+      // int id = omp_get_thread_num();
+      // if (id == 0)
+      //   masstree_wrapper::ti = main_threadinfo;
+      // else
         masstree_wrapper::ti = threadinfo::make(threadinfo::TI_PROCESS, id);
     }
   }
