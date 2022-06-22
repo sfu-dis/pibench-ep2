@@ -2,7 +2,7 @@
 
 Here hosts resources for benchmarking newly proposed persistent memory range indexes on Pibench, including benchmark, wrapper generation and results parse scripts (generate_wrappers.sh, benchmark.py, parse.py). Also contains source code of five PM indexes + two DRAM index (see below).
 
-See detailed analysis in our tech report here: https://arxiv.org/abs/2201.13047
+See detailed analysis in our VLDB 2022 paper. Preprint: https://arxiv.org/abs/2201.13047
 
 # Clone repo and submodule
 ```
