@@ -99,6 +99,9 @@ namespace ART_ROWEX {
         N *anyChild = nullptr;
         for (uint64_t i = 0; i < 256; ++i) {
             pptr<N> child = children[i].load();
+	    while (child.isDirty ()) {  // DL
+                child = children[i].load ();
+            }
 	    N *rawChild = child.getVaddr();
             if (rawChild != nullptr) {
                 if (N::isLeaf(rawChild)) {

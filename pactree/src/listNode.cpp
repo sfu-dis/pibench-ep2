@@ -274,8 +274,8 @@ pptr<ListNode> ListNode :: split(Key_t key, Val_t val, uint8_t keyHash, int thre
     PMEMoid oid;
     PMem::alloc(poolId,sizeof(OpStruct),(void **)&(oplogPtr), &oid);
     oplog=(OpStruct *) oplogPtr.getVaddr();*/
-    oplog = (OpStruct *)PMem::getOpLog(logIdx);
-	    
+//    oplog = (OpStruct *)PMem::getOpLog(logIdx);
+    oplog = new OpStruct();	    
     // 1) Add Oplog and set the infomration for current(overflown) node.
     Oplog::writeOpLog(oplog, OpStruct::insert, newMin, (void*)curPtr.getRawPtr(), poolId, key, val); 
     flushToNVM((char*)oplog,sizeof(OpStruct));

@@ -168,7 +168,7 @@ class PMem {
 			unsigned long vaddr = (unsigned long)logVaddr[0];
 			//printf("vaddr :%p %p\n",vaddr, (void *)(vaddr+(64*i)));
 
-			return (void*)(vaddr + (64*i));
+			return (void*)(vaddr + (sizeof(OpStruct)*i));
 		}
 
 };

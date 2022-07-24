@@ -13,24 +13,27 @@ class pptr {
             rawPtr = ((unsigned long)poolId) << 48 | offset;
 
         }
-        T *operator->() {
-           int poolId = (rawPtr&MASK_POOL) >> 48;
-           void *baseAddr = PMem::getBaseOf(poolId); 
-	   unsigned long offset = rawPtr & MASK;
-	   return (T *)((unsigned long)baseAddr + offset);
-        }
 
-        T *getVaddr() {
-	   unsigned long offset = rawPtr & MASK;
-	   if(offset == 0){
-               return nullptr;
-		}
+T *operator->() {
+  unsigned long p = rawPtr;
+  int poolId = (p&MASK_POOL) >> 48; // [1]
+  void *baseAddr = PMem::getBaseOf(poolId); 
+  unsigned long offset = p & MASK; // [2]
+  return (T *)((unsigned long)baseAddr + offset);
+}
 
-           int poolId = (rawPtr&MASK_POOL) >> 48;
-           void *baseAddr = PMem::getBaseOf(poolId); 
+T *getVaddr() {
+  unsigned long p = rawPtr;
+  unsigned long offset = p & MASK; // [3]
+  if(offset == 0){
+    return nullptr;
+  }
 
-	   return (T *)((unsigned long)baseAddr + offset);
-        }
+  int poolId = (p&MASK_POOL) >> 48; // [4]
+  void *baseAddr = PMem::getBaseOf(poolId); 
+  
+  return (T *)((unsigned long)baseAddr + offset);
+}
 	
         unsigned long getRawPtr() {
 		return rawPtr;
